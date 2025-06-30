@@ -1,0 +1,38 @@
+
+GET localhost:8001/organizations
+
+<> 2025-06-30T212339.200.json
+<> 2025-06-30T212322.200.json
+<> 2025-06-30T212149.200.json
+<> 2025-06-30T212100.200.json
+<> 2025-06-30T212028.200.json
+<> 2025-06-30T211852.200.json
+
+###
+
+GET localhost:8001/organizations/1
+
+<> 2025-06-30T211920.200.json
+
+###
+
+POST localhost:8001/organizations
+Content-Type: application/json
+
+{
+  "name": "FAO",
+  "location": "Rome"
+}
+
+###
+
+PUT localhost:8001/organizations/3
+Content-Type: application/json
+
+{
+"name": "BestSecret",
+"location": "Athens"
+}
+
+###
+DELETE localhost:8001/organizations/3

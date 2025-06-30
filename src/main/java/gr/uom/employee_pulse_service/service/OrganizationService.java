@@ -49,7 +49,7 @@ public class OrganizationService {
         Organization organization = findById(id);
 
         organization.setName(dto.getName());
-        organization.setLocation(organization.getLocation());
+        organization.setLocation(dto.getLocation());
     }
 
     @Transactional
