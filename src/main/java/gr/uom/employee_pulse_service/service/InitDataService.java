@@ -10,7 +10,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class InitDatService {
+public class InitDataService {
 
     private final OrganizationRepository organizationRepository;
 
