@@ -4,7 +4,7 @@ GET localhost:8001/departments
 
 ###
 
-GET localhost:8001/departments/1
+GET localhost:8001/departments/3
 
 
 ###
@@ -23,8 +23,7 @@ PUT localhost:8001/departments/3
 Content-Type: application/json
 
 {
-"name": "BestSecret",
-"location": "Athens"
+  "name": "Test"
 }
 
 ###

@@ -41,11 +41,11 @@ public class DepartmentController {
 
         return ResponseEntity.ok().build();
     }
-//
-//    @DeleteMapping("/{id}")
-//    public ResponseEntity<Void> deleteOrganization(@PathVariable Integer id) {
-//        organizationService.deleteOrganization(id);
-//
-//        return ResponseEntity.ok().build();
-//    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteDepartment(@PathVariable Integer id) {
+        departmentService.deleteDepartment(id);
+
+        return ResponseEntity.ok().build();
+    }
 }

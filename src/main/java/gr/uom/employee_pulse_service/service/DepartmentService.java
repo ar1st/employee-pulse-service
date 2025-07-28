@@ -7,6 +7,7 @@ import gr.uom.employee_pulse_service.mapper.DepartmentMapper;
 import gr.uom.employee_pulse_service.model.Department;
 import gr.uom.employee_pulse_service.model.Organization;
 import gr.uom.employee_pulse_service.repository.DepartmentRepository;
+import gr.uom.employee_pulse_service.repository.EmployeeRepository;
 import gr.uom.employee_pulse_service.repository.OrganizationRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -20,6 +21,7 @@ public class DepartmentService {
 
     private final DepartmentRepository departmentRepository;
     private final OrganizationRepository organizationRepository;
+    private final EmployeeRepository employeeRepository;
     private final DepartmentMapper departmentMapper;
 
     @Transactional(readOnly = true)
@@ -53,6 +55,18 @@ public class DepartmentService {
         department.setName(dto.name());
     }
 
+    @Transactional
+    public void deleteDepartment(Integer id) {
+        boolean hsEmployees = employeeRepository.existsByDepartmentId(id);
+
+        //todo check that it works
+        if (hsEmployees) {
+            throw new RuntimeException("Cannot deleted department %d because employees are assigned to it".formatted(id));
+        }
+
+        departmentRepository.deleteById(id);
+    }
+
     private Department findById(Integer id) {
         return departmentRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Department not found"));
@@ -62,6 +76,5 @@ public class DepartmentService {
         return organizationRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Organization not found"));
     }
-
 
 }
