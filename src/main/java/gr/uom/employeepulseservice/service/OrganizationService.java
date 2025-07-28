@@ -48,8 +48,8 @@ public class OrganizationService {
     public void updateOrganization(Integer id, SaveOrganizationDto dto) {
         Organization organization = findById(id);
 
-        organization.setName(dto.getName());
-        organization.setLocation(dto.getLocation());
+        organization.setName(dto.name());
+        organization.setLocation(dto.location());
     }
 
     @Transactional

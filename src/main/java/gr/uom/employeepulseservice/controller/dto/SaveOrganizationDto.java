@@ -1,9 +1,8 @@
 package gr.uom.employeepulseservice.controller.dto;
 
-import lombok.Data;
+public record SaveOrganizationDto(
+        String name,
+        String location
+) {
 
-@Data
-public class SaveOrganizationDto {
-    private String name;
-    private String location;
 }
