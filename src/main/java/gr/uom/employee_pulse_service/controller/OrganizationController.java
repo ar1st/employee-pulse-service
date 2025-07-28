@@ -21,22 +21,20 @@ public class OrganizationController {
         return ResponseEntity.ok(organizationService.findAll());
     }
 
-    //todo find departments by organization id
-
     @GetMapping("/{id}")
     public ResponseEntity<OrganizationDto> findById(@PathVariable Integer id) {
         return ResponseEntity.ok(organizationService.findOrganizationById(id));
     }
 
     @PostMapping
-    public ResponseEntity<Object> createOrganization(@RequestBody SaveOrganizationDto dto) {
+    public ResponseEntity<Void> createOrganization(@RequestBody SaveOrganizationDto dto) {
         organizationService.createOrganization(dto);
 
         return ResponseEntity.ok().build();
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<OrganizationDto> updateOrganization(@PathVariable Integer id, @RequestBody SaveOrganizationDto dto) {
+    public ResponseEntity<Void> updateOrganization(@PathVariable Integer id, @RequestBody SaveOrganizationDto dto) {
         organizationService.updateOrganization(id, dto);
 
         return ResponseEntity.ok().build();

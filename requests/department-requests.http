@@ -1,0 +1,31 @@
+
+GET localhost:8001/departments
+
+
+###
+
+GET localhost:8001/departments/1
+
+
+###
+
+POST localhost:8001/departments
+Content-Type: application/json
+
+{
+  "name": "Engineering",
+  "organizationId": 2
+}
+
+###
+
+PUT localhost:8001/departments/3
+Content-Type: application/json
+
+{
+"name": "BestSecret",
+"location": "Athens"
+}
+
+###
+DELETE localhost:8001/departments/3
