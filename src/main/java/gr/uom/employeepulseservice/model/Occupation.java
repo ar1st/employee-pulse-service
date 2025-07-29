@@ -15,6 +15,7 @@ public class Occupation {
 
     private String title;
 
+    @Column(name = "description", length = 1000)
     private String description;
 
     private String escoId;
