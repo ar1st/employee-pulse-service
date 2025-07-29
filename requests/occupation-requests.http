@@ -1,0 +1,36 @@
+
+GET localhost:8001/occupations
+
+
+
+###
+
+GET localhost:8001/occupations/3
+
+
+
+###
+
+POST localhost:8001/occupations
+Content-Type: application/json
+
+{
+  "title": "###",
+  "description": "###",
+  "escoId": "####"
+}
+
+###
+
+PUT localhost:8001/occupations/2
+Content-Type: application/json
+
+{
+  "title": "$$$$",
+  "description": "###",
+  "escoId": "####"
+}
+
+
+###
+DELETE localhost:8001/occupations/2

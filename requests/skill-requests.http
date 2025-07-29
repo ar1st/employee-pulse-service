@@ -1,0 +1,36 @@
+
+GET localhost:8001/skills
+
+
+
+###
+
+GET localhost:8001/skills/5
+
+
+
+###
+
+POST localhost:8001/skills
+Content-Type: application/json
+
+{
+  "name": "###",
+  "description": "###",
+  "escoId": "####"
+}
+
+###
+
+PUT localhost:8001/skills/2
+Content-Type: application/json
+
+{
+  "name": "$$$$",
+  "description": "###",
+  "escoId": "####"
+}
+
+
+###
+DELETE localhost:8001/skills/2
