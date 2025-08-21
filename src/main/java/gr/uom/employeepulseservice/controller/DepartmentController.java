@@ -2,6 +2,7 @@ package gr.uom.employeepulseservice.controller;
 
 import gr.uom.employeepulseservice.controller.dto.CreateDepartmentDto;
 import gr.uom.employeepulseservice.controller.dto.DepartmentDto;
+import gr.uom.employeepulseservice.controller.dto.EmployeeDto;
 import gr.uom.employeepulseservice.controller.dto.UpdateDepartmentDto;
 import gr.uom.employeepulseservice.service.DepartmentService;
 import lombok.RequiredArgsConstructor;
@@ -47,5 +48,10 @@ public class DepartmentController {
         departmentService.deleteDepartment(id);
 
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/{id}/employees")
+    public ResponseEntity<List<EmployeeDto>> findEmployeesById(@PathVariable Integer id) {
+        return ResponseEntity.ok(departmentService.findEmployeesById(id));
     }
 }

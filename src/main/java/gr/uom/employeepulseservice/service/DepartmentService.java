@@ -2,9 +2,12 @@ package gr.uom.employeepulseservice.service;
 
 import gr.uom.employeepulseservice.controller.dto.DepartmentDto;
 import gr.uom.employeepulseservice.controller.dto.CreateDepartmentDto;
+import gr.uom.employeepulseservice.controller.dto.EmployeeDto;
 import gr.uom.employeepulseservice.controller.dto.UpdateDepartmentDto;
 import gr.uom.employeepulseservice.mapper.DepartmentMapper;
+import gr.uom.employeepulseservice.mapper.EmployeeMapper;
 import gr.uom.employeepulseservice.model.Department;
+import gr.uom.employeepulseservice.model.Employee;
 import gr.uom.employeepulseservice.model.Organization;
 import gr.uom.employeepulseservice.repository.DepartmentRepository;
 import gr.uom.employeepulseservice.repository.EmployeeRepository;
@@ -23,6 +26,7 @@ public class DepartmentService {
     private final OrganizationRepository organizationRepository;
     private final EmployeeRepository employeeRepository;
     private final DepartmentMapper departmentMapper;
+    private final EmployeeMapper employeeMapper;
 
     @Transactional(readOnly = true)
     public List<DepartmentDto> findAll() {
@@ -77,4 +81,10 @@ public class DepartmentService {
                 .orElseThrow(() -> new RuntimeException("Organization not found"));
     }
 
+    @Transactional(readOnly = true)
+    public List<EmployeeDto> findEmployeesById(Integer id) {
+        List<Employee> employees = employeeRepository.findByDepartmentId(id);
+
+        return employeeMapper.toDtos(employees);
+    }
 }

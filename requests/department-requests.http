@@ -28,3 +28,8 @@ Content-Type: application/json
 
 ###
 DELETE localhost:8001/departments/3
+
+
+###
+
+GET localhost:8001/departments/4/employees
