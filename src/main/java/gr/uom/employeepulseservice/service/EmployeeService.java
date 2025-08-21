@@ -82,6 +82,14 @@ public class EmployeeService {
                 .orElseThrow(() -> new RuntimeException("Occupation not found"));
     }
 
+    @Transactional
+    public void deleteEmployee(Integer id) {
+        boolean hasSubordinates = employeeRepository.existsByManagerId(id);
 
+        if (hasSubordinates) {
+            throw new RuntimeException("Cannot deleted employee %d because subordinates are assigned to them".formatted(id));
+        }
 
+        employeeRepository.deleteById(id);
+    }
 }

@@ -19,7 +19,7 @@ Content-Type: application/json
   "hireDate": "2023-05-15",
   "departmentId": 5,
   "occupationId": 1,
-  "managerId": 2
+  "managerId": 3
 }
 
 
@@ -39,4 +39,4 @@ Content-Type: application/json
 }
 
 ###
-DELETE localhost:8001/employees/3
+DELETE localhost:8001/employees/2

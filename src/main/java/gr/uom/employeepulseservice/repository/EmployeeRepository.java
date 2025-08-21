@@ -8,4 +8,6 @@ import org.springframework.stereotype.Repository;
 public interface EmployeeRepository extends JpaRepository<Employee, Integer> {
 
     boolean existsByDepartmentId(Integer departmentId);
+
+    boolean existsByManagerId(Integer managerId);
 }

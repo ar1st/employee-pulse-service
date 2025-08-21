@@ -57,10 +57,10 @@ public class DepartmentService {
 
     @Transactional
     public void deleteDepartment(Integer id) {
-        boolean hsEmployees = employeeRepository.existsByDepartmentId(id);
+        boolean hasEmployees = employeeRepository.existsByDepartmentId(id);
 
         //todo check that it works
-        if (hsEmployees) {
+        if (hasEmployees) {
             throw new RuntimeException("Cannot deleted department %d because employees are assigned to it".formatted(id));
         }
 

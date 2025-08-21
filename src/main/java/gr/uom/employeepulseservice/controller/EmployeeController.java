@@ -40,7 +40,12 @@ public class EmployeeController {
         return ResponseEntity.ok().build();
     }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteDepartment(@PathVariable Integer id) {
+        employeeService.deleteEmployee(id);
 
+        return ResponseEntity.ok().build();
+    }
 
     //find by department
     //find by organization
