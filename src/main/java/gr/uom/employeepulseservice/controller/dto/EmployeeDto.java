@@ -10,6 +10,7 @@ public record EmployeeDto(
         String email,
         LocalDate hireDate,
         Integer departmentId,
+        Integer organizationId,
         Integer occupationId,
         Integer managerId,
         List<Integer> subordinateIds,

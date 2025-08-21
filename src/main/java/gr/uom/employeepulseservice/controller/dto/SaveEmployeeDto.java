@@ -7,6 +7,7 @@ public record SaveEmployeeDto(
         String lastName,
         String email,
         LocalDate hireDate,
+        Integer organizationId,
         Integer departmentId,
         Integer occupationId,
         Integer managerId

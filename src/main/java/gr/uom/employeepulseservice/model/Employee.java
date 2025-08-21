@@ -28,6 +28,10 @@ public class Employee {
     private Department department;
 
     @ManyToOne
+    @JoinColumn(name = "organization_id")
+    private Organization organization;
+
+    @ManyToOne
     @JoinColumn(name = "occupation_id")
     private Occupation occupation;
 

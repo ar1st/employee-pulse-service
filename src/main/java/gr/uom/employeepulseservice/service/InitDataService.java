@@ -122,6 +122,7 @@ public class InitDataService {
         nikosNikas.setHireDate(LocalDate.now());
         nikosNikas.setOccupation(ceo);
         nikosNikas.setDepartment(department4);
+        nikosNikas.setOrganization(organization1);
 
         Employee giorgosGiorgou = new Employee();
         giorgosGiorgou.setFirstName("Giorgos");
@@ -131,6 +132,7 @@ public class InitDataService {
         giorgosGiorgou.setOccupation(occupation1);
         giorgosGiorgou.setManager(nikosNikas);
         giorgosGiorgou.setDepartment(department5);
+        giorgosGiorgou.setOrganization(organization1);
 
         employeeRepository.saveAll(List.of(nikosNikas, giorgosGiorgou));
 
