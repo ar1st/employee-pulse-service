@@ -1,9 +1,13 @@
 package gr.uom.employeepulseservice.service;
 
+import gr.uom.employeepulseservice.controller.dto.EmployeeDto;
 import gr.uom.employeepulseservice.controller.dto.OrganizationDto;
 import gr.uom.employeepulseservice.controller.dto.SaveOrganizationDto;
+import gr.uom.employeepulseservice.mapper.EmployeeMapper;
 import gr.uom.employeepulseservice.mapper.OrganizationMapper;
+import gr.uom.employeepulseservice.model.Employee;
 import gr.uom.employeepulseservice.model.Organization;
+import gr.uom.employeepulseservice.repository.EmployeeRepository;
 import gr.uom.employeepulseservice.repository.OrganizationRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -17,6 +21,8 @@ public class OrganizationService {
 
     private final OrganizationRepository organizationRepository;
     private final OrganizationMapper organizationMapper;
+    private final EmployeeRepository employeeRepository;
+    private final EmployeeMapper employeeMapper;
 
     @Transactional(readOnly = true)
     public List<OrganizationDto> findAll() {
@@ -55,5 +61,12 @@ public class OrganizationService {
     @Transactional
     public void deleteOrganization(Integer id) {
         organizationRepository.deleteById(id);
+    }
+
+    @Transactional(readOnly = true)
+    public List<EmployeeDto> findEmployeesById(Integer id) {
+        List<Employee> employees = employeeRepository.findByOrganizationId(id);
+
+        return employeeMapper.toDtos(employees);
     }
 }

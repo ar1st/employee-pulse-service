@@ -1,5 +1,6 @@
 package gr.uom.employeepulseservice.controller;
 
+import gr.uom.employeepulseservice.controller.dto.EmployeeDto;
 import gr.uom.employeepulseservice.controller.dto.OrganizationDto;
 import gr.uom.employeepulseservice.controller.dto.SaveOrganizationDto;
 import gr.uom.employeepulseservice.service.OrganizationService;
@@ -45,5 +46,10 @@ public class OrganizationController {
         organizationService.deleteOrganization(id);
 
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/{id}/employees")
+    public ResponseEntity<List<EmployeeDto>> findEmployeesById(@PathVariable Integer id) {
+        return ResponseEntity.ok(organizationService.findEmployeesById(id));
     }
 }

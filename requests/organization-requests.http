@@ -36,3 +36,7 @@ Content-Type: application/json
 
 ###
 DELETE localhost:8001/organizations/3
+
+###
+
+GET localhost:8001/organizations/1/employees
