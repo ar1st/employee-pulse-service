@@ -1,17 +1,12 @@
 package gr.uom.employeepulseservice.service;
 
-import gr.uom.employeepulseservice.model.Department;
-import gr.uom.employeepulseservice.model.Occupation;
-import gr.uom.employeepulseservice.model.Organization;
-import gr.uom.employeepulseservice.model.Skill;
-import gr.uom.employeepulseservice.repository.DepartmentRepository;
-import gr.uom.employeepulseservice.repository.OccupationRepository;
-import gr.uom.employeepulseservice.repository.OrganizationRepository;
-import gr.uom.employeepulseservice.repository.SkillRepository;
+import gr.uom.employeepulseservice.model.*;
+import gr.uom.employeepulseservice.repository.*;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -22,6 +17,7 @@ public class InitDataService {
     private final DepartmentRepository departmentRepository;
     private final SkillRepository skillRepository;
     private final OccupationRepository occupationRepository;
+    private final EmployeeRepository employeeRepository;
 
     @PostConstruct
     public void initData() {
@@ -55,7 +51,16 @@ public class InitDataService {
         Department department3 = new Department();
         department3.setName("Supply");
         department3.setOrganization(organization1);
-        departmentRepository.saveAll(List.of(department1, department2, department3));
+
+        Department department4 = new Department();
+        department4.setName("Senior Leadership Team");
+        department4.setOrganization(organization1);
+
+        Department department5 = new Department();
+        department5.setName("Technology");
+        department5.setOrganization(organization1);
+
+        departmentRepository.saveAll(List.of(department1, department2, department3, department4, department5));
 
         /*
          * Skills
@@ -100,7 +105,34 @@ public class InitDataService {
         occupation3.setDescription("Software Engineer");
         occupation3.setEscoId("Software Engineer");
 
-        occupationRepository.saveAll(List.of(occupation1, occupation2, occupation3));
+        Occupation ceo = new Occupation();
+        occupation3.setTitle("CEO");
+        occupation3.setDescription("CEO - Description");
+        occupation3.setEscoId("CEO - ESCO ID");
+        occupationRepository.saveAll(List.of(occupation1, occupation2, occupation3, ceo));
+
+        /*
+         * Employees
+         */
+
+        Employee nikosNikas = new Employee();
+        nikosNikas.setFirstName("Nikos");
+        nikosNikas.setLastName("Nikas");
+        nikosNikas.setEmail("nikos.nikas@gmail.com");
+        nikosNikas.setHireDate(LocalDate.now());
+        nikosNikas.setOccupation(ceo);
+        nikosNikas.setDepartment(department4);
+
+        Employee giorgosGiorgou = new Employee();
+        giorgosGiorgou.setFirstName("Giorgos");
+        giorgosGiorgou.setLastName("Giorgou");
+        giorgosGiorgou.setEmail("giorgos.giorgou@gmail.com");
+        giorgosGiorgou.setHireDate(LocalDate.now());
+        giorgosGiorgou.setOccupation(occupation1);
+        giorgosGiorgou.setManager(nikosNikas);
+        giorgosGiorgou.setDepartment(department5);
+
+        employeeRepository.saveAll(List.of(nikosNikas, giorgosGiorgou));
 
     }
 

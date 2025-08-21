@@ -1,0 +1,42 @@
+
+GET localhost:8001/employees
+
+
+###
+
+GET localhost:8001/employees/3
+
+
+###
+
+POST localhost:8001/employees
+Content-Type: application/json
+
+{
+  "firstName": "Maria",
+  "lastName": "Papadopoulou",
+  "email": "maria.papadopoulou@gmail.com",
+  "hireDate": "2023-05-15",
+  "departmentId": 5,
+  "occupationId": 1,
+  "managerId": 2
+}
+
+
+###
+
+PUT localhost:8001/employees/3
+Content-Type: application/json
+
+{
+  "firstName": "Kostas",
+  "lastName": "Papadopoulou",
+  "email": "maria.papadopoulou@gmail.com",
+  "hireDate": "2023-05-15",
+  "departmentId": 5,
+  "occupationId": 1,
+  "managerId": 1
+}
+
+###
+DELETE localhost:8001/employees/3

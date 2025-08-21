@@ -38,8 +38,9 @@ public class Employee {
     @OneToMany(mappedBy = "manager", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Employee> subordinates;
 
-    //todo
-//    private List<SkillEntry> skillEntries;
+    @OneToMany(orphanRemoval = true, cascade = CascadeType.ALL)
+    @JoinColumn(name = "employee_id")
+    private List<SkillEntry> skillEntries;
 //
 //    private List<PerformanceReview> performanceReviews;
 
