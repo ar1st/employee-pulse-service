@@ -53,11 +53,16 @@ public class EmployeeService {
     private void setEmployeeRelations(SaveEmployeeDto dto, Employee employee) {
         Department department = findDepartmentById(dto.departmentId());
         Organization organization = findOrganizationById(dto.organizationId());
-
-        //todo make sure employee and manager are on the same organization and department
-
-        Occupation occupation = findOccupationById(dto.occupationId());
         Employee manager = findById(dto.managerId());
+        Occupation occupation = findOccupationById(dto.occupationId());
+
+        if (!department.getOrganization().getId().equals(organization.getId())) {
+            throw new RuntimeException("Department does not belong to the Organization");
+        }
+
+        if (!manager.getOrganization().getId().equals(employee.getOrganization().getId())) {
+            throw new RuntimeException("Employee and Manager do not belong to the same Organization");
+        }
 
         employee.setDepartment(department);
 
