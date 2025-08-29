@@ -45,7 +45,9 @@ public class Employee {
     @OneToMany(orphanRemoval = true, cascade = CascadeType.ALL)
     @JoinColumn(name = "employee_id")
     private List<SkillEntry> skillEntries;
-//
-//    private List<PerformanceReview> performanceReviews;
+
+    @OneToMany(orphanRemoval = true, cascade = CascadeType.ALL)
+    @JoinColumn(name = "employee_id")
+    private List<PerformanceReview> performanceReviews;
 
 }

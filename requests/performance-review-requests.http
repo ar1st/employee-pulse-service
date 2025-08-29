@@ -1,0 +1,12 @@
+
+POST localhost:8001/performance-reviews
+Content-Type: application/json
+
+{
+  "rawText": "raw-text",
+  "comments": "comments",
+  "overallRating": 10,
+  "reporterId": 1,
+  "employeeId": 2
+}
+

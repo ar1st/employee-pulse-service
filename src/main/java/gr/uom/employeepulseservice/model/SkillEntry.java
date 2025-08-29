@@ -23,8 +23,8 @@ public class SkillEntry {
 
     private LocalDate entryDate;
 
-//    @ManyToOne
-//    @JoinColumn(name = "performance_review_id")
-//    private PerformanceReview generatedFrom;
+    @ManyToOne
+    @JoinColumn(name = "employee_id")
+    private Employee employee;
 
 }
