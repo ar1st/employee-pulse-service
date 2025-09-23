@@ -47,10 +47,9 @@ public class EmployeeController {
         return ResponseEntity.ok().build();
     }
 
-    //find by department
-    //find by organization
+    // get skills
+    // add skill to employee
+    // remove skill from employee
 
-    //create employee
-    //update employee
 
 }

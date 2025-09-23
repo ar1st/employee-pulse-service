@@ -54,4 +54,8 @@ public class DepartmentController {
     public ResponseEntity<List<EmployeeDto>> findEmployeesById(@PathVariable Integer id) {
         return ResponseEntity.ok(departmentService.findEmployeesById(id));
     }
+
+    //get skills
+    // add employee
+    // delete employee
 }

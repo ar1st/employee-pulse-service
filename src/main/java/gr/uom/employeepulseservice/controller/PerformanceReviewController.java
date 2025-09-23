@@ -22,4 +22,12 @@ public class PerformanceReviewController {
 
         return ResponseEntity.ok().build();
     }
+
+    // get by id
+    // get by date
+    //get by employee
+    //get by reviewer
+    //get by department
+    //get by skills
+    //get by occupation
 }

@@ -52,4 +52,7 @@ public class OrganizationController {
     public ResponseEntity<List<EmployeeDto>> findEmployeesById(@PathVariable Integer id) {
         return ResponseEntity.ok(organizationService.findEmployeesById(id));
     }
+
+    // get departments by organization
+   // get skills by organization
 }
