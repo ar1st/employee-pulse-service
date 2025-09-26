@@ -30,4 +30,5 @@ public class PerformanceReviewController {
     //get by department
     //get by skills
     //get by occupation
+    //get by occupation
 }
