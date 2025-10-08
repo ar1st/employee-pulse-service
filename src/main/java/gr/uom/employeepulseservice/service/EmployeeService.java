@@ -68,7 +68,6 @@ public class EmployeeService {
 
         employee.setOccupation(occupation);
 
-        employee.setManager(manager);
 
         employee.setOrganization(organization);
     }
@@ -105,12 +104,6 @@ public class EmployeeService {
 
     @Transactional
     public void deleteEmployee(Integer id) {
-        boolean hasSubordinates = employeeRepository.existsByManagerId(id);
-
-        if (hasSubordinates) {
-            throw new RuntimeException("Cannot deleted employee %d because subordinates are assigned to them".formatted(id));
-        }
-
         employeeRepository.deleteById(id);
     }
 }

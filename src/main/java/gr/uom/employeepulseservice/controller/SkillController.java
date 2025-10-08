@@ -47,5 +47,5 @@ public class SkillController {
         return ResponseEntity.ok().build();
     }
 
-    // add skills in bulk
+    // add skills in bulk (json)
 }

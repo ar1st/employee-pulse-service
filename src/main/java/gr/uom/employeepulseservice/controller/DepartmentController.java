@@ -57,5 +57,5 @@ public class DepartmentController {
 
     //get skills
     // add employee
-    // delete employee
+    // change employee department
 }

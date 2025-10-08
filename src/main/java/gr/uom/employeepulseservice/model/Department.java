@@ -21,8 +21,13 @@ public class Department {
     @JoinColumn(name = "organization_id")
     private Organization organization;
 
+    @ManyToOne
+    @JoinColumn(name = "manager_id")
+    private Employee manager;
+
     @OneToMany(mappedBy = "department", orphanRemoval = true, cascade = CascadeType.ALL)
     private List<Employee> employees;
 
+    //todo Add skill history not affected by employees
 
 }

@@ -5,6 +5,8 @@ import lombok.Data;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 @Data
 @Entity
@@ -35,16 +37,30 @@ public class Employee {
     @JoinColumn(name = "occupation_id")
     private Occupation occupation;
 
-    @ManyToOne
-    @JoinColumn(name = "manager_id")
-    private Employee manager;
-
-    @OneToMany(mappedBy = "manager", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Employee> subordinates;
-
     @OneToMany(orphanRemoval = true, cascade = CascadeType.ALL)
     @JoinColumn(name = "employee_id")
     private List<SkillEntry> skillEntries;
+    /*
+    [
+        {
+        skill: java
+        rating: 4
+        date: 20-01-2025
+        },
+        {
+        skill: java
+        rating: 5
+        date: 20-01-2026
+        },
+        {
+        teamwork
+        5
+        wed
+        }
+    ]
+     */
+
+//    private Map<Skill, Double> skillToRating;
 
     @OneToMany(orphanRemoval = true, cascade = CascadeType.ALL)
     @JoinColumn(name = "employee_id")

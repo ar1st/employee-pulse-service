@@ -130,7 +130,6 @@ public class InitDataService {
         giorgosGiorgou.setEmail("giorgos.giorgou@gmail.com");
         giorgosGiorgou.setHireDate(LocalDate.now());
         giorgosGiorgou.setOccupation(occupation1);
-        giorgosGiorgou.setManager(nikosNikas);
         giorgosGiorgou.setDepartment(department5);
         giorgosGiorgou.setOrganization(organization1);
 
