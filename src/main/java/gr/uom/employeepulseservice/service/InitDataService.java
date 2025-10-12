@@ -21,119 +21,196 @@ public class InitDataService {
 
     @PostConstruct
     public void initData() {
+
         /*
          * Organizations
          */
-        Organization organization1 = new Organization();
-        organization1.setName("University of Macedonia");
-        organization1.setLocation("Thessaloniki");
+        Organization uom = new Organization();
+        uom.setName("University of Macedonia");
+        uom.setLocation("Thessaloniki");
 
-        Organization organization2 = new Organization();
-        organization2.setName("International Hellenic University");
-        organization2.setLocation("Thessaloniki");
+        Organization ihu = new Organization();
+        ihu.setName("International Hellenic University");
+        ihu.setLocation("Thessaloniki");
 
-        Organization organization3 = new Organization();
-        organization3.setName("BestSecret");
-        organization3.setLocation("Munich");
-        organizationRepository.saveAll(List.of(organization1, organization2, organization3));
+        Organization bestSecret = new Organization();
+        bestSecret.setName("BestSecret");
+        bestSecret.setLocation("Munich");
+
+        organizationRepository.saveAll(List.of(uom, ihu, bestSecret));
 
         /*
          * Departments
          */
-        Department department1 = new Department();
-        department1.setName("HR");
-        department1.setOrganization(organization1);
+        Department hr = new Department();
+        hr.setName("HR");
+        hr.setOrganization(uom);
 
-        Department department2 = new Department();
-        department2.setName("Marketing");
-        department2.setOrganization(organization1);
+        Department marketing = new Department();
+        marketing.setName("Marketing");
+        marketing.setOrganization(uom);
 
-        Department department3 = new Department();
-        department3.setName("Supply");
-        department3.setOrganization(organization1);
+        Department supply = new Department();
+        supply.setName("Supply");
+        supply.setOrganization(uom);
 
-        Department department4 = new Department();
-        department4.setName("Senior Leadership Team");
-        department4.setOrganization(organization1);
+        Department slt = new Department();
+        slt.setName("Senior Leadership Team");
+        slt.setOrganization(uom);
 
-        Department department5 = new Department();
-        department5.setName("Technology");
-        department5.setOrganization(organization1);
+        Department tech = new Department();
+        tech.setName("Technology");
+        tech.setOrganization(uom);
 
-        departmentRepository.saveAll(List.of(department1, department2, department3, department4, department5));
+        // Departments for IHU
+        Department ihuAdmin = new Department();
+        ihuAdmin.setName("Administration");
+        ihuAdmin.setOrganization(ihu);
+
+        Department ihuIt = new Department();
+        ihuIt.setName("IT Services");
+        ihuIt.setOrganization(ihu);
+
+        // Departments for BestSecret
+        Department bsEng = new Department();
+        bsEng.setName("Engineering");
+        bsEng.setOrganization(bestSecret);
+
+        Department bsOps = new Department();
+        bsOps.setName("Operations");
+        bsOps.setOrganization(bestSecret);
+
+        departmentRepository.saveAll(List.of(
+                hr, marketing, supply, slt, tech,
+                ihuAdmin, ihuIt,
+                bsEng, bsOps
+        ));
 
         /*
          * Skills
          */
-        Skill skill1 = new Skill();
-        skill1.setName("Java");
-        skill1.setDescription("The techniques and principles of software development, such as analysis, algorithms, coding, testing and compiling of programming paradigms in Java.");
-        skill1.setEscoId("19a8293b-8e95-4de3-983f-77484079c389");
+        Skill java = new Skill();
+        java.setName("Java");
+        java.setDescription("Software development with Java & Spring.");
+        java.setEscoId("19a8293b-8e95-4de3-983f-77484079c389");
 
-        Skill skill2 = new Skill();
-        skill2.setName("SQL");
-        skill2.setDescription("The computer language SQL is a query language for retrieval of information from a database and of documents containing the needed information. It is developed by the American National Standards Institute and the International Organization for Standardization.");
-        skill2.setEscoId("598de5b0-5b58-4ea7-8058-a4bc4d18c742");
+        Skill sql = new Skill();
+        sql.setName("SQL");
+        sql.setDescription("Relational database querying and optimization.");
+        sql.setEscoId("598de5b0-5b58-4ea7-8058-a4bc4d18c742");
 
-        Skill skill3 = new Skill();
-        skill3.setName("Python");
-        skill3.setDescription("The techniques and principles of software development, such as analysis, algorithms, coding, testing and compiling of programming paradigms in Python.");
-        skill3.setEscoId("ccd0a1d9-afda-43d9-b901-96344886e14d");
+        Skill python = new Skill();
+        python.setName("Python");
+        python.setDescription("Software development with Python.");
+        python.setEscoId("ccd0a1d9-afda-43d9-b901-96344886e14d");
 
-        Skill skill4 = new Skill();
-        skill4.setName("Communication");
-        skill4.setDescription("The exchange and conveying of information, ideas, concepts, thoughts, and feelings through the use of a shared system of words, signs, and semiotic rules via a medium.");
-        skill4.setEscoId("15d76317-c71a-4fa2-aadc-2ecc34e627b7");
-        skillRepository.saveAll(List.of(skill1, skill2, skill3, skill4));
+        Skill communication = new Skill();
+        communication.setName("Communication");
+        communication.setDescription("Clear written and verbal communication.");
+        communication.setEscoId("15d76317-c71a-4fa2-aadc-2ecc34e627b7");
+
+        Skill leadership = new Skill();
+        leadership.setName("Leadership");
+        leadership.setDescription("People leadership and decision-making.");
+        leadership.setEscoId("esco-leadership-001");
+
+        Skill analytics = new Skill();
+        analytics.setName("Analytics");
+        analytics.setDescription("Data analysis and insights.");
+        analytics.setEscoId("esco-analytics-001");
+
+        skillRepository.saveAll(List.of(java, sql, python, communication, leadership, analytics));
 
         /*
          * Occupations
          */
+        Occupation swe = new Occupation();
+        swe.setTitle("Software Engineer");
+        swe.setDescription("Software Engineer");
+        swe.setEscoId("ESCO-SE");
 
-        Occupation occupation1 = new Occupation();
-        occupation1.setTitle("Software Engineer");
-        occupation1.setDescription("Software Engineer");
-        occupation1.setEscoId("Software Engineer");
+        Occupation set = new Occupation();
+        set.setTitle("Software Engineer in Test");
+        set.setDescription("Software Engineer in Test");
+        set.setEscoId("ESCO-SET");
 
-        Occupation occupation2 = new Occupation();
-        occupation2.setTitle("Software Engineer in Test");
-        occupation2.setDescription("Software Engineer");
-        occupation2.setEscoId("Software Engineer");
-
-        Occupation occupation3 = new Occupation();
-        occupation3.setTitle("HR Officer");
-        occupation3.setDescription("Software Engineer");
-        occupation3.setEscoId("Software Engineer");
+        Occupation hrOfficer = new Occupation();
+        hrOfficer.setTitle("HR Officer");
+        hrOfficer.setDescription("HR Officer");
+        hrOfficer.setEscoId("ESCO-HR");
 
         Occupation ceo = new Occupation();
-        occupation3.setTitle("CEO");
-        occupation3.setDescription("CEO - Description");
-        occupation3.setEscoId("CEO - ESCO ID");
-        occupationRepository.saveAll(List.of(occupation1, occupation2, occupation3, ceo));
+        ceo.setTitle("CEO");
+        ceo.setDescription("Chief Executive Officer");
+        ceo.setEscoId("ESCO-CEO");
+
+        Occupation da = new Occupation();
+        da.setTitle("Data Analyst");
+        da.setDescription("Data Analyst");
+        da.setEscoId("ESCO-DA");
+
+        occupationRepository.saveAll(List.of(swe, set, hrOfficer, ceo, da));
 
         /*
-         * Employees
+         * Employees (create a few across orgs & departments)
          */
-
         Employee nikosNikas = new Employee();
         nikosNikas.setFirstName("Nikos");
         nikosNikas.setLastName("Nikas");
         nikosNikas.setEmail("nikos.nikas@gmail.com");
-        nikosNikas.setHireDate(LocalDate.now());
+        nikosNikas.setHireDate(LocalDate.now().minusYears(5));
         nikosNikas.setOccupation(ceo);
-        nikosNikas.setDepartment(department4);
-        nikosNikas.setOrganization(organization1);
+        nikosNikas.setDepartment(slt);
+        nikosNikas.setOrganization(uom);
 
         Employee giorgosGiorgou = new Employee();
         giorgosGiorgou.setFirstName("Giorgos");
         giorgosGiorgou.setLastName("Giorgou");
         giorgosGiorgou.setEmail("giorgos.giorgou@gmail.com");
-        giorgosGiorgou.setHireDate(LocalDate.now());
-        giorgosGiorgou.setOccupation(occupation1);
-        giorgosGiorgou.setDepartment(department5);
-        giorgosGiorgou.setOrganization(organization1);
+        giorgosGiorgou.setHireDate(LocalDate.now().minusYears(2));
+        giorgosGiorgou.setOccupation(swe);
+        giorgosGiorgou.setDepartment(tech);
+        giorgosGiorgou.setOrganization(uom);
 
-        employeeRepository.saveAll(List.of(nikosNikas, giorgosGiorgou));
+        Employee mariaIhu = new Employee();
+        mariaIhu.setFirstName("Maria");
+        mariaIhu.setLastName("Papadopoulou");
+        mariaIhu.setEmail("maria.p@ihu.edu");
+        mariaIhu.setHireDate(LocalDate.now().minusYears(3));
+        mariaIhu.setOccupation(hrOfficer);
+        mariaIhu.setDepartment(ihuAdmin);
+        mariaIhu.setOrganization(ihu);
+
+        Employee alexIhu = new Employee();
+        alexIhu.setFirstName("Alexandros");
+        alexIhu.setLastName("Ioannou");
+        alexIhu.setEmail("alex.i@ihu.edu");
+        alexIhu.setHireDate(LocalDate.now().minusMonths(18));
+        alexIhu.setOccupation(set);
+        alexIhu.setDepartment(ihuIt);
+        alexIhu.setOrganization(ihu);
+
+        Employee lenaBs = new Employee();
+        lenaBs.setFirstName("Elena");
+        lenaBs.setLastName("K.");
+        lenaBs.setEmail("elena.k@bestsecret.com");
+        lenaBs.setHireDate(LocalDate.now().minusYears(1));
+        lenaBs.setOccupation(da);
+        lenaBs.setDepartment(bsEng);
+        lenaBs.setOrganization(bestSecret);
+
+        Employee tomBs = new Employee();
+        tomBs.setFirstName("Thomas");
+        tomBs.setLastName("M.");
+        tomBs.setEmail("thomas.m@bestsecret.com");
+        tomBs.setHireDate(LocalDate.now().minusMonths(8));
+        tomBs.setOccupation(swe);
+        tomBs.setDepartment(bsOps);
+        tomBs.setOrganization(bestSecret);
+
+        // Persist employees (and later cascaded children)
+        employeeRepository.saveAll(List.of(nikosNikas, giorgosGiorgou, mariaIhu, alexIhu, lenaBs, tomBs));
+
 
     }
 
