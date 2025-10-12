@@ -1,4 +1,6 @@
 databaseChangeLog:
   - include: { file: db/changelog/baseline.sql }
-  - include: { file: db/changelog/seeds/seed-data.sql }
+  - include: { file: db/changelog/seeds/001-seed-skills.sql }
+  - include: { file: db/changelog/seeds/002-seed-occupations.sql }
+  - include: { file: db/changelog/seeds/003-seed-data.sql }
 

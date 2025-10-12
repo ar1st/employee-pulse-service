@@ -1,6 +1,6 @@
--- liquibase formatted sql
+--liquibase formatted sql
 
--- changeset Aristeidis Tsachlaris:1
+--changeset Aristeidis_Tsachlaris:1
 CREATE SEQUENCE if NOT EXISTS "departments_seq" AS bigint START WITH 1 INCREMENT BY 1 MINVALUE 1 MAXVALUE 9223372036854775807 CACHE 1;
 
 CREATE SEQUENCE if NOT EXISTS "employees_seq" AS bigint START WITH 1 INCREMENT BY 1 MINVALUE 1 MAXVALUE 9223372036854775807 CACHE 1;
@@ -37,7 +37,7 @@ CREATE TABLE "employees" (
 
 CREATE TABLE "occupations" (
     "id"          INTEGER NOT NULL,
-    "description" VARCHAR(1000),
+    "description" VARCHAR(10000),
     "esco_id"     VARCHAR(255),
     "title"       VARCHAR(255),
     CONSTRAINT "occupations_pkey" PRIMARY KEY ("id")
@@ -73,7 +73,7 @@ CREATE TABLE "skill_entries" (
 
 CREATE TABLE "skills" (
     "id"          INTEGER NOT NULL,
-    "description" VARCHAR(1000),
+    "description" VARCHAR(10000),
     "esco_id"     VARCHAR(255),
     "name"        VARCHAR(255),
     CONSTRAINT "skills_pkey" PRIMARY KEY ("id")
