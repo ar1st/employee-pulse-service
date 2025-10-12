@@ -47,6 +47,6 @@ public class OccupationController {
         return ResponseEntity.ok().build();
     }
 
-    // add skills in bulk
+    // add occupations in bulk
 
 }
