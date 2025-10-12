@@ -1,10 +1,8 @@
 package gr.uom.employeepulseservice.controller;
 
-import gr.uom.employeepulseservice.controller.dto.CreateDepartmentDto;
-import gr.uom.employeepulseservice.controller.dto.DepartmentDto;
-import gr.uom.employeepulseservice.controller.dto.EmployeeDto;
-import gr.uom.employeepulseservice.controller.dto.UpdateDepartmentDto;
+import gr.uom.employeepulseservice.controller.dto.*;
 import gr.uom.employeepulseservice.service.DepartmentService;
+import gr.uom.employeepulseservice.service.SkillService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,13 +15,13 @@ import java.util.List;
 public class DepartmentController {
 
     private final DepartmentService departmentService;
+    private final SkillService skillService;
 
     @GetMapping
     public ResponseEntity<List<DepartmentDto>> findAll() {
         return ResponseEntity.ok(departmentService.findAll());
     }
 
-    //todo find departments by organization id
     @GetMapping("/{id}")
     public ResponseEntity<DepartmentDto> findById(@PathVariable Integer id) {
         return ResponseEntity.ok(departmentService.findDepartmentById(id));
@@ -55,7 +53,9 @@ public class DepartmentController {
         return ResponseEntity.ok(departmentService.findEmployeesById(id));
     }
 
-    //get skills
-    // add employee
-    // change employee department
+    @GetMapping("/{id}/skills")
+    public ResponseEntity<List<SkillDto>> findSkillsById(@PathVariable Integer id) {
+        return ResponseEntity.ok(skillService.findByDepartmentId(id));
+    }
+
 }

@@ -19,6 +19,7 @@ public class Employee {
     private Integer id;
 
     private String firstName;
+
     private String lastName;
 
     private String email;
@@ -40,27 +41,6 @@ public class Employee {
     @OneToMany(orphanRemoval = true, cascade = CascadeType.ALL)
     @JoinColumn(name = "employee_id")
     private List<SkillEntry> skillEntries;
-    /*
-    [
-        {
-        skill: java
-        rating: 4
-        date: 20-01-2025
-        },
-        {
-        skill: java
-        rating: 5
-        date: 20-01-2026
-        },
-        {
-        teamwork
-        5
-        wed
-        }
-    ]
-     */
-
-//    private Map<Skill, Double> skillToRating;
 
     @OneToMany(orphanRemoval = true, cascade = CascadeType.ALL)
     @JoinColumn(name = "employee_id")

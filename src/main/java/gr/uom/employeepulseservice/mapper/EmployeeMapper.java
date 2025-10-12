@@ -29,9 +29,9 @@ public interface EmployeeMapper {
     @Mapping(target = "occupationId", source = "occupation.id")
     @Mapping(target = "departmentId", source = "department.id")
     @Mapping(target = "organizationId", source = "organization.id")
-    EmployeeDto toDto(Employee skill);
+    EmployeeDto toDto(Employee employee);
 
-    List<EmployeeDto> toDtos(List<Employee> skills);
+    List<EmployeeDto> toDtos(List<Employee> employees);
 
     default List<Integer> mapSkillEntries(List<SkillEntry> skillEntries) {
         if (skillEntries == null) {

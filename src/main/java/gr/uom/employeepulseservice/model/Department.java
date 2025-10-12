@@ -21,6 +21,8 @@ public class Department {
     @JoinColumn(name = "organization_id")
     private Organization organization;
 
+
+    //todo Assign manager to department
     @ManyToOne
     @JoinColumn(name = "manager_id")
     private Employee manager;

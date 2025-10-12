@@ -1,8 +1,6 @@
 package gr.uom.employeepulseservice.controller;
 
-import gr.uom.employeepulseservice.controller.dto.EmployeeDto;
-import gr.uom.employeepulseservice.controller.dto.OrganizationDto;
-import gr.uom.employeepulseservice.controller.dto.SaveOrganizationDto;
+import gr.uom.employeepulseservice.controller.dto.*;
 import gr.uom.employeepulseservice.service.OrganizationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -53,6 +51,13 @@ public class OrganizationController {
         return ResponseEntity.ok(organizationService.findEmployeesById(id));
     }
 
-    // get departments by organization
-   // get skills by organization
+    @GetMapping("/{id}/departments")
+    public ResponseEntity<List<DepartmentDto>> findDepartmentsById(@PathVariable Integer id) {
+        return ResponseEntity.ok(organizationService.findDepartmentsById(id));
+    }
+
+    @GetMapping("/{id}/skills")
+    public ResponseEntity<List<SkillDto>> findSkillsById(@PathVariable Integer id) {
+        return ResponseEntity.ok(organizationService.findSkillsById(id));
+    }
 }

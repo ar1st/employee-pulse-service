@@ -55,4 +55,14 @@ public class OccupationService {
     public void deleteOccupation(Integer id) {
         occupationRepository.deleteById(id);
     }
+
+    @Transactional
+    public void bulkCreateOccupations(List<SaveOccupationDto> dtos) {
+        List<Occupation> toSave = dtos.stream()
+                .map(occupationMapper::toEntity)
+                .toList();
+
+        occupationRepository.saveAll(toSave);
+    }
+
 }

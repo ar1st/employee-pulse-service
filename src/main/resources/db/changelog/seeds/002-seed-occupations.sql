@@ -19282,3 +19282,5 @@ Examples of the occupations classified here:
 Some related occupations classified elsewhere:
 - Parking valet - 8322
 ', 'http://data.europa.eu/esco/isco/C9629', 'Elementary workers not elsewhere classified');
+
+ALTER SEQUENCE IF EXISTS public.occupations_seq RESTART WITH 35865;

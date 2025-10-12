@@ -1,14 +1,17 @@
 package gr.uom.employeepulseservice.service;
 
-import gr.uom.employeepulseservice.controller.dto.EmployeeDto;
-import gr.uom.employeepulseservice.controller.dto.OrganizationDto;
-import gr.uom.employeepulseservice.controller.dto.SaveOrganizationDto;
+import gr.uom.employeepulseservice.controller.dto.*;
+import gr.uom.employeepulseservice.mapper.DepartmentMapper;
 import gr.uom.employeepulseservice.mapper.EmployeeMapper;
 import gr.uom.employeepulseservice.mapper.OrganizationMapper;
+import gr.uom.employeepulseservice.mapper.SkillMapper;
 import gr.uom.employeepulseservice.model.Employee;
 import gr.uom.employeepulseservice.model.Organization;
+import gr.uom.employeepulseservice.model.Skill;
+import gr.uom.employeepulseservice.repository.DepartmentRepository;
 import gr.uom.employeepulseservice.repository.EmployeeRepository;
 import gr.uom.employeepulseservice.repository.OrganizationRepository;
+import gr.uom.employeepulseservice.repository.SkillRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,6 +26,10 @@ public class OrganizationService {
     private final OrganizationMapper organizationMapper;
     private final EmployeeRepository employeeRepository;
     private final EmployeeMapper employeeMapper;
+    private final DepartmentRepository departmentRepository;
+    private final DepartmentMapper departmentMapper;
+    private final SkillRepository skillRepository;
+    private final SkillMapper skillMapper;
 
     @Transactional(readOnly = true)
     public List<OrganizationDto> findAll() {
@@ -68,5 +75,24 @@ public class OrganizationService {
         List<Employee> employees = employeeRepository.findByOrganizationId(id);
 
         return employeeMapper.toDtos(employees);
+    }
+
+    @Transactional(readOnly = true)
+    public List<DepartmentDto> findDepartmentsById(Integer id) {
+        organizationRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Organization not found"));
+
+        return departmentMapper.toDtos(
+                departmentRepository.findByOrganizationId(id)
+        );
+    }
+
+    @Transactional(readOnly = true)
+    public List<SkillDto> findSkillsById(Integer id) {
+        organizationRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Organization not found"));
+
+        List<Skill> skills = skillRepository.findSkillsByOrganizationId(id);
+        return skillMapper.toDtos(skills);
     }
 }

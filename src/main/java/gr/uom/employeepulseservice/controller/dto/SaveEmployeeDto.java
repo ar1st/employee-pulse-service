@@ -9,7 +9,6 @@ public record SaveEmployeeDto(
         LocalDate hireDate,
         Integer organizationId,
         Integer departmentId,
-        Integer occupationId,
-        Integer managerId
+        Integer occupationId
 ) {
 }

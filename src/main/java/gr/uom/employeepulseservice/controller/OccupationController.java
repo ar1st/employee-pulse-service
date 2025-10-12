@@ -47,6 +47,10 @@ public class OccupationController {
         return ResponseEntity.ok().build();
     }
 
-    // add occupations in bulk
+    @PostMapping("/bulk")
+    public ResponseEntity<Void> bulkCreateOccupations(@RequestBody List<SaveOccupationDto> dtos) {
+        occupationService.bulkCreateOccupations(dtos);
+        return ResponseEntity.ok().build();
+    }
 
 }

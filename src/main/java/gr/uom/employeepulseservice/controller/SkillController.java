@@ -47,5 +47,19 @@ public class SkillController {
         return ResponseEntity.ok().build();
     }
 
-    // add skills in bulk (json)
+    @PostMapping("/bulk")
+    public ResponseEntity<Void> bulkCreateSkills(@RequestBody List<SaveSkillDto> dtos) {
+        skillService.bulkCreateSkills(dtos);
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/organization/{organizationId}")
+    public ResponseEntity<List<SkillDto>> findByOrganizationId(@PathVariable Integer organizationId) {
+        return ResponseEntity.ok(skillService.findByOrganizationId(organizationId));
+    }
+
+    @GetMapping("/department/{departmentId}")
+    public ResponseEntity<List<SkillDto>> findByDepartmentId(@PathVariable Integer departmentId) {
+        return ResponseEntity.ok(skillService.findByDepartmentId(departmentId));
+    }
 }

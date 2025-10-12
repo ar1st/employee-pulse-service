@@ -1,6 +1,7 @@
 package gr.uom.employeepulseservice.service;
 
 import gr.uom.employeepulseservice.controller.dto.CreatePerformanceReviewDto;
+import gr.uom.employeepulseservice.controller.dto.PerformanceReviewDto;
 import gr.uom.employeepulseservice.mapper.PerformanceReviewMapper;
 import gr.uom.employeepulseservice.model.Employee;
 import gr.uom.employeepulseservice.model.PerformanceReview;
@@ -55,6 +56,62 @@ public class PerformanceReviewService {
     private Employee findEmployeeById(Integer id) {
         return employeeRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Employee not found"));
+    }
+
+    @Transactional(readOnly = true)
+    public PerformanceReviewDto findById(Integer id) {
+        PerformanceReview pr = performanceReviewRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Performance review not found"));
+        return performanceReviewMapper.toDto(pr);
+    }
+
+    @Transactional(readOnly = true)
+    public List<PerformanceReviewDto> findByDate(LocalDate date) {
+        return performanceReviewMapper.toDtos(
+                performanceReviewRepository.findAllByReviewDate(date)
+        );
+    }
+
+    @Transactional(readOnly = true)
+    public List<PerformanceReviewDto> findByDateRange(LocalDate from, LocalDate to) {
+        return performanceReviewMapper.toDtos(
+                performanceReviewRepository.findAllByReviewDateBetween(from, to)
+        );
+    }
+
+    @Transactional(readOnly = true)
+    public List<PerformanceReviewDto> findByEmployee(Integer employeeId) {
+        return performanceReviewMapper.toDtos(
+                performanceReviewRepository.findAllByRefersToId(employeeId)
+        );
+    }
+
+    @Transactional(readOnly = true)
+    public List<PerformanceReviewDto> findByReviewer(Integer reporterId) {
+        return performanceReviewMapper.toDtos(
+                performanceReviewRepository.findAllByReportedById(reporterId)
+        );
+    }
+
+    @Transactional(readOnly = true)
+    public List<PerformanceReviewDto> findByDepartment(Integer departmentId) {
+        return performanceReviewMapper.toDtos(
+                performanceReviewRepository.findAllByRefersToDepartmentId(departmentId)
+        );
+    }
+
+    @Transactional(readOnly = true)
+    public List<PerformanceReviewDto> findBySkill(Integer skillId) {
+        return performanceReviewMapper.toDtos(
+                performanceReviewRepository.findAllBySkillId(skillId)
+        );
+    }
+
+    @Transactional(readOnly = true)
+    public List<PerformanceReviewDto> findByOccupation(Integer occupationId) {
+        return performanceReviewMapper.toDtos(
+                performanceReviewRepository.findAllByRefersToOccupationId(occupationId)
+        );
     }
 
 }

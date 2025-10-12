@@ -55,4 +55,29 @@ public class SkillService {
     public void deleteSkill(Integer id) {
         skillRepository.deleteById(id);
     }
+
+    @Transactional
+    public void bulkCreateSkills(List<SaveSkillDto> dtos) {
+        List<Skill> toSave = dtos.stream()
+                .map(skillMapper::toEntity)
+                .toList();
+
+        skillRepository.saveAll(toSave);
+    }
+
+    @Transactional(readOnly = true)
+    public List<SkillDto> findByOrganizationId(Integer organizationId) {
+        return skillMapper.toDtos(
+                skillRepository.findSkillsByOrganizationId(organizationId)
+        );
+    }
+
+    @Transactional(readOnly = true)
+    public List<SkillDto> findByDepartmentId(Integer departmentId) {
+        return skillMapper.toDtos(
+                skillRepository.findSkillsByDepartmentId(departmentId)
+        );
+    }
+
+
 }

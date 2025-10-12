@@ -26,3 +26,8 @@ VALUES (4, '2020-10-12', 1, 33553, 1, 'nikos.nikas@gmail.com', 'Nikos', 'Nikas')
        (8, '2024-10-12', 5, 32627, 3, 'elena.k@bestsecret.com', 'Elena', 'K.'),
        (9, '2025-02-12', 6, 35401, 3, 'thomas.m@bestsecret.com', 'Thomas', 'M.');
 
+ALTER SEQUENCE IF EXISTS public.organizations_seq RESTART WITH 4;
+
+ALTER SEQUENCE IF EXISTS public.departments_seq RESTART WITH 10;
+
+ALTER SEQUENCE IF EXISTS public.employees_seq RESTART WITH 7;
