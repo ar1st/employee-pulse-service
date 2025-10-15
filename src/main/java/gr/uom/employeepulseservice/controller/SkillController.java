@@ -48,8 +48,8 @@ public class SkillController {
     }
 
     @PostMapping("/bulk")
-    public ResponseEntity<Void> bulkCreateSkills(@RequestBody List<SaveSkillDto> dtos) {
-        skillService.bulkCreateSkills(dtos);
+    public ResponseEntity<Void> bulkCreateSkills(@RequestBody String json) {
+        skillService.bulkCreateSkills(json);
         return ResponseEntity.ok().build();
     }
 
