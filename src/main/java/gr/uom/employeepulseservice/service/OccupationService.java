@@ -1,11 +1,14 @@
 package gr.uom.employeepulseservice.service;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import gr.uom.employeepulseservice.controller.dto.OccupationDto;
 import gr.uom.employeepulseservice.controller.dto.SaveOccupationDto;
 import gr.uom.employeepulseservice.mapper.OccupationMapper;
 import gr.uom.employeepulseservice.model.Occupation;
 import gr.uom.employeepulseservice.repository.OccupationRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,6 +20,8 @@ public class OccupationService {
 
     private final OccupationRepository occupationRepository;
     private final OccupationMapper occupationMapper;
+
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Transactional(readOnly = true)
     public List<OccupationDto> findAll() {
@@ -56,8 +61,11 @@ public class OccupationService {
         occupationRepository.deleteById(id);
     }
 
+    @SneakyThrows
     @Transactional
-    public void bulkCreateOccupations(List<SaveOccupationDto> dtos) {
+    public void bulkCreateOccupations(String json) {
+        List<SaveOccupationDto> dtos = objectMapper.readValue(json, new TypeReference<>() {});
+
         List<Occupation> toSave = dtos.stream()
                 .map(occupationMapper::toEntity)
                 .toList();

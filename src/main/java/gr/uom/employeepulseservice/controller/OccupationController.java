@@ -48,8 +48,8 @@ public class OccupationController {
     }
 
     @PostMapping("/bulk")
-    public ResponseEntity<Void> bulkCreateOccupations(@RequestBody List<SaveOccupationDto> dtos) {
-        occupationService.bulkCreateOccupations(dtos);
+    public ResponseEntity<Void> bulkCreateOccupations(@RequestBody String json) {
+        occupationService.bulkCreateOccupations(json);
         return ResponseEntity.ok().build();
     }
 

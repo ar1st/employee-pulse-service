@@ -34,3 +34,13 @@ Content-Type: application/json
 
 ###
 DELETE localhost:8001/occupations/2
+
+
+###
+POST http://localhost:8001/occupations/bulk
+Content-Type: application/json
+
+[
+  { "title": "Plumberr", "description": "Pipes", "escoId": "123" },
+  { "title": "Electrician", "description": "Wiring", "escoId": "456" }
+]

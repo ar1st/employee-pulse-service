@@ -28,14 +28,14 @@ public class DepartmentController {
     }
 
     @PostMapping
-    public ResponseEntity<Void> createOrganization(@RequestBody CreateDepartmentDto dto) {
+    public ResponseEntity<Void> createDepartment(@RequestBody CreateDepartmentDto dto) {
         departmentService.createDepartment(dto);
 
         return ResponseEntity.ok().build();
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Void> updateOrganization(@PathVariable Integer id, @RequestBody UpdateDepartmentDto dto) {
+    public ResponseEntity<Void> updateDepartment(@PathVariable Integer id, @RequestBody UpdateDepartmentDto dto) {
         departmentService.updateDepartment(id, dto);
 
         return ResponseEntity.ok().build();
