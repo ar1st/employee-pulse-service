@@ -102,9 +102,8 @@ public class EmployeeService {
         employeeRepository.saveAll(entities);
     }
 
-    //todo return skill name and rating instead
     @Transactional(readOnly = true)
-    public List<SkillEntryDto> getLatestSkillEntriesOfEmployee(Integer employeeId) {
+    public List<SkillToRatingDto> getLatestSkillEntriesOfEmployee(Integer employeeId) {
         ensureEmployeeExists(employeeId);
 
         List<SkillEntry> all = skillEntryRepository.findAllByEmployeeIdOrderByEntryDateDesc(employeeId);
@@ -114,7 +113,10 @@ public class EmployeeService {
             Integer skillId = se.getSkill().getId();
             latestPerSkill.putIfAbsent(skillId, se);
         }
-        return skillEntryMapper.toDtos(new ArrayList<>(latestPerSkill.values()));
+
+        return latestPerSkill.values().stream()
+                .map(it -> new SkillToRatingDto(it.getId(), it.getSkill().getName(), it.getRating()))
+                .toList();
     }
 
     @Transactional
@@ -179,9 +181,7 @@ public class EmployeeService {
     }
 
     private void ensureEmployeeExists(Integer id) {
-        if (!employeeRepository.existsById(id)) {
-            throw new RuntimeException("Employee not found");
-        }
+        findById(id);
     }
 
     /* ===================== Helpers ===================== */

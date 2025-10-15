@@ -1,9 +1,6 @@
 package gr.uom.employeepulseservice.controller;
 
-import gr.uom.employeepulseservice.controller.dto.EmployeeDto;
-import gr.uom.employeepulseservice.controller.dto.SaveEmployeeDto;
-import gr.uom.employeepulseservice.controller.dto.SaveSkillEntryDto;
-import gr.uom.employeepulseservice.controller.dto.SkillEntryDto;
+import gr.uom.employeepulseservice.controller.dto.*;
 import gr.uom.employeepulseservice.service.EmployeeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -68,7 +65,7 @@ public class EmployeeController {
     }
 
     @GetMapping("/{employeeId}/skill-entries/latest")
-    public ResponseEntity<List<SkillEntryDto>> getLatestSkillEntriesOfEmployee(@PathVariable Integer employeeId) {
+    public ResponseEntity<List<SkillToRatingDto>> getLatestSkillEntriesOfEmployee(@PathVariable Integer employeeId) {
         return ResponseEntity.ok(employeeService.getLatestSkillEntriesOfEmployee(employeeId));
     }
 
