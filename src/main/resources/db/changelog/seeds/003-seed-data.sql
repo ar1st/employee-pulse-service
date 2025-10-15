@@ -18,13 +18,13 @@ VALUES (1, NULL, 1, 'HR'),
        (8, NULL, 3, 'Engineering'),
        (9, NULL, 3, 'Operations');
 
-INSERT INTO public.employees (department_id, hire_date, id, occupation_id, organization_id, email, first_name, last_name)
-VALUES (4, '2020-10-12', 1, 33553, 1, 'nikos.nikas@gmail.com', 'Nikos', 'Nikas'),
-       (5, '2023-10-12', 2, 35401, 1, 'giorgos.giorgou@gmail.com', 'Giorgos', 'Giorgou'),
-       (6, '2022-10-12', 3, 34789, 2, 'maria.p@ihu.edu', 'Maria', 'Papadopoulou'),
-       (7, '2024-04-12', 4, 35401, 2, 'alex.i@ihu.edu', 'Alexandros', 'Ioannou'),
-       (8, '2024-10-12', 5, 32627, 3, 'elena.k@bestsecret.com', 'Elena', 'K.'),
-       (9, '2025-02-12', 6, 35401, 3, 'thomas.m@bestsecret.com', 'Thomas', 'M.');
+INSERT INTO public.employees (id, department_id, hire_date, occupation_id, organization_id, email, first_name, last_name)
+VALUES (1, 4, '2020-10-12', 33553, 1, 'nikos.nikas@gmail.com', 'Nikos', 'Nikas'),
+       (2, 5, '2023-10-12', 35401, 1, 'giorgos.giorgou@gmail.com', 'Giorgos', 'Giorgou'),
+       (3, 6, '2022-10-12', 34789, 2, 'maria.p@ihu.edu', 'Maria', 'Papadopoulou'),
+       (4, 7, '2024-04-12', 35401, 2, 'alex.i@ihu.edu', 'Alexandros', 'Ioannou'),
+       (5, 8, '2024-10-12', 32627, 3, 'elena.k@bestsecret.com', 'Elena', 'K.'),
+       (6, 9, '2025-02-12', 35401, 3, 'thomas.m@bestsecret.com', 'Thomas', 'M.');
 
 ALTER SEQUENCE IF EXISTS public.organizations_seq RESTART WITH 4;
 
