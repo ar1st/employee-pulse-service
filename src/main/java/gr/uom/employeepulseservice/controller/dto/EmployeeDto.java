@@ -12,8 +12,6 @@ public record EmployeeDto(
         Integer departmentId,
         Integer organizationId,
         Integer occupationId,
-        Integer managerId,
-        List<Integer> subordinateIds,
         List<Integer> skillEntryIds
 ) {
 }
