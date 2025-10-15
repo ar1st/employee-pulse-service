@@ -30,6 +30,7 @@ public class PerformanceReviewService {
         LocalDate now = LocalDate.now();
         PerformanceReview performanceReview = performanceReviewMapper.toEntity(dto);
 
+        //todo make sure reporter is manager of employee
         Employee employee = findEmployeeById(dto.employeeId());
         performanceReview.setRefersTo(employee);
 
