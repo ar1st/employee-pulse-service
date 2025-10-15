@@ -57,8 +57,8 @@ public class EmployeeController {
     }
 
     @PostMapping("/bulk")
-    public ResponseEntity<Void> bulkCreate(@RequestBody List<SaveEmployeeDto> employees) {
-        employeeService.bulkCreate(employees);
+    public ResponseEntity<Void> bulkCreate(@RequestBody String json) {
+        employeeService.bulkCreate(json);
         return ResponseEntity.ok().build();
     }
 

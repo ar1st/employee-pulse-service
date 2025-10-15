@@ -1,14 +1,14 @@
 package gr.uom.employeepulseservice.service;
 
-import gr.uom.employeepulseservice.controller.dto.EmployeeDto;
-import gr.uom.employeepulseservice.controller.dto.SaveEmployeeDto;
-import gr.uom.employeepulseservice.controller.dto.SaveSkillEntryDto;
-import gr.uom.employeepulseservice.controller.dto.SkillEntryDto;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import gr.uom.employeepulseservice.controller.dto.*;
 import gr.uom.employeepulseservice.mapper.EmployeeMapper;
 import gr.uom.employeepulseservice.mapper.SkillEntryMapper;
 import gr.uom.employeepulseservice.model.*;
 import gr.uom.employeepulseservice.repository.*;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,6 +28,8 @@ public class EmployeeService {
 
     private final EmployeeMapper employeeMapper;
     private final SkillEntryMapper skillEntryMapper;
+
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Transactional(readOnly = true)
     public List<EmployeeDto> findAll() {
@@ -61,6 +63,7 @@ public class EmployeeService {
 
     }
 
+    //todo should we be able to delete employees that have performance review. if yes, what should happen to the performance review
     @Transactional
     public void deleteEmployee(Integer id) {
         employeeRepository.deleteById(id);
@@ -84,8 +87,12 @@ public class EmployeeService {
                 skillEntryRepository.findAllByEmployeeIdOrderByEntryDateDesc(employeeId)
         );
     }
+
+    @SneakyThrows
     @Transactional
-    public void bulkCreate(List<SaveEmployeeDto> dtos) {
+    public void bulkCreate(String json) {
+        List<SaveEmployeeDto> dtos = objectMapper.readValue(json, new TypeReference<>() {});
+
         List<Employee> entities = new ArrayList<>(dtos.size());
         for (SaveEmployeeDto dto : dtos) {
             Employee e = employeeMapper.toEntity(dto);
@@ -95,6 +102,7 @@ public class EmployeeService {
         employeeRepository.saveAll(entities);
     }
 
+    //todo return skill name and rating instead
     @Transactional(readOnly = true)
     public List<SkillEntryDto> getLatestSkillEntriesOfEmployee(Integer employeeId) {
         ensureEmployeeExists(employeeId);
