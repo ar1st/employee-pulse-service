@@ -16,6 +16,7 @@ public class OccupationController {
 
     private final OccupationService occupationService;
 
+    //TODO add pagination
     @GetMapping
     public ResponseEntity<List<OccupationDto>> findAll() {
         return ResponseEntity.ok(occupationService.findAll());

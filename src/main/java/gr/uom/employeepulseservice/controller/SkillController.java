@@ -16,6 +16,7 @@ public class SkillController {
 
     private final SkillService skillService;
 
+    //TODO add pagination
     @GetMapping
     public ResponseEntity<List<SkillDto>> findAll() {
         return ResponseEntity.ok(skillService.findAll());
