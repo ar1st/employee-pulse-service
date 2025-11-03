@@ -4,5 +4,6 @@ databaseChangeLog:
   - include: { file: db/changelog/seeds/002-seed-occupations.sql }
   - include: { file: db/changelog/seeds/003-seed-data.sql }
   - include: { file: db/changelog/seeds/004-seed-performance-reviews.sql }
+  - include: { file: db/changelog/seeds/005-create-reporting-views.sql }
 
 
