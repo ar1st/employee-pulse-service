@@ -9,8 +9,10 @@ public interface ReportingRepository {
 
     List<OrgDeptSkillPeriodStatsDto> getOrgDeptSkillPeriod(String grain,
                                                            Integer organizationId,
-                                                           Integer departmentId);
+                                                           Integer departmentId,
+                                                           Integer number);
 
     List<EmployeeSkillPeriodStatsDto> getEmployeeSkillPeriod(String grain,
-                                                             Integer employeeId);
+                                                             Integer employeeId,
+                                                             Integer number);
 }
