@@ -2,7 +2,7 @@ package gr.uom.employeepulseservice.controller.dto;
 
 import java.time.LocalDate;
 
-public record EmployeeSkillPeriodStatsDto (
+public record EmployeeReportingStatsDto(
         Integer employeeId,
         String firstName,
         String lastName,
@@ -10,6 +10,5 @@ public record EmployeeSkillPeriodStatsDto (
         LocalDate periodStart,
         Double avgRating,
         Double minRating,
-        Double maxRating,
-        Long sampleCount
+        Double maxRating
 ) {}

@@ -1,7 +1,7 @@
 package gr.uom.employeepulseservice.repository.impl;
 
-import gr.uom.employeepulseservice.controller.dto.EmployeeSkillPeriodStatsDto;
-import gr.uom.employeepulseservice.controller.dto.OrgDeptSkillPeriodStatsDto;
+import gr.uom.employeepulseservice.controller.dto.EmployeeReportingStatsDto;
+import gr.uom.employeepulseservice.controller.dto.OrgDeptReportingStatsDto;
 import gr.uom.employeepulseservice.repository.ReportingRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -22,14 +22,15 @@ public class ReportingRepositoryImpl implements ReportingRepository {
     private final NamedParameterJdbcTemplate jdbc;
 
     private String normalizeGrain(String grain) {
-        String g = (grain == null) ? "month" : grain.trim().toLowerCase();
-        if (!ALLOWED_GRAINS.contains(g)) {
-            throw new IllegalArgumentException("Unsupported grain: " + grain + " (use month|quarter|semester|year)");
+        String normalizedGrain = (grain == null) ? "month" : grain.trim().toLowerCase();
+
+        if (!ALLOWED_GRAINS.contains(normalizedGrain)) {
+            throw new IllegalArgumentException("Unsupported grain: " + grain + ". Use month|quarter|semester|year");
         }
-        return g;
+        return normalizedGrain;
     }
 
-    private String periodStartExpr(String grain) {
+    private String periodStartExpression(String grain) {
         return switch (grain) {
             case "month" -> "date_trunc('month', entry_date)::date";
             case "quarter" -> "date_trunc('quarter', entry_date)::date";
@@ -40,26 +41,27 @@ public class ReportingRepositoryImpl implements ReportingRepository {
         };
     }
 
-    private String numberPredicate(String grain, Integer number) {
-        if (number == null) return "TRUE";
+    private String periodValuePredicate(String grain, Integer periodValue) {
+        if (periodValue == null) return "TRUE";
+
         return switch (grain) {
-            case "month" -> "EXTRACT(month   FROM entry_date)::int = :number";
-            case "quarter" -> "EXTRACT(quarter FROM entry_date)::int = :number";
-            case "semester" -> "(((EXTRACT(quarter FROM entry_date)::int - 1) / 2) + 1) = :number";
-            case "year" -> "EXTRACT(year    FROM entry_date)::int = :number";
+            case "month" -> "EXTRACT(month FROM entry_date)::int = :periodValue";
+            case "quarter" -> "EXTRACT(quarter FROM entry_date)::int = :periodValue";
+            case "semester" -> "(((EXTRACT(quarter FROM entry_date)::int - 1) / 2) + 1) = :periodValue";
+            case "year" -> "EXTRACT(year FROM entry_date)::int = :periodValue";
             default -> throw new IllegalStateException("Unexpected grain: " + grain);
         };
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<OrgDeptSkillPeriodStatsDto> getOrgDeptSkillPeriod(String grain,
-                                                                  Integer organizationId,
-                                                                  Integer departmentId,
-                                                                  Integer number) {
-        String g = normalizeGrain(grain);
-        String periodStart = periodStartExpr(g);
-        String numberWhere = numberPredicate(g, number);
+    public List<OrgDeptReportingStatsDto> getReportByOrganizationAndDepartment(String grain,
+                                                                               Integer organizationId,
+                                                                               Integer departmentId,
+                                                                               Integer periodValue) {
+        String normalizedGrain = normalizeGrain(grain);
+        String periodStart = periodStartExpression(normalizedGrain);
+        String periodValueWhere = periodValuePredicate(normalizedGrain, periodValue);
 
         String sql = """
                     SELECT
@@ -77,14 +79,14 @@ public class ReportingRepositoryImpl implements ReportingRepository {
                       AND %s
                     GROUP BY organization_name, department_name, skill_name, period_start
                     ORDER BY period_start DESC;
-                """.formatted(periodStart, numberWhere);
+                """.formatted(periodStart, periodValueWhere);
 
         MapSqlParameterSource params = new MapSqlParameterSource()
                 .addValue("orgId", organizationId)
                 .addValue("deptId", departmentId);
-        if (number != null) params.addValue("number", number);
+        if (periodValue != null) params.addValue("periodValue", periodValue);
 
-        return jdbc.query(sql, params, (rs, rn) -> new OrgDeptSkillPeriodStatsDto(
+        return jdbc.query(sql, params, (rs, rn) -> new OrgDeptReportingStatsDto(
                 rs.getString("organization_name"),
                 rs.getString("department_name"),
                 rs.getString("skill_name"),
@@ -99,12 +101,12 @@ public class ReportingRepositoryImpl implements ReportingRepository {
 
     @Override
     @Transactional(readOnly = true)
-    public List<EmployeeSkillPeriodStatsDto> getEmployeeSkillPeriod(String grain,
-                                                                    Integer employeeId,
-                                                                    Integer number) {
-        String g = normalizeGrain(grain);
-        String periodStart = periodStartExpr(g);
-        String numberWhere = numberPredicate(g, number);
+    public List<EmployeeReportingStatsDto> getReportByEmployee(String grain,
+                                                               Integer employeeId,
+                                                               Integer periodValue) {
+        String normalizedGrain = normalizeGrain(grain);
+        String periodStart = periodStartExpression(normalizedGrain);
+        String periodValueWhere = periodValuePredicate(normalizedGrain, periodValue);
 
         String sql = """
                     SELECT
@@ -115,20 +117,19 @@ public class ReportingRepositoryImpl implements ReportingRepository {
                         %s AS period_start,
                         avg(rating) AS avg_rating,
                         min(rating) AS min_rating,
-                        max(rating) AS max_rating,
-                        count(*)    AS sample_count
+                        max(rating) AS max_rating
                     FROM v_employee_skill_period
                     WHERE employee_id = :employeeId
                       AND %s
                     GROUP BY employee_id, first_name, last_name, skill_name, period_start
                     ORDER BY period_start DESC;
-                """.formatted(periodStart, numberWhere);
+                """.formatted(periodStart, periodValueWhere);
 
         MapSqlParameterSource params = new MapSqlParameterSource()
                 .addValue("employeeId", employeeId);
-        if (number != null) params.addValue("number", number);
+        if (periodValue != null) params.addValue("periodValue", periodValue);
 
-        return jdbc.query(sql, params, (rs, rn) -> new EmployeeSkillPeriodStatsDto(
+        return jdbc.query(sql, params, (rs, rn) -> new EmployeeReportingStatsDto(
                 rs.getInt("employee_id"),
                 rs.getString("first_name"),
                 rs.getString("last_name"),
@@ -136,8 +137,7 @@ public class ReportingRepositoryImpl implements ReportingRepository {
                 rs.getObject("period_start", LocalDate.class),
                 rs.getDouble("avg_rating"),
                 rs.getDouble("min_rating"),
-                rs.getDouble("max_rating"),
-                rs.getLong("sample_count")
+                rs.getDouble("max_rating")
         ));
     }
 }

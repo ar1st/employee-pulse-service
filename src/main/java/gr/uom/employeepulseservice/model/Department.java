@@ -21,15 +21,14 @@ public class Department {
     @JoinColumn(name = "organization_id")
     private Organization organization;
 
-
     //todo Assign manager to department
+    //add to create/update department
+    //and add separate endpoint to assign employee to department
     @ManyToOne
     @JoinColumn(name = "manager_id")
     private Employee manager;
 
     @OneToMany(mappedBy = "department", orphanRemoval = true, cascade = CascadeType.ALL)
     private List<Employee> employees;
-
-    //todo Add skill history not affected by employees
 
 }

@@ -1,18 +1,18 @@
 package gr.uom.employeepulseservice.repository;
 
-import gr.uom.employeepulseservice.controller.dto.EmployeeSkillPeriodStatsDto;
-import gr.uom.employeepulseservice.controller.dto.OrgDeptSkillPeriodStatsDto;
+import gr.uom.employeepulseservice.controller.dto.EmployeeReportingStatsDto;
+import gr.uom.employeepulseservice.controller.dto.OrgDeptReportingStatsDto;
 
 import java.util.List;
 
 public interface ReportingRepository {
 
-    List<OrgDeptSkillPeriodStatsDto> getOrgDeptSkillPeriod(String grain,
-                                                           Integer organizationId,
-                                                           Integer departmentId,
-                                                           Integer number);
+    List<OrgDeptReportingStatsDto> getReportByOrganizationAndDepartment(String grain,
+                                                                        Integer organizationId,
+                                                                        Integer departmentId,
+                                                                        Integer periodValue);
 
-    List<EmployeeSkillPeriodStatsDto> getEmployeeSkillPeriod(String grain,
-                                                             Integer employeeId,
-                                                             Integer number);
+    List<EmployeeReportingStatsDto> getReportByEmployee(String grain,
+                                                        Integer employeeId,
+                                                        Integer periodValue);
 }
