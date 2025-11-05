@@ -2,6 +2,7 @@ package gr.uom.employeepulseservice.repository.impl;
 
 import gr.uom.employeepulseservice.controller.dto.EmployeeReportingStatsDto;
 import gr.uom.employeepulseservice.controller.dto.OrgDeptReportingStatsDto;
+import gr.uom.employeepulseservice.model.PeriodType;
 import gr.uom.employeepulseservice.repository.ReportingRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -11,57 +12,38 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Set;
 
 @Repository
 @RequiredArgsConstructor
 public class ReportingRepositoryImpl implements ReportingRepository {
-
-    private static final Set<String> ALLOWED_GRAINS = Set.of("month", "quarter", "semester", "year");
-
     private final NamedParameterJdbcTemplate jdbc;
 
-    private String normalizeGrain(String grain) {
-        String normalizedGrain = (grain == null) ? "month" : grain.trim().toLowerCase();
-
-        if (!ALLOWED_GRAINS.contains(normalizedGrain)) {
-            throw new IllegalArgumentException("Unsupported grain: " + grain + ". Use month|quarter|semester|year");
-        }
-        return normalizedGrain;
-    }
-
-    private String periodStartExpression(String grain) {
-        return switch (grain) {
-            case "month" -> "date_trunc('month', entry_date)::date";
-            case "quarter" -> "date_trunc('quarter', entry_date)::date";
-            case "semester" ->
-                    "(date_trunc('quarter', entry_date) - ((EXTRACT(quarter FROM entry_date)::int % 2) * interval '3 months'))::date";
-            case "year" -> "date_trunc('year', entry_date)::date";
-            default -> throw new IllegalStateException("Unexpected grain: " + grain);
+    private String periodStartExpression(PeriodType periodType) {
+        return switch (periodType) {
+            case PeriodType.MONTH -> "date_trunc('month', entry_date)::date";
+            case PeriodType.QUARTER -> "date_trunc('quarter', entry_date)::date";
         };
     }
 
-    private String periodValuePredicate(String grain, Integer periodValue) {
+    private String periodValuePredicate(PeriodType periodType, Integer periodValue) {
         if (periodValue == null) return "TRUE";
 
-        return switch (grain) {
-            case "month" -> "EXTRACT(month FROM entry_date)::int = :periodValue";
-            case "quarter" -> "EXTRACT(quarter FROM entry_date)::int = :periodValue";
-            case "semester" -> "(((EXTRACT(quarter FROM entry_date)::int - 1) / 2) + 1) = :periodValue";
-            case "year" -> "EXTRACT(year FROM entry_date)::int = :periodValue";
-            default -> throw new IllegalStateException("Unexpected grain: " + grain);
+        return switch (periodType) {
+            case PeriodType.MONTH -> "EXTRACT(month FROM entry_date)::int = :periodValue";
+            case PeriodType.QUARTER -> "EXTRACT(quarter FROM entry_date)::int = :periodValue";
         };
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<OrgDeptReportingStatsDto> getReportByOrganizationAndDepartment(String grain,
+    public List<OrgDeptReportingStatsDto> getReportByOrganizationAndDepartment(PeriodType periodType,
                                                                                Integer organizationId,
                                                                                Integer departmentId,
                                                                                Integer periodValue) {
-        String normalizedGrain = normalizeGrain(grain);
-        String periodStart = periodStartExpression(normalizedGrain);
-        String periodValueWhere = periodValuePredicate(normalizedGrain, periodValue);
+        periodType = periodType == null ? PeriodType.QUARTER : periodType;
+
+        String periodStart = periodStartExpression(periodType);
+        String periodValueWhere = periodValuePredicate(periodType, periodValue);
 
         String sql = """
                     SELECT
@@ -101,12 +83,13 @@ public class ReportingRepositoryImpl implements ReportingRepository {
 
     @Override
     @Transactional(readOnly = true)
-    public List<EmployeeReportingStatsDto> getReportByEmployee(String grain,
+    public List<EmployeeReportingStatsDto> getReportByEmployee(PeriodType periodType,
                                                                Integer employeeId,
                                                                Integer periodValue) {
-        String normalizedGrain = normalizeGrain(grain);
-        String periodStart = periodStartExpression(normalizedGrain);
-        String periodValueWhere = periodValuePredicate(normalizedGrain, periodValue);
+        periodType = periodType == null ? PeriodType.MONTH : periodType;
+
+        String periodStart = periodStartExpression(periodType);
+        String periodValueWhere = periodValuePredicate(periodType, periodValue);
 
         String sql = """
                     SELECT

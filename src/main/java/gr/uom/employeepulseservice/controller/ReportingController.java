@@ -2,6 +2,7 @@ package gr.uom.employeepulseservice.controller;
 
 import gr.uom.employeepulseservice.controller.dto.EmployeeReportingStatsDto;
 import gr.uom.employeepulseservice.controller.dto.OrgDeptReportingStatsDto;
+import gr.uom.employeepulseservice.model.PeriodType;
 import gr.uom.employeepulseservice.repository.ReportingRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -20,22 +21,22 @@ public class ReportingController {
     public ResponseEntity<List<OrgDeptReportingStatsDto>> getReportByOrganizationAndDepartment(
             @PathVariable Integer orgId,
             @PathVariable Integer deptId,
-            @RequestParam(defaultValue = "quarter") String grain,
+            @RequestParam PeriodType periodType,
             @RequestParam(required = false) Integer periodValue
     ) {
         return ResponseEntity.ok(
-                reportingRepository.getReportByOrganizationAndDepartment(grain, orgId, deptId, periodValue)
+                reportingRepository.getReportByOrganizationAndDepartment(periodType, orgId, deptId, periodValue)
         );
     }
 
     @GetMapping("/employee/{employeeId}")
     public ResponseEntity<List<EmployeeReportingStatsDto>> getReportByEmployee(
             @PathVariable Integer employeeId,
-            @RequestParam(defaultValue = "month") String grain,
+            @RequestParam PeriodType periodType,
             @RequestParam(required = false) Integer periodValue
     ) {
         return ResponseEntity.ok(
-                reportingRepository.getReportByEmployee(grain, employeeId, periodValue)
+                reportingRepository.getReportByEmployee(periodType, employeeId, periodValue)
                 );
     }
 }
