@@ -22,10 +22,11 @@ public class ReportingController {
             @PathVariable Integer orgId,
             @PathVariable Integer deptId,
             @RequestParam PeriodType periodType,
-            @RequestParam(required = false) Integer periodValue
+            @RequestParam(required = false) Integer periodValue,
+            @RequestParam(required = false) Integer year
     ) {
         return ResponseEntity.ok(
-                reportingRepository.getReportByOrganizationAndDepartment(periodType, orgId, deptId, periodValue)
+                reportingRepository.getReportByOrganizationAndDepartment(periodType, orgId, deptId, periodValue, year)
         );
     }
 
@@ -33,10 +34,12 @@ public class ReportingController {
     public ResponseEntity<List<EmployeeReportingStatsDto>> getReportByEmployee(
             @PathVariable Integer employeeId,
             @RequestParam PeriodType periodType,
-            @RequestParam(required = false) Integer periodValue
+            @RequestParam(required = false) Integer periodValue,
+            @RequestParam(required = false) Integer year
     ) {
         return ResponseEntity.ok(
-                reportingRepository.getReportByEmployee(periodType, employeeId, periodValue)
-                );
+                reportingRepository.getReportByEmployee(periodType, employeeId, periodValue, year)
+        );
     }
 }
+

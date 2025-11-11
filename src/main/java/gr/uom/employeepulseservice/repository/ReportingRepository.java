@@ -11,9 +11,11 @@ public interface ReportingRepository {
     List<OrgDeptReportingStatsDto> getReportByOrganizationAndDepartment(PeriodType periodType,
                                                                         Integer organizationId,
                                                                         Integer departmentId,
-                                                                        Integer periodValue);
+                                                                        Integer periodValue,
+                                                                        Integer year);
 
     List<EmployeeReportingStatsDto> getReportByEmployee(PeriodType periodType,
                                                         Integer employeeId,
-                                                        Integer periodValue);
+                                                        Integer periodValue,
+                                                        Integer year);
 }
