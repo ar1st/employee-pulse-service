@@ -1,0 +1,32 @@
+
+// Αποτελέσματα αξιολόγησης δεξιοτήτων του Giorgos για το Γ’ τρίμηνο 2025, ομαδοποιημένα ανά δεξιότητα.
+GET localhost:8001/reports/employee/2?periodType=QUARTER&periodValue=3&year=2025
+Content-Type: application/json
+
+###
+// Ετήσια συγκεντρωτικά αποτελέσματα δεξιοτήτων του Giorgos για το 2025.
+GET localhost:8001/reports/employee/2?periodType=YEAR&year=2025
+Content-Type: application/json
+
+###
+// Αποτελέσματα αξιολόγησης δεξιοτήτων του Giorgos για τον Ιούλιο 2025, ομαδοποιημένα ανά δεξιότητα.
+GET localhost:8001/reports/employee/2?periodType=MONTH&periodValue=7&year=2025
+Content-Type: application/json
+
+###
+// Αποτελέσματα δεξιοτήτων του Τμήματος Τεχνολογίας του Πανεπιστημίου Μακεδονίας για το Γ’ τρίμηνο 2025, ομαδοποιημένα ανά δεξιότητα.
+GET localhost:8001/reports/org/1/dept/5?periodType=QUARTER&periodValue=3&year=2025
+
+###
+// Ετήσια συγκεντρωτικά αποτελέσματα δεξιοτήτων για το Τμήμα Τεχνολογίας του Πανεπιστημίου Μακεδονίας για το 2025, ομαδοποιημένα ανά δεξιότητα
+GET localhost:8001/reports/org/1/dept/5?periodType=YEAR&year=2025
+
+###
+//Αποτελέσματα δεξιοτήτων του Τμήματος Τεχνολογίας του Πανεπιστημίου Μακεδονίας για τον Ιούλιο 2025, ομαδοποιημένα ανά δεξιότητα
+GET localhost:8001/reports/org/1/dept/5?periodType=MONTH&periodValue=7&year=2025
+
+
+###
+// Συνολικά αποτελέσματα δεξιοτήτων του Τμήματος Τεχνολογίας του Πανεπιστημίου Μακεδονίας για όλα τα τρίμηνα του 2025, ομαδοποιημένα ανά δεξιότητα
+GET localhost:8001/reports/org/1/dept/5?periodType=QUARTER&year=2025
+
