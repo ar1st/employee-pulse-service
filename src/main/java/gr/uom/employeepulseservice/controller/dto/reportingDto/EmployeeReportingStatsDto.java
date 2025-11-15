@@ -1,4 +1,4 @@
-package gr.uom.employeepulseservice.controller.dto;
+package gr.uom.employeepulseservice.controller.dto.reportingDto;
 
 import java.time.LocalDate;
 
