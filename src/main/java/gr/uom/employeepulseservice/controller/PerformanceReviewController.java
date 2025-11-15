@@ -2,6 +2,7 @@ package gr.uom.employeepulseservice.controller;
 
 import gr.uom.employeepulseservice.controller.dto.CreatePerformanceReviewDto;
 import gr.uom.employeepulseservice.controller.dto.PerformanceReviewDto;
+import gr.uom.employeepulseservice.controller.dto.SaveSkillEntryDto;
 import gr.uom.employeepulseservice.service.PerformanceReviewService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -66,6 +67,37 @@ public class PerformanceReviewController {
     @GetMapping("/occupation/{occupationId}")
     public ResponseEntity<List<PerformanceReviewDto>> getByOccupation(@PathVariable Integer occupationId) {
         return ResponseEntity.ok(performanceReviewService.findByOccupation(occupationId));
+    }
+
+    @PostMapping("/{reviewId}/skill-entries")
+    public ResponseEntity<PerformanceReviewDto> addSkillEntry(
+            @PathVariable Integer reviewId,
+            @RequestBody SaveSkillEntryDto dto
+    ) {
+        return ResponseEntity.ok(
+                performanceReviewService.addSkillEntryToReview(reviewId, dto)
+        );
+    }
+
+    @PutMapping("/{reviewId}/skill-entries/{entryId}")
+    public ResponseEntity<PerformanceReviewDto> updateSkillEntry(
+            @PathVariable Integer reviewId,
+            @PathVariable Integer entryId,
+            @RequestBody SaveSkillEntryDto dto
+    ) {
+        return ResponseEntity.ok(
+                performanceReviewService.updateSkillEntryInReview(reviewId, entryId, dto)
+        );
+    }
+
+    @DeleteMapping("/{reviewId}/skill-entries/{entryId}")
+    public ResponseEntity<PerformanceReviewDto> removeSkillEntry(
+            @PathVariable Integer reviewId,
+            @PathVariable Integer entryId
+    ) {
+        return ResponseEntity.ok(
+                performanceReviewService.removeSkillEntryFromReview(reviewId, entryId)
+        );
     }
 
 }

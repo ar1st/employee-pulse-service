@@ -2,9 +2,11 @@ package gr.uom.employeepulseservice.service;
 
 import gr.uom.employeepulseservice.controller.dto.CreatePerformanceReviewDto;
 import gr.uom.employeepulseservice.controller.dto.PerformanceReviewDto;
+import gr.uom.employeepulseservice.controller.dto.SaveSkillEntryDto;
 import gr.uom.employeepulseservice.mapper.PerformanceReviewMapper;
 import gr.uom.employeepulseservice.model.Employee;
 import gr.uom.employeepulseservice.model.PerformanceReview;
+import gr.uom.employeepulseservice.model.Skill;
 import gr.uom.employeepulseservice.model.SkillEntry;
 import gr.uom.employeepulseservice.repository.EmployeeRepository;
 import gr.uom.employeepulseservice.repository.PerformanceReviewRepository;
@@ -114,5 +116,65 @@ public class PerformanceReviewService {
                 performanceReviewRepository.findAllByRefersToOccupationId(occupationId)
         );
     }
+
+    @Transactional
+    public PerformanceReviewDto addSkillEntryToReview(Integer reviewId, SaveSkillEntryDto dto) {
+        PerformanceReview review = performanceReviewRepository.findById(reviewId)
+                .orElseThrow(() -> new RuntimeException("Performance review not found"));
+
+        Skill skill = skillRepository.findById(dto.skillId())
+                .orElseThrow(() -> new RuntimeException("Skill not found"));
+
+        SkillEntry entry = new SkillEntry();
+        entry.setSkill(skill);
+        entry.setRating(dto.rating());
+        entry.setEntryDate(dto.entryDate() != null ? dto.entryDate() : LocalDate.now());
+        entry.setEmployee(review.getRefersTo());
+
+        review.getSkillEntries().add(entry);
+
+        return performanceReviewMapper.toDto(
+                performanceReviewRepository.save(review)
+        );
+    }
+
+    @Transactional
+    public PerformanceReviewDto updateSkillEntryInReview(Integer reviewId, Integer entryId, SaveSkillEntryDto dto) {
+        PerformanceReview review = performanceReviewRepository.findById(reviewId)
+                .orElseThrow(() -> new RuntimeException("Performance review not found"));
+
+        SkillEntry entry = review.getSkillEntries().stream()
+                .filter(se -> se.getId().equals(entryId))
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("Skill entry not found for this review"));
+
+        if (dto.skillId() != null && !dto.skillId().equals(entry.getSkill().getId())) {
+            Skill skill = skillRepository.findById(dto.skillId())
+                    .orElseThrow(() -> new RuntimeException("Skill not found"));
+            entry.setSkill(skill);
+        }
+
+        if (dto.rating() != null) entry.setRating(dto.rating());
+        if (dto.entryDate() != null) entry.setEntryDate(dto.entryDate());
+
+        return performanceReviewMapper.toDto(review);
+    }
+
+    @Transactional
+    public PerformanceReviewDto removeSkillEntryFromReview(Integer reviewId, Integer entryId) {
+        PerformanceReview review = performanceReviewRepository.findById(reviewId)
+                .orElseThrow(() -> new RuntimeException("Performance review not found"));
+
+        boolean removed = review.getSkillEntries().removeIf(se -> se.getId().equals(entryId));
+
+        if (!removed) {
+            throw new RuntimeException("Skill entry not found for this review");
+        }
+
+        return performanceReviewMapper.toDto(
+                performanceReviewRepository.save(review)
+        );
+    }
+
 
 }
