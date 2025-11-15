@@ -1,8 +1,9 @@
 package gr.uom.employeepulseservice.repository;
 
-import gr.uom.employeepulseservice.controller.dto.reportingDto.EmployeeReportingStatsDto;
-import gr.uom.employeepulseservice.controller.dto.reportingDto.EmployeeSkillTimelineStatsDto;
-import gr.uom.employeepulseservice.controller.dto.reportingDto.OrgDeptReportingStatsDto;
+import gr.uom.employeepulseservice.controller.dto.reportingDto.employee.EmployeeReportingStatsDto;
+import gr.uom.employeepulseservice.controller.dto.reportingDto.employee.EmployeeSkillTimelineStatsDto;
+import gr.uom.employeepulseservice.controller.dto.reportingDto.orgdept.OrgDeptReportingStatsDto;
+import gr.uom.employeepulseservice.controller.dto.reportingDto.orgdept.OrgDeptSkillTimelineStatsDto;
 import gr.uom.employeepulseservice.model.PeriodType;
 
 import java.util.List;
@@ -23,5 +24,10 @@ public interface ReportingRepository {
     List<EmployeeSkillTimelineStatsDto> getSkillTimelineByEmployee(Integer employeeId,
                                                                    Integer skillId);
 
+    List<OrgDeptSkillTimelineStatsDto> getSkillTimelineByOrganizationAndDepartment(
+            Integer organizationId,
+            Integer departmentId,
+            Integer skillId
+    );
 }
 

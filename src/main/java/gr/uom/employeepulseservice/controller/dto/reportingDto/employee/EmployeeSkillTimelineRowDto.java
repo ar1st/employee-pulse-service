@@ -1,14 +1,15 @@
-package gr.uom.employeepulseservice.controller.dto.reportingDto;
+package gr.uom.employeepulseservice.controller.dto.reportingDto.employee;
 
-import java.util.List;
+import java.time.LocalDate;
 
-public record EmployeeSkillTimelineStatsDto(
+public record EmployeeSkillTimelineRowDto(
         Integer employeeId,
         String firstName,
         String lastName,
         Integer skillId,
         String skillName,
-        List<SkillTimelinePointDto> timeline,
+        LocalDate entryDate,
+        Double rating,
         Double minRating,
         Double maxRating,
         Double avgRating

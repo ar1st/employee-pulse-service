@@ -1,6 +1,13 @@
 package gr.uom.employeepulseservice.repository.impl;
 
-import gr.uom.employeepulseservice.controller.dto.reportingDto.*;
+import gr.uom.employeepulseservice.controller.dto.reportingDto.employee.EmployeeReportingStatsDto;
+import gr.uom.employeepulseservice.controller.dto.reportingDto.employee.EmployeeSkillTimelineRowDto;
+import gr.uom.employeepulseservice.controller.dto.reportingDto.employee.EmployeeSkillTimelineStatsDto;
+import gr.uom.employeepulseservice.controller.dto.reportingDto.employee.SkillTimelinePointDto;
+import gr.uom.employeepulseservice.controller.dto.reportingDto.orgdept.OrgDeptReportingStatsDto;
+import gr.uom.employeepulseservice.controller.dto.reportingDto.orgdept.OrgDeptSkillTimelinePointDto;
+import gr.uom.employeepulseservice.controller.dto.reportingDto.orgdept.OrgDeptSkillTimelineRowDto;
+import gr.uom.employeepulseservice.controller.dto.reportingDto.orgdept.OrgDeptSkillTimelineStatsDto;
 import gr.uom.employeepulseservice.model.PeriodType;
 import gr.uom.employeepulseservice.repository.ReportingRepository;
 import lombok.RequiredArgsConstructor;
@@ -151,20 +158,20 @@ public class ReportingRepositoryImpl implements ReportingRepository {
 
         // Base query: fetch all skill entry rows for an employee
         String baseSql = """
-            SELECT
-                employee_id,
-                first_name,
-                last_name,
-                skill_id,
-                skill_name,
-                entry_date,
-                rating,
-                MIN(rating) OVER (PARTITION BY employee_id, skill_id) AS min_rating,
-                MAX(rating) OVER (PARTITION BY employee_id, skill_id) AS max_rating,
-                AVG(rating) OVER (PARTITION BY employee_id, skill_id) AS avg_rating
-            FROM v_employee_skill_period
-            WHERE employee_id = :employeeId
-            """;
+                SELECT
+                    employee_id,
+                    first_name,
+                    last_name,
+                    skill_id,
+                    skill_name,
+                    entry_date,
+                    rating,
+                    MIN(rating) OVER (PARTITION BY employee_id, skill_id) AS min_rating,
+                    MAX(rating) OVER (PARTITION BY employee_id, skill_id) AS max_rating,
+                    AVG(rating) OVER (PARTITION BY employee_id, skill_id) AS avg_rating
+                FROM v_employee_skill_period
+                WHERE employee_id = :employeeId
+                """;
 
         // Dynamically apply skill filter when a specific skillId is requested
         String sql;
@@ -243,6 +250,127 @@ public class ReportingRepositoryImpl implements ReportingRepository {
 
             result.add(stats);
 
+        }
+
+        return result;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<OrgDeptSkillTimelineStatsDto> getSkillTimelineByOrganizationAndDepartment(
+            Integer organizationId,
+            Integer departmentId,
+            Integer skillId
+    ) {
+
+        // Base query: fetch aggregated skill ratings per day for org + department
+        String baseSql = """
+                SELECT
+                    organization_id,
+                    organization_name,
+                    department_id,
+                    department_name,
+                    skill_id,
+                    skill_name,
+                    entry_date::date AS date,
+                    MIN(rating) AS min_rating,
+                    MAX(rating) AS max_rating,
+                    AVG(rating) AS avg_rating
+                FROM v_org_department_skill_period
+                WHERE organization_id = :orgId
+                """;
+
+        StringBuilder sqlBuilder = new StringBuilder(baseSql);
+
+        // Optional department filter
+        if (departmentId != null) {
+            sqlBuilder.append(" AND department_id = :deptId");
+        }
+
+        // Optional skill filter
+        if (skillId != null) {
+            sqlBuilder.append(" AND skill_id = :skillId");
+        }
+
+        // Final GROUP BY + ORDER BY
+        sqlBuilder.append(" GROUP BY organization_id, organization_name," +
+                "          department_id, department_name," +
+                "          skill_id, skill_name, date" +
+                " ORDER BY skill_name, date");
+
+        String sql = sqlBuilder.toString();
+
+        MapSqlParameterSource params = new MapSqlParameterSource()
+                .addValue("orgId", organizationId);
+        if (departmentId != null) params.addValue("deptId", departmentId);
+        if (skillId != null) params.addValue("skillId", skillId);
+
+        // Execute the query and map each database row to a simple DTO
+        List<OrgDeptSkillTimelineRowDto> rows = jdbc.query(sql, params, (rs, rn) ->
+                new OrgDeptSkillTimelineRowDto(
+                        rs.getInt("organization_id"),
+                        rs.getString("organization_name"),
+                        rs.getInt("department_id"),
+                        rs.getString("department_name"),
+                        rs.getInt("skill_id"),
+                        rs.getString("skill_name"),
+                        rs.getObject("date", LocalDate.class),
+                        rs.getDouble("min_rating"),
+                        rs.getDouble("max_rating"),
+                        rs.getDouble("avg_rating")
+                )
+        );
+
+        // Group timeline rows by skill so each skill produces one aggregated result
+        Map<Integer, List<OrgDeptSkillTimelineRowDto>> bySkill = new LinkedHashMap<>();
+        for (OrgDeptSkillTimelineRowDto row : rows) {
+
+            Integer skillKey = row.skillId();
+
+            // Create the list for this skill if it doesn't exist yet
+            if (!bySkill.containsKey(skillKey)) {
+                bySkill.put(skillKey, new ArrayList<>());
+            }
+
+            bySkill.get(skillKey).add(row);
+        }
+
+        // Convert grouped rows into final response structures
+        List<OrgDeptSkillTimelineStatsDto> result = new ArrayList<>();
+
+        for (List<OrgDeptSkillTimelineRowDto> skillRows : bySkill.values()) {
+            if (skillRows.isEmpty()) continue;
+
+            // First row holds shared org/dept + skill metadata
+            OrgDeptSkillTimelineRowDto first = skillRows.get(0);
+
+            // If no department filter was passed in, we null out dept info in the response
+            Integer deptIdForResponse   = (departmentId != null) ? first.departmentId()   : null;
+            String  deptNameForResponse = (departmentId != null) ? first.departmentName() : null;
+
+            // Build timeline points for this skill
+            List<OrgDeptSkillTimelinePointDto> timeline = new ArrayList<>();
+            for (OrgDeptSkillTimelineRowDto row : skillRows) {
+                timeline.add(new OrgDeptSkillTimelinePointDto(
+                        row.date(),
+                        row.minRating(),
+                        row.maxRating(),
+                        row.avgRating()
+                ));
+            }
+
+            // Create the final aggregated result for this skill
+            OrgDeptSkillTimelineStatsDto stats = new OrgDeptSkillTimelineStatsDto(
+                    first.organizationId(),
+                    first.organizationName(),
+                    deptIdForResponse,
+                    deptNameForResponse,
+                    first.skillId(),
+                    first.skillName(),
+                    timeline
+            );
+
+            result.add(stats);
         }
 
         return result;

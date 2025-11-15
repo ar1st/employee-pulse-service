@@ -1,8 +1,9 @@
 package gr.uom.employeepulseservice.controller;
 
-import gr.uom.employeepulseservice.controller.dto.reportingDto.EmployeeReportingStatsDto;
-import gr.uom.employeepulseservice.controller.dto.reportingDto.EmployeeSkillTimelineStatsDto;
-import gr.uom.employeepulseservice.controller.dto.reportingDto.OrgDeptReportingStatsDto;
+import gr.uom.employeepulseservice.controller.dto.reportingDto.employee.EmployeeReportingStatsDto;
+import gr.uom.employeepulseservice.controller.dto.reportingDto.employee.EmployeeSkillTimelineStatsDto;
+import gr.uom.employeepulseservice.controller.dto.reportingDto.orgdept.OrgDeptReportingStatsDto;
+import gr.uom.employeepulseservice.controller.dto.reportingDto.orgdept.OrgDeptSkillTimelineStatsDto;
 import gr.uom.employeepulseservice.model.PeriodType;
 import gr.uom.employeepulseservice.repository.ReportingRepository;
 import lombok.RequiredArgsConstructor;
@@ -49,6 +50,19 @@ public class ReportingController {
             @RequestParam(required = false) Integer skillId
     ) {
         return reportingRepository.getSkillTimelineByEmployee(employeeId, skillId);
+    }
+
+    @GetMapping("/organizations/{organizationId}/skills/timeline")
+    public List<OrgDeptSkillTimelineStatsDto> getSkillTimelineByOrganizationAndDepartment(
+            @PathVariable Integer organizationId,
+            @RequestParam(required = false) Integer departmentId,
+            @RequestParam(required = false) Integer skillId
+    ) {
+        return reportingRepository.getSkillTimelineByOrganizationAndDepartment(
+                organizationId,
+                departmentId,
+                skillId
+        );
     }
 
 }
