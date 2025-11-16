@@ -3,6 +3,7 @@ package gr.uom.employeepulseservice.service;
 import gr.uom.employeepulseservice.controller.dto.CreatePerformanceReviewDto;
 import gr.uom.employeepulseservice.controller.dto.PerformanceReviewDto;
 import gr.uom.employeepulseservice.controller.dto.SaveSkillEntryDto;
+import gr.uom.employeepulseservice.llm.ChatGptClient;
 import gr.uom.employeepulseservice.mapper.PerformanceReviewMapper;
 import gr.uom.employeepulseservice.model.Employee;
 import gr.uom.employeepulseservice.model.PerformanceReview;
@@ -26,6 +27,7 @@ public class PerformanceReviewService {
     private final PerformanceReviewMapper performanceReviewMapper;
     private final SkillRepository skillRepository;
     private final EmployeeRepository employeeRepository;
+    private final ChatGptClient chatGptClient;
 
     @Transactional
     public void createPerformanceReview(CreatePerformanceReviewDto dto) {
@@ -38,6 +40,8 @@ public class PerformanceReviewService {
 
         Employee reporter = findEmployeeById(dto.reporterId());
         performanceReview.setReportedBy(reporter);
+
+        chatGptClient.analyzePerformanceReview(dto.rawText());
 
         //todo replace by NLP service
         performanceReview.setSkillEntries(mockSkillEntries(employee, now));

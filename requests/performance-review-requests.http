@@ -3,7 +3,32 @@ POST localhost:8001/performance-reviews
 Content-Type: application/json
 
 {
-  "rawText": "raw-text",
+  "rawText": "Maria consistently delivers work of exceptional quality. She shows strong problem-solving skills, collaborates effectively with cross-functional teams, and proactively identifies process improvements. Her communication is clear and professional, and she often mentors junior developers. Maria took full ownership of the last sprint and delivered ahead of schedule",
+  "comments": "comments",
+  "overallRating": 10,
+  "reporterId": 1,
+  "employeeId": 2
+}
+
+###
+
+POST localhost:8001/performance-reviews
+Content-Type: application/json
+
+{
+  "rawText": "Elena struggles to complete assignments without close supervision. She frequently misunderstands requirements and her testing coverage is insufficient. Team members have reported that she is slow to respond to messages. Although she is improving her documentation, overall her performance remains below expectations",
+  "comments": "comments",
+  "overallRating": 10,
+  "reporterId": 1,
+  "employeeId": 2
+}
+
+###
+POST localhost:8001/performance-reviews
+Content-Type: application/json
+
+{
+  "rawText": "Maria is excellent at toxicological testing methods. She needs improvement in Haskell but shows initiative",
   "comments": "comments",
   "overallRating": 10,
   "reporterId": 1,
