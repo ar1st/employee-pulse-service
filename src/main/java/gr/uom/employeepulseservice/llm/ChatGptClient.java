@@ -1,5 +1,7 @@
 package gr.uom.employeepulseservice.llm;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.openai.client.OpenAIClient;
 import com.openai.client.okhttp.OpenAIOkHttpClient;
 import com.openai.core.JsonValue;
@@ -8,9 +10,8 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
 import java.util.List;
-
+import java.util.Optional;
 
 @Component
 @Slf4j
@@ -18,18 +19,19 @@ public class ChatGptClient {
 
     private final String chatGptApiKey;
     private final String chatGptModel;
+    private final ObjectMapper objectMapper;
 
     public ChatGptClient() {
         this.chatGptApiKey = System.getenv("EMPLOYEE_PULSE_SERVICE_OPENAI_KEY");
         this.chatGptModel = "gpt-5.1-2025-11-13";
-
+        this.objectMapper = new ObjectMapper();
         if (this.chatGptApiKey == null) {
             log.warn("OpenAI key not found!");
         }
     }
 
     @SneakyThrows
-    public String analyzePerformanceReview(String prompt) {
+    public List<GeneratedSkill> analyzePerformanceReview(String prompt) {
 
         OpenAIClient client = OpenAIOkHttpClient.builder()
                 .apiKey(chatGptApiKey)
@@ -50,9 +52,25 @@ public class ChatGptClient {
                 .build();
 
         Response response = client.responses().create(params);
-        ResponseOutputItem output = response.output().getFirst();
-        System.out.println(output.message().get().content().getFirst().outputText().get());
-        return "";
+
+        Optional<ResponseOutputItem> assistantOutputOptional = response.output().stream()
+                .filter(it -> it.message()
+                        .map(msg -> "assistant".equals(msg._role().asStringOrThrow()))
+                        .orElse(false))
+                .findFirst();
+
+        if (assistantOutputOptional.isEmpty() || assistantOutputOptional.get().message().isEmpty()) {
+            return null;
+        }
+
+        String json = assistantOutputOptional.get().message().get()
+                .content()
+                .getFirst()
+                .asOutputText()
+                .text();
+
+
+        return objectMapper.readValue(json, new TypeReference<>() {});
     }
 
 }
