@@ -9,6 +9,8 @@ import gr.uom.employeepulseservice.model.Skill;
 import gr.uom.employeepulseservice.repository.SkillRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,10 +26,9 @@ public class SkillService {
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Transactional(readOnly = true)
-    public List<SkillDto> findAll() {
-        List<Skill> skills = skillRepository.findAll();
-
-        return skillMapper.toDtos(skills);
+    public Page<SkillDto> findAll(Pageable pageable) {
+        return skillRepository.findAll(pageable)
+                .map(skillMapper::toDto);
     }
 
     @Transactional(readOnly = true)

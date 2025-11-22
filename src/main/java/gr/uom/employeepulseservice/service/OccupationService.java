@@ -9,6 +9,8 @@ import gr.uom.employeepulseservice.model.Occupation;
 import gr.uom.employeepulseservice.repository.OccupationRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,10 +26,9 @@ public class OccupationService {
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Transactional(readOnly = true)
-    public List<OccupationDto> findAll() {
-        List<Occupation> occupations = occupationRepository.findAll();
-
-        return occupationMapper.toDtos(occupations);
+    public Page<OccupationDto> findAll(Pageable pageable) {
+        return occupationRepository.findAll(pageable)
+                .map(occupationMapper::toDto);
     }
 
     @Transactional(readOnly = true)

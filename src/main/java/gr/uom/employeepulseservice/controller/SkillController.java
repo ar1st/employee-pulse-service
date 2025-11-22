@@ -4,6 +4,9 @@ import gr.uom.employeepulseservice.controller.dto.SaveSkillDto;
 import gr.uom.employeepulseservice.controller.dto.SkillDto;
 import gr.uom.employeepulseservice.service.SkillService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,10 +19,13 @@ public class SkillController {
 
     private final SkillService skillService;
 
-    //TODO add pagination
     @GetMapping
-    public ResponseEntity<List<SkillDto>> findAll() {
-        return ResponseEntity.ok(skillService.findAll());
+    public ResponseEntity<Page<SkillDto>> findAll(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size
+    ) {
+        Pageable pageable = PageRequest.of(page, size);
+        return ResponseEntity.ok(skillService.findAll(pageable));
     }
 
     @GetMapping("/{id}")
