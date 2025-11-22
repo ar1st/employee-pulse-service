@@ -1,9 +1,9 @@
 package gr.uom.employeepulseservice.controller;
 
-import gr.uom.employeepulseservice.controller.dto.reportingDto.employee.EmployeeReportingStatsDto;
-import gr.uom.employeepulseservice.controller.dto.reportingDto.employee.EmployeeSkillTimelineStatsDto;
-import gr.uom.employeepulseservice.controller.dto.reportingDto.orgdept.OrgDeptReportingStatsDto;
-import gr.uom.employeepulseservice.controller.dto.reportingDto.orgdept.OrgDeptSkillTimelineStatsDto;
+import gr.uom.employeepulseservice.controller.dto.reportingDto.employee.EmployeeReportingResponseDto;
+import gr.uom.employeepulseservice.controller.dto.reportingDto.employee.EmployeeSkillTimelineResponseDto;
+import gr.uom.employeepulseservice.controller.dto.reportingDto.orgdept.OrgDeptReportingResponseDto;
+import gr.uom.employeepulseservice.controller.dto.reportingDto.orgdept.OrgDeptSkillTimelineResponseDto;
 import gr.uom.employeepulseservice.model.PeriodType;
 import gr.uom.employeepulseservice.repository.ReportingRepository;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +20,7 @@ public class ReportingController {
     private final ReportingRepository reportingRepository;
 
     @GetMapping("/org/{orgId}/dept/{deptId}")
-    public ResponseEntity<List<OrgDeptReportingStatsDto>> getReportByOrganizationAndDepartment(
+    public ResponseEntity<OrgDeptReportingResponseDto> getReportByOrganizationAndDepartment(
             @PathVariable Integer orgId,
             @PathVariable Integer deptId,
             @RequestParam PeriodType periodType,
@@ -33,7 +33,7 @@ public class ReportingController {
     }
 
     @GetMapping("/employee/{employeeId}")
-    public ResponseEntity<List<EmployeeReportingStatsDto>> getReportByEmployee(
+    public ResponseEntity<EmployeeReportingResponseDto> getReportByEmployee(
             @PathVariable Integer employeeId,
             @RequestParam PeriodType periodType,
             @RequestParam(required = false) Integer periodValue,
@@ -45,7 +45,7 @@ public class ReportingController {
     }
 
     @GetMapping("/employees/{employeeId}/skills/timeline")
-    public List<EmployeeSkillTimelineStatsDto> getSkillTimelineByEmployee(
+    public EmployeeSkillTimelineResponseDto getSkillTimelineByEmployee(
             @PathVariable Integer employeeId,
             @RequestParam(required = false) Integer skillId
     ) {
@@ -53,7 +53,7 @@ public class ReportingController {
     }
 
     @GetMapping("/organizations/{organizationId}/skills/timeline")
-    public List<OrgDeptSkillTimelineStatsDto> getSkillTimelineByOrganizationAndDepartment(
+    public OrgDeptSkillTimelineResponseDto getSkillTimelineByOrganizationAndDepartment(
             @PathVariable Integer organizationId,
             @RequestParam(required = false) Integer departmentId,
             @RequestParam(required = false) Integer skillId

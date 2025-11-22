@@ -1,33 +1,35 @@
 package gr.uom.employeepulseservice.repository;
 
-import gr.uom.employeepulseservice.controller.dto.reportingDto.employee.EmployeeReportingStatsDto;
-import gr.uom.employeepulseservice.controller.dto.reportingDto.employee.EmployeeSkillTimelineStatsDto;
-import gr.uom.employeepulseservice.controller.dto.reportingDto.orgdept.OrgDeptReportingStatsDto;
-import gr.uom.employeepulseservice.controller.dto.reportingDto.orgdept.OrgDeptSkillTimelineStatsDto;
+import gr.uom.employeepulseservice.controller.dto.reportingDto.employee.EmployeeReportingResponseDto;
+import gr.uom.employeepulseservice.controller.dto.reportingDto.employee.EmployeeSkillTimelineResponseDto;
+import gr.uom.employeepulseservice.controller.dto.reportingDto.orgdept.OrgDeptReportingResponseDto;
+import gr.uom.employeepulseservice.controller.dto.reportingDto.orgdept.OrgDeptSkillTimelineResponseDto;
 import gr.uom.employeepulseservice.model.PeriodType;
-
-import java.util.List;
 
 public interface ReportingRepository {
 
-    List<OrgDeptReportingStatsDto> getReportByOrganizationAndDepartment(PeriodType periodType,
-                                                                        Integer organizationId,
-                                                                        Integer departmentId,
-                                                                        Integer periodValue,
-                                                                        Integer year);
+    // Returns aggregated reporting stats for an organization and department
+    OrgDeptReportingResponseDto getReportByOrganizationAndDepartment(PeriodType periodType,
+                                                                     Integer organizationId,
+                                                                     Integer departmentId,
+                                                                     Integer periodValue,
+                                                                     Integer year);
 
-    List<EmployeeReportingStatsDto> getReportByEmployee(PeriodType periodType,
-                                                        Integer employeeId,
-                                                        Integer periodValue,
-                                                        Integer year);
+    // Returns aggregated reporting stats for an employee
+    EmployeeReportingResponseDto getReportByEmployee(PeriodType periodType,
+                                                     Integer employeeId,
+                                                     Integer periodValue,
+                                                     Integer year);
 
-    List<EmployeeSkillTimelineStatsDto> getSkillTimelineByEmployee(Integer employeeId,
-                                                                   Integer skillId);
+    // Returns timeline data for all skills of an employee
+    EmployeeSkillTimelineResponseDto getSkillTimelineByEmployee(Integer employeeId, Integer skillId);
 
-    List<OrgDeptSkillTimelineStatsDto> getSkillTimelineByOrganizationAndDepartment(
+    // Returns timeline data for all skills in an organization/department
+    OrgDeptSkillTimelineResponseDto getSkillTimelineByOrganizationAndDepartment(
             Integer organizationId,
             Integer departmentId,
             Integer skillId
     );
+
 }
 

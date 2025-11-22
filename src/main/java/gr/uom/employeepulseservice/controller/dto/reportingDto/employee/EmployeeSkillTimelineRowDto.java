@@ -2,6 +2,7 @@ package gr.uom.employeepulseservice.controller.dto.reportingDto.employee;
 
 import java.time.LocalDate;
 
+// Raw database row representing a single skill entry for the employee
 public record EmployeeSkillTimelineRowDto(
         Integer employeeId,
         String firstName,

@@ -2,6 +2,7 @@ package gr.uom.employeepulseservice.controller.dto.reportingDto.orgdept;
 
 import java.time.LocalDate;
 
+// Raw database row representing a skill entry for org/department
 public record OrgDeptSkillTimelineRowDto(
         Integer organizationId,
         String organizationName,
