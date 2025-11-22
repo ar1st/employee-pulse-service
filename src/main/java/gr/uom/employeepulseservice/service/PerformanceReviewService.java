@@ -9,6 +9,7 @@ import gr.uom.employeepulseservice.model.Employee;
 import gr.uom.employeepulseservice.model.PerformanceReview;
 import gr.uom.employeepulseservice.model.Skill;
 import gr.uom.employeepulseservice.model.SkillEntry;
+import gr.uom.employeepulseservice.repository.DepartmentRepository;
 import gr.uom.employeepulseservice.repository.EmployeeRepository;
 import gr.uom.employeepulseservice.repository.PerformanceReviewRepository;
 import gr.uom.employeepulseservice.repository.SkillRepository;
@@ -28,20 +29,22 @@ public class PerformanceReviewService {
     private final SkillRepository skillRepository;
     private final EmployeeRepository employeeRepository;
     private final ChatGptClient chatGptClient;
+    private final DepartmentRepository departmentRepository;
 
     @Transactional
     public void createPerformanceReview(CreatePerformanceReviewDto dto) {
         LocalDate now = LocalDate.now();
         PerformanceReview performanceReview = performanceReviewMapper.toEntity(dto);
 
-        //todo make sure reporter is manager of employee
         Employee employee = findEmployeeById(dto.employeeId());
         performanceReview.setRefersTo(employee);
 
         Employee reporter = findEmployeeById(dto.reporterId());
         performanceReview.setReportedBy(reporter);
 
-        chatGptClient.analyzePerformanceReview(dto.rawText());
+        ensureReporterIsManagerOfEmployee(dto.reporterId(), dto.employeeId());
+
+//        chatGptClient.analyzePerformanceReview(dto.rawText());
 
         //todo replace by NLP service
         performanceReview.setSkillEntries(mockSkillEntries(employee, now));
@@ -51,13 +54,25 @@ public class PerformanceReviewService {
         performanceReviewRepository.save(performanceReview);
     }
 
+    private void ensureReporterIsManagerOfEmployee(Integer reporterId, Integer employeeId) {
+        boolean isManager = departmentRepository.isManagerOfEmployee(reporterId, employeeId);
+        if (!isManager) {
+            throw new RuntimeException("Reporter is not the manager of this employee");
+        }
+    }
+
     private List<SkillEntry> mockSkillEntries(Employee employee, LocalDate now) {
+        Skill skill = skillRepository.findAll().stream()
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("No skills found in database"));
+
         SkillEntry skillEntry1 = new SkillEntry();
         skillEntry1.setEntryDate(now);
         skillEntry1.setRating(5.0);
-        skillEntry1.setSkill(skillRepository.findById(1).orElseThrow());
+        skillEntry1.setSkill(skill);
         skillEntry1.setEmployee(employee);
         return List.of(skillEntry1);
+
     }
 
     private Employee findEmployeeById(Integer id) {
