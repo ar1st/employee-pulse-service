@@ -81,12 +81,13 @@ public class ReportingRepositoryImpl implements ReportingRepository {
             avg(rating) AS avg_rating,
             min(rating) AS min_rating,
             max(rating) AS max_rating,
-            count(*)    AS sample_count
+            count(*)                        AS sample_count,
+            COUNT(DISTINCT employee_id)     AS employee_count
         FROM v_org_department_skill_period
         WHERE organization_id = :orgId
           AND department_id   = :deptId
-          AND %s
-          AND %s
+          AND %s              -- period filter
+          AND %s              -- year filter
         GROUP BY organization_name, department_name, skill_name, period_start
         ORDER BY skill_name, period_start DESC;
         """.formatted(periodStart, periodValueWhere, yearWhere);
@@ -98,7 +99,7 @@ public class ReportingRepositoryImpl implements ReportingRepository {
 
         // Optional parameters
         if (periodValue != null) params.addValue("periodValue", periodValue);
-        if (year != null) params.addValue("year", year);
+        if (year != null)        params.addValue("year", year);
 
         // Execute SQL & map each row to a statistics DTO
         List<OrgDeptReportingStatsDto> rows = jdbc.query(sql, params, (rs, rn) ->
@@ -110,7 +111,8 @@ public class ReportingRepositoryImpl implements ReportingRepository {
                         rs.getDouble("avg_rating"),
                         rs.getDouble("min_rating"),
                         rs.getDouble("max_rating"),
-                        rs.getLong("sample_count")
+                        rs.getLong("sample_count"),
+                        rs.getLong("employee_count")
                 )
         );
 
@@ -140,7 +142,8 @@ public class ReportingRepositoryImpl implements ReportingRepository {
                         r.avgRating(),
                         r.minRating(),
                         r.maxRating(),
-                        r.sampleCount()
+                        r.sampleCount(),
+                        r.employeeCount()
                 ));
             }
 
@@ -172,12 +175,14 @@ public class ReportingRepositoryImpl implements ReportingRepository {
         // Default period type if missing
         periodType = periodType == null ? PeriodType.MONTH : periodType;
 
-        // SQL helpers for period filtering
+        // SQL expression for period grouping (month, quarter, etc.)
         String periodStart = periodStartExpression(periodType);
+        // SQL predicate for filtering by period number
         String periodValueWhere = periodValuePredicate(periodType, periodValue);
+        // SQL predicate for filtering by year
         String yearWhere = yearPredicate(year);
 
-        // Query returns flat rows: employee + skill + period statistics
+        // Query that returns a flat list: employee + skill + period stats
         String sql = """
         SELECT
             employee_id,
@@ -190,21 +195,21 @@ public class ReportingRepositoryImpl implements ReportingRepository {
             max(rating) AS max_rating
         FROM v_employee_skill_period
         WHERE employee_id = :employeeId
-          AND %s
-          AND %s
+          AND %s          -- period filter
+          AND %s          -- year filter
         GROUP BY employee_id, first_name, last_name, skill_name, period_start
         ORDER BY skill_name, period_start DESC;
         """.formatted(periodStart, periodValueWhere, yearWhere);
 
-        // Required employee ID
+        // Mandatory employee parameter
         MapSqlParameterSource params = new MapSqlParameterSource()
                 .addValue("employeeId", employeeId);
 
-        // Optional filters
+        // Optional parameters
         if (periodValue != null) params.addValue("periodValue", periodValue);
-        if (year != null) params.addValue("year", year);
+        if (year != null)        params.addValue("year", year);
 
-        // Execute query & convert each row to stats object
+        // Execute SQL & map each row to a statistics DTO
         List<EmployeeReportingStatsDto> rows = jdbc.query(sql, params, (rs, rn) ->
                 new EmployeeReportingStatsDto(
                         rs.getInt("employee_id"),
@@ -218,25 +223,25 @@ public class ReportingRepositoryImpl implements ReportingRepository {
                 )
         );
 
-        // If no entries found return null
+        // No results found
         if (rows.isEmpty()) {
             return null;
         }
 
-        // Group rows by skillName
+        // Group all rows by skillName
         Map<String, List<EmployeeReportingStatsDto>> bySkill = new LinkedHashMap<>();
         for (EmployeeReportingStatsDto row : rows) {
             bySkill.computeIfAbsent(row.skillName(), k -> new ArrayList<>()).add(row);
         }
 
-        // Build the final list of skills
+        // Convert grouped rows into skill-level structures
         List<EmployeeReportingSkillDto> skills = new ArrayList<>();
 
         for (Map.Entry<String, List<EmployeeReportingStatsDto>> entry : bySkill.entrySet()) {
             String skillName = entry.getKey();
             List<EmployeeReportingStatsDto> skillRows = entry.getValue();
 
-            // Convert each stat row into a compact "period-only" DTO
+            // Convert each flat row into a lean period DTO
             List<EmployeeReportingPeriodDto> periods = new ArrayList<>();
             for (EmployeeReportingStatsDto r : skillRows) {
                 periods.add(new EmployeeReportingPeriodDto(
@@ -247,14 +252,14 @@ public class ReportingRepositoryImpl implements ReportingRepository {
                 ));
             }
 
-            // Add the skill and its periods
+            // Add final skill entry
             skills.add(new EmployeeReportingSkillDto(skillName, periods));
         }
 
-        // Take parent employee information from the first row
+        // Extract parent employee info from first row
         EmployeeReportingStatsDto first = rows.get(0);
 
-        // Construct final parent DTO
+        // Build the final parent DTO
         return new EmployeeReportingResponseDto(
                 employeeId,
                 first.firstName(),
@@ -262,6 +267,7 @@ public class ReportingRepositoryImpl implements ReportingRepository {
                 skills
         );
     }
+
 
     @Override
     @Transactional(readOnly = true)

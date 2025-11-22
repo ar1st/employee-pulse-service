@@ -38,6 +38,8 @@ SELECT
     department_id,
     department_name,
 
+    employee_id,
+
     skill_id,
     skill_name,
     skill_description,

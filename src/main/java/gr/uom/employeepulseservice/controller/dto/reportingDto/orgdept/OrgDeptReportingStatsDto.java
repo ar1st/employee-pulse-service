@@ -11,5 +11,6 @@ public record OrgDeptReportingStatsDto(
         Double avgRating,
         Double minRating,
         Double maxRating,
-        Long sampleCount) {
+        Long sampleCount,
+        Long employeeCount) {
 }

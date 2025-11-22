@@ -127,7 +127,9 @@ VALUES
     (22,'Elena H2: feature store adoption and governance.','Add data tests in CI.',4.4,6,5,'2025-10-18'),
     (23,'Nikos year-end: stakeholder satisfaction and OKRs.','Refine comms cadence.',4.6,3,1,'2025-12-08'),
     (24,'Giorgos year-end: platform stability and SLOs.','Codify runbooks.',4.5,1,2,'2025-12-12'),
-    (25,'Maria year-end: onboarding NPS uplift.','Scale mentorship program.',4.7,1,3,'2025-12-15');
+    (25,'Maria year-end: onboarding NPS uplift.','Scale mentorship program.',4.7,1,3,'2025-12-15'),
+    (26,'Q4 2025 review for Anna: contributed to backend APIs and refactoring.','Focus on database indexing and query optimization.',4.3,1,7,'2025-12-10'),
+    (27,'Q4 2025 review for Kostas: strong contributions on feature flags and monitoring.','Improve documentation and knowledge sharing.',4.4,1,8,'2025-12-14');
 
 -- ======================================================================
 -- SKILL ENTRIES
@@ -268,10 +270,18 @@ VALUES
     (78, 30366, 4.8, '2025-12-15', 3, 25),
     (79, 35721, 4.7, '2025-12-15', 3, 25),
     (80, 37563, 4.5, '2025-12-15', 3, 25),
-    (81, 34122, 4.4, '2025-12-15', 3, 25);
+    (81, 34122, 4.4, '2025-12-15', 3, 25),
+    (82, 30567, 4.4, '2025-12-10', 7, 26),
+    (83, 34122, 4.2, '2025-12-10', 7, 26),
+    (84, 30366, 4.5, '2025-12-10', 7, 26),
+    (85, 37563, 4.3, '2025-12-10', 7, 26),
+    (86, 30567, 4.5, '2025-12-14', 8, 27),
+    (87, 34122, 4.3, '2025-12-14', 8, 27),
+    (88, 30366, 4.4, '2025-12-14', 8, 27),
+    (89, 37563, 4.2, '2025-12-14', 8, 27);
 
 -- ======================================================================
 -- SEQUENCE UPDATES
 -- ======================================================================
-ALTER SEQUENCE IF EXISTS public.performance_reviews_seq RESTART WITH 26;
-ALTER SEQUENCE IF EXISTS public.skill_entries_seq RESTART WITH 82;
+ALTER SEQUENCE IF EXISTS public.performance_reviews_seq RESTART WITH 28;
+ALTER SEQUENCE IF EXISTS public.skill_entries_seq RESTART WITH 89;
