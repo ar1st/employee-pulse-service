@@ -3,7 +3,9 @@ package gr.uom.employeepulseservice.service;
 import gr.uom.employeepulseservice.controller.dto.CreatePerformanceReviewDto;
 import gr.uom.employeepulseservice.controller.dto.PerformanceReviewDto;
 import gr.uom.employeepulseservice.controller.dto.SaveSkillEntryDto;
+import gr.uom.employeepulseservice.controller.dto.SkillEntryDto;
 import gr.uom.employeepulseservice.llm.ChatGptClient;
+import gr.uom.employeepulseservice.llm.GeneratedSkill;
 import gr.uom.employeepulseservice.mapper.PerformanceReviewMapper;
 import gr.uom.employeepulseservice.model.Employee;
 import gr.uom.employeepulseservice.model.PerformanceReview;
@@ -14,6 +16,7 @@ import gr.uom.employeepulseservice.repository.EmployeeRepository;
 import gr.uom.employeepulseservice.repository.PerformanceReviewRepository;
 import gr.uom.employeepulseservice.repository.SkillRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,6 +25,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class PerformanceReviewService {
 
     private final PerformanceReviewRepository performanceReviewRepository;
@@ -33,7 +37,8 @@ public class PerformanceReviewService {
 
     @Transactional
     public void createPerformanceReview(CreatePerformanceReviewDto dto) {
-        LocalDate now = LocalDate.now();
+        log.info("Creating performance review for employee {}", dto.employeeId());
+
         PerformanceReview performanceReview = performanceReviewMapper.toEntity(dto);
 
         Employee employee = findEmployeeById(dto.employeeId());
@@ -44,14 +49,45 @@ public class PerformanceReviewService {
 
         ensureReporterIsManagerOfEmployee(dto.reporterId(), dto.employeeId());
 
-//        chatGptClient.analyzePerformanceReview(dto.rawText());
+        List<GeneratedSkill> generatedSkills = chatGptClient.analyzePerformanceReview(dto.rawText());
+        log.info("Generated skills: {}", formatGeneratedSkills(generatedSkills));
 
-        //todo replace by NLP service
-        performanceReview.setSkillEntries(mockSkillEntries(employee, now));
+        LocalDate now = LocalDate.now();
+
+        List<SkillEntryDto> dtos = generatedSkills.stream()
+                .map(generatedSkill -> {
+                         Skill skill = skillRepository.findByEscoId(generatedSkill.getEscoSkillId());
+
+                         return new SkillEntryDto(
+                                 null,
+                                 skill != null ? skill.getId() : null,
+                                 skill != null ? skill.getName() : null,
+                                 generatedSkill.getRating(),
+                                 now,
+                                 dto.employeeId()
+                         );
+                     }
+                ).toList();
+
+        performanceReview.setSkillEntries(map(dtos, employee));
 
         performanceReview.setReviewDate(now);
 
         performanceReviewRepository.save(performanceReview);
+    }
+
+    private List<SkillEntry> map(List<SkillEntryDto> dtos, Employee employee) {
+        return dtos.stream()
+                .map(dto -> {
+                         SkillEntry skillEntry = new SkillEntry();
+
+                         skillEntry.setEntryDate(dto.entryDate());
+                         skillEntry.setEmployee(employee);
+                         skillEntry.setRating(dto.rating());
+                         return skillEntry;
+                     }
+                )
+                .toList();
     }
 
     private void ensureReporterIsManagerOfEmployee(Integer reporterId, Integer employeeId) {
@@ -59,20 +95,6 @@ public class PerformanceReviewService {
         if (!isManager) {
             throw new RuntimeException("Reporter is not the manager of this employee");
         }
-    }
-
-    private List<SkillEntry> mockSkillEntries(Employee employee, LocalDate now) {
-        Skill skill = skillRepository.findAll().stream()
-                .findFirst()
-                .orElseThrow(() -> new RuntimeException("No skills found in database"));
-
-        SkillEntry skillEntry1 = new SkillEntry();
-        skillEntry1.setEntryDate(now);
-        skillEntry1.setRating(5.0);
-        skillEntry1.setSkill(skill);
-        skillEntry1.setEmployee(employee);
-        return List.of(skillEntry1);
-
     }
 
     private Employee findEmployeeById(Integer id) {
@@ -195,5 +217,14 @@ public class PerformanceReviewService {
         );
     }
 
+    private String formatGeneratedSkills(List<GeneratedSkill> skills) {
+        if (skills == null || skills.isEmpty()) {
+            return "[]";
+        }
+        return "[\n" + skills.stream()
+                .map(GeneratedSkill::toString)
+                .reduce((a, b) -> a + ",\n" + b)
+                .orElse("") + "\n]";
+    }
 
 }

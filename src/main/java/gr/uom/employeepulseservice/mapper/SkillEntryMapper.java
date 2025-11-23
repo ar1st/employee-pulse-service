@@ -11,6 +11,7 @@ import java.util.List;
 public interface SkillEntryMapper {
 
     @Mapping(source = "skill.id", target = "skillId")
+    @Mapping(source = "skill.name", target = "skillName")
     @Mapping(source = "employee.id", target = "employeeId")
     SkillEntryDto toDto(SkillEntry entity);
 

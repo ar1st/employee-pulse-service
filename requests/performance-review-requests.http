@@ -28,10 +28,10 @@ POST localhost:8001/performance-reviews
 Content-Type: application/json
 
 {
-  "rawText": "Maria is excellent at toxicological testing methods. She needs improvement in Haskell but shows initiative",
+  "rawText": "Anna is excellent at toxicological testing methods. She needs improvement in Haskell but shows initiative",
   "comments": "comments",
   "overallRating": 10,
-  "reporterId": 1,
-  "employeeId": 2
+  "reporterId": 9,
+  "employeeId": 7
 }
 
