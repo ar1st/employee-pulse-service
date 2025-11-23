@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Service
@@ -128,7 +129,8 @@ public class EmployeeService {
         se.setEmployee(employee);
         se.setSkill(skill);
         se.setRating(dto.rating());
-        se.setEntryDate(dto.entryDate() != null ? dto.entryDate() : LocalDate.now());
+        se.setEntryDate(LocalDate.now());
+        se.setEntryDateTime(LocalDateTime.now());
         skillEntryRepository.save(se);
     }
 

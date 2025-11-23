@@ -66,12 +66,13 @@ public class PerformanceReviewService {
                                  skill != null ? skill.getName() : null,
                                  generatedSkill.getRating(),
                                  now,
+                                 nowDateTime,
                                  dto.employeeId()
                          );
                      }
                 ).toList();
 
-        performanceReview.setSkillEntries(map(dtos, employee));
+        performanceReview.setSkillEntries(map(dtos, employee, nowDateTime));
 
         performanceReview.setReviewDate(now);
         performanceReview.setReviewDateTime(nowDateTime);
@@ -79,12 +80,13 @@ public class PerformanceReviewService {
         performanceReviewRepository.save(performanceReview);
     }
 
-    private List<SkillEntry> map(List<SkillEntryDto> dtos, Employee employee) {
+    private List<SkillEntry> map(List<SkillEntryDto> dtos, Employee employee, LocalDateTime entryDateTime) {
         return dtos.stream()
                 .map(dto -> {
                          SkillEntry skillEntry = new SkillEntry();
 
                          skillEntry.setEntryDate(dto.entryDate());
+                         skillEntry.setEntryDateTime(dto.entryDateTime() != null ? dto.entryDateTime() : entryDateTime);
                          skillEntry.setEmployee(employee);
                          skillEntry.setRating(dto.rating());
                          return skillEntry;
@@ -172,7 +174,9 @@ public class PerformanceReviewService {
         SkillEntry entry = new SkillEntry();
         entry.setSkill(skill);
         entry.setRating(dto.rating());
-        entry.setEntryDate(dto.entryDate() != null ? dto.entryDate() : LocalDate.now());
+        LocalDate entryDate = LocalDate.now();
+        entry.setEntryDate(entryDate);
+        entry.setEntryDateTime(LocalDateTime.now());
         entry.setEmployee(review.getRefersTo());
 
         review.getSkillEntries().add(entry);
@@ -199,7 +203,8 @@ public class PerformanceReviewService {
         }
 
         if (dto.rating() != null) entry.setRating(dto.rating());
-        if (dto.entryDate() != null) entry.setEntryDate(dto.entryDate());
+        entry.setEntryDate(LocalDate.now());
+        entry.setEntryDateTime(LocalDateTime.now());
 
         return performanceReviewMapper.toDto(review);
     }

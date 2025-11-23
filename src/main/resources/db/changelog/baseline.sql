@@ -65,6 +65,7 @@ CREATE TABLE "performance_reviews" (
 CREATE TABLE "skill_entries" (
     "employee_id"           INTEGER,
     "entry_date"            DATE,
+    "entry_date_time"       TIMESTAMP,
     "id"                    INTEGER NOT NULL,
     "performance_review_id" INTEGER,
     "rating"                float8,

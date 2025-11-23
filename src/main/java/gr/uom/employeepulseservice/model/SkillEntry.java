@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Data
 @Entity
@@ -22,6 +23,7 @@ public class SkillEntry {
     private Double rating;
 
     private LocalDate entryDate;
+    private LocalDateTime entryDateTime;
 
     @ManyToOne
     @JoinColumn(name = "employee_id")
