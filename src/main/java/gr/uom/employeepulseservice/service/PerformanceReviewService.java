@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -37,7 +38,7 @@ public class PerformanceReviewService {
 
     @Transactional
     public void createPerformanceReview(CreatePerformanceReviewDto dto) {
-        log.info("Creating performance review for employee {}", dto.employeeId());
+        log.info("Creating performance review for {}", dto.employeeId());
 
         PerformanceReview performanceReview = performanceReviewMapper.toEntity(dto);
 
@@ -50,9 +51,10 @@ public class PerformanceReviewService {
         ensureReporterIsManagerOfEmployee(dto.reporterId(), dto.employeeId());
 
         List<GeneratedSkill> generatedSkills = chatGptClient.analyzePerformanceReview(dto.rawText());
-        log.info("Generated skills: {}", formatGeneratedSkills(generatedSkills));
+        log.info("Generated skills:\n{}", formatGeneratedSkills(generatedSkills));
 
         LocalDate now = LocalDate.now();
+        LocalDateTime nowDateTime = LocalDateTime.now();
 
         List<SkillEntryDto> dtos = generatedSkills.stream()
                 .map(generatedSkill -> {
@@ -72,6 +74,7 @@ public class PerformanceReviewService {
         performanceReview.setSkillEntries(map(dtos, employee));
 
         performanceReview.setReviewDate(now);
+        performanceReview.setReviewDateTime(nowDateTime);
 
         performanceReviewRepository.save(performanceReview);
     }

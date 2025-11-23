@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -30,6 +31,7 @@ public class PerformanceReview {
     private Employee refersTo;
 
     private LocalDate reviewDate;
+    private LocalDateTime reviewDateTime;
 
     @OneToMany(orphanRemoval = true, cascade = CascadeType.ALL)
     @JoinColumn(name = "performance_review_id")

@@ -56,6 +56,7 @@ CREATE TABLE "performance_reviews" (
     "overall_rating" float8,
     "reporter_id"    INTEGER,
     "review_date"    DATE,
+    "review_date_time" TIMESTAMP,
     "comments"       VARCHAR(255),
     "raw_text"       VARCHAR(255),
     CONSTRAINT "performance_reviews_pkey" PRIMARY KEY ("id")

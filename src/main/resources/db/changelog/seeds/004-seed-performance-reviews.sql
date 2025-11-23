@@ -284,4 +284,4 @@ VALUES
 -- SEQUENCE UPDATES
 -- ======================================================================
 ALTER SEQUENCE IF EXISTS public.performance_reviews_seq RESTART WITH 28;
-ALTER SEQUENCE IF EXISTS public.skill_entries_seq RESTART WITH 89;
+ALTER SEQUENCE IF EXISTS public.skill_entries_seq RESTART WITH 90;
