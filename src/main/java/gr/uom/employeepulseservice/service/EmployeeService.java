@@ -63,7 +63,6 @@ public class EmployeeService {
 
     }
 
-    //todo should we be able to delete employees that have performance review. if yes, what should happen to the performance review
     @Transactional
     public void deleteEmployee(Integer id) {
         employeeRepository.deleteById(id);

@@ -21,12 +21,27 @@ GET localhost:8001/reports/org/1/dept/5?periodType=QUARTER&periodValue=3&year=20
 // Ετήσια συγκεντρωτικά αποτελέσματα δεξιοτήτων για το Τμήμα Τεχνολογίας του Πανεπιστημίου Μακεδονίας για το 2025, ομαδοποιημένα ανά δεξιότητα
 GET localhost:8001/reports/org/1/dept/5?periodType=YEAR&year=2025
 
-###
-//Αποτελέσματα δεξιοτήτων του Τμήματος Τεχνολογίας του Πανεπιστημίου Μακεδονίας για τον Ιούλιο 2025, ομαδοποιημένα ανά δεξιότητα
+### Department reporting for July 2025
 GET localhost:8001/reports/org/1/dept/5?periodType=MONTH&periodValue=7&year=2025
 
 
 ###
 // Συνολικά αποτελέσματα δεξιοτήτων του Τμήματος Τεχνολογίας του Πανεπιστημίου Μακεδονίας για όλα τα τρίμηνα του 2025, ομαδοποιημένα ανά δεξιότητα
 GET localhost:8001/reports/org/1/dept/5?periodType=QUARTER&year=2025
+
+
+### Employee timeline (All skills)
+GET localhost:8001/reports/employees/1/skills/timeline
+
+### Employee timeline for specific skill
+GET localhost:8001/reports/employees/1/skills/timeline?skillId=30366
+
+### Organization timeline (All departments and skills)
+http://localhost:8001/reports/organizations/1/skills/timeline
+
+### Organization timeline for specific department (All skills)
+http://localhost:8001/reports/organizations/1/skills/timeline?departmentId=5
+
+### Organization timeline for specific department and specific skill
+http://localhost:8001/reports/organizations/1/skills/timeline?departmentId=5&skillId=30366
 

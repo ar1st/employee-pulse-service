@@ -13,8 +13,6 @@ public interface DepartmentRepository extends JpaRepository<Department, Integer>
 
     List<Department> findByOrganizationId(Integer organizationId);
 
-    boolean existsByOrganizationId(Integer organizationId);
-
     @Query(value = """
         select case when count(*) > 0 then true else false end
         from departments d

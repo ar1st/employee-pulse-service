@@ -5,6 +5,7 @@ import gr.uom.employeepulseservice.controller.dto.reportingDto.orgdept.*;
 import gr.uom.employeepulseservice.model.PeriodType;
 import gr.uom.employeepulseservice.repository.ReportingRepository;
 import lombok.RequiredArgsConstructor;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
@@ -65,32 +66,25 @@ public class ReportingRepositoryImpl implements ReportingRepository {
         periodType = periodType == null ? PeriodType.QUARTER : periodType;
 
         // SQL expression for period grouping (month, quarter, etc.)
-        String periodStart = periodStartExpression(periodType);
-        // SQL predicate for filtering by period number
-        String periodValueWhere = periodValuePredicate(periodType, periodValue);
-        // SQL predicate for filtering by year
-        String yearWhere = yearPredicate(year);
-
-        // Query that returns a flat list: org/dept + skill + period stats
-        String sql = """
-        SELECT
-            organization_name,
-            department_name,
-            skill_name,
-            %s AS period_start,
-            avg(rating) AS avg_rating,
-            min(rating) AS min_rating,
-            max(rating) AS max_rating,
-            count(*)                        AS sample_count,
-            COUNT(DISTINCT employee_id)     AS employee_count
-        FROM v_org_department_skill_period
-        WHERE organization_id = :orgId
-          AND department_id   = :deptId
-          AND %s              -- period filter
-          AND %s              -- year filter
-        GROUP BY organization_name, department_name, skill_name, period_start
-        ORDER BY skill_name, period_start DESC;
-        """.formatted(periodStart, periodValueWhere, yearWhere);
+        String sql = constructSqlStatement(periodType, periodValue, year, """
+                SELECT
+                    organization_name,
+                    department_name,
+                    skill_name,
+                    %s AS period_start,
+                    avg(rating) AS avg_rating,
+                    min(rating) AS min_rating,
+                    max(rating) AS max_rating,
+                    count(*)                        AS sample_count,
+                    COUNT(DISTINCT employee_id)     AS employee_count
+                FROM v_org_department_skill_period
+                WHERE organization_id = :orgId
+                  AND department_id   = :deptId
+                  AND %s              -- period filter
+                  AND %s              -- year filter
+                GROUP BY organization_name, department_name, skill_name, period_start
+                ORDER BY skill_name, period_start DESC;
+                """);
 
         // Mandatory parameters
         MapSqlParameterSource params = new MapSqlParameterSource()
@@ -152,7 +146,7 @@ public class ReportingRepositoryImpl implements ReportingRepository {
         }
 
         // Extract parent org/dept info from first row
-        OrgDeptReportingStatsDto first = rows.get(0);
+        OrgDeptReportingStatsDto first = rows.getFirst();
 
         // Build the final parent DTO
         return new OrgDeptReportingResponseDto(
@@ -162,6 +156,18 @@ public class ReportingRepositoryImpl implements ReportingRepository {
                 first.departmentName(),
                 skills
         );
+    }
+
+    @NotNull
+    private String constructSqlStatement(PeriodType periodType, Integer periodValue, Integer year, String x) {
+        String periodStart = periodStartExpression(periodType);
+        // SQL predicate for filtering by period number
+        String periodValueWhere = periodValuePredicate(periodType, periodValue);
+        // SQL predicate for filtering by year
+        String yearWhere = yearPredicate(year);
+
+        // Query that returns a flat list: org/dept + skill + period stats
+        return x.formatted(periodStart, periodValueWhere, yearWhere);
     }
 
     @Override
@@ -176,30 +182,23 @@ public class ReportingRepositoryImpl implements ReportingRepository {
         periodType = periodType == null ? PeriodType.MONTH : periodType;
 
         // SQL expression for period grouping (month, quarter, etc.)
-        String periodStart = periodStartExpression(periodType);
-        // SQL predicate for filtering by period number
-        String periodValueWhere = periodValuePredicate(periodType, periodValue);
-        // SQL predicate for filtering by year
-        String yearWhere = yearPredicate(year);
-
-        // Query that returns a flat list: employee + skill + period stats
-        String sql = """
-        SELECT
-            employee_id,
-            first_name,
-            last_name,
-            skill_name,
-            %s AS period_start,
-            avg(rating) AS avg_rating,
-            min(rating) AS min_rating,
-            max(rating) AS max_rating
-        FROM v_employee_skill_period
-        WHERE employee_id = :employeeId
-          AND %s          -- period filter
-          AND %s          -- year filter
-        GROUP BY employee_id, first_name, last_name, skill_name, period_start
-        ORDER BY skill_name, period_start DESC;
-        """.formatted(periodStart, periodValueWhere, yearWhere);
+        String sql = constructSqlStatement(periodType, periodValue, year, """
+                SELECT
+                    employee_id,
+                    first_name,
+                    last_name,
+                    skill_name,
+                    %s AS period_start,
+                    avg(rating) AS avg_rating,
+                    min(rating) AS min_rating,
+                    max(rating) AS max_rating
+                FROM v_employee_skill_period
+                WHERE employee_id = :employeeId
+                  AND %s          -- period filter
+                  AND %s          -- year filter
+                GROUP BY employee_id, first_name, last_name, skill_name, period_start
+                ORDER BY skill_name, period_start DESC;
+                """);
 
         // Mandatory employee parameter
         MapSqlParameterSource params = new MapSqlParameterSource()
@@ -257,7 +256,7 @@ public class ReportingRepositoryImpl implements ReportingRepository {
         }
 
         // Extract parent employee info from first row
-        EmployeeReportingStatsDto first = rows.get(0);
+        EmployeeReportingStatsDto first = rows.getFirst();
 
         // Build the final parent DTO
         return new EmployeeReportingResponseDto(
@@ -329,12 +328,12 @@ public class ReportingRepositoryImpl implements ReportingRepository {
         }
 
         // Use the first row to extract common employee info
-        EmployeeSkillTimelineRowDto first = rows.get(0);
+        EmployeeSkillTimelineRowDto first = rows.getFirst();
         List<EmployeeSkillTimelineSkillDto> skills = new ArrayList<>();
 
         // Convert each group (per skill) into a skill DTO with its timeline
         for (List<EmployeeSkillTimelineRowDto> skillRows : bySkill.values()) {
-            EmployeeSkillTimelineRowDto srFirst = skillRows.get(0);
+            EmployeeSkillTimelineRowDto srFirst = skillRows.getFirst();
 
             // Build the ordered timeline of points for that skill
             List<EmployeeSkillTimelinePointDto> timeline = new ArrayList<>();
@@ -449,7 +448,7 @@ public class ReportingRepositoryImpl implements ReportingRepository {
         }
 
         // Use the first row to extract org/dept info
-        OrgDeptSkillTimelineRowDto first = rows.get(0);
+        OrgDeptSkillTimelineRowDto first = rows.getFirst();
 
         // When department is not filtered, do not expose department details in the response
         Integer deptIdForResponse   = (departmentId != null) ? first.departmentId()   : null;
@@ -459,7 +458,7 @@ public class ReportingRepositoryImpl implements ReportingRepository {
 
         // Convert each group (per skill) into a skill DTO with its timeline
         for (List<OrgDeptSkillTimelineRowDto> skillRows : bySkill.values()) {
-            OrgDeptSkillTimelineRowDto srFirst = skillRows.get(0);
+            OrgDeptSkillTimelineRowDto srFirst = skillRows.getFirst();
 
             // Build the ordered timeline of points for that skill
             List<OrgDeptSkillTimelinePointDto> timeline = new ArrayList<>();
