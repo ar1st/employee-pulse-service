@@ -58,4 +58,10 @@ public class DepartmentController {
         return ResponseEntity.ok(skillService.findByDepartmentId(id));
     }
 
+    @PostMapping("{id}/assign-manager/{managerId}")
+    public ResponseEntity<Void> assignManagerToDepartment(@PathVariable Integer id, @PathVariable Integer managerId) {
+        departmentService.assignManagerToDepartment(id, managerId);
+
+        return ResponseEntity.ok().build();
+    }
 }

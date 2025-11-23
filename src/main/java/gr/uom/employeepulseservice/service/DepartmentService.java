@@ -87,4 +87,20 @@ public class DepartmentService {
         return employeeMapper.toDtos(employees);
     }
 
+    private Employee findEmployeeById(Integer id) {
+        return employeeRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Employee not found"));
+    }
+
+    @Transactional
+    public void assignManagerToDepartment(Integer id, Integer managerId) {
+        Department department = findById(id);
+        Employee manager = findEmployeeById(managerId);
+
+        if (!manager.getDepartment().getId().equals(department.getId())) {
+            throw new IllegalArgumentException("Provided manager is not part the department");
+        }
+
+        department.setManager(manager);
+    }
 }

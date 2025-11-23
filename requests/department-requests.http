@@ -33,3 +33,6 @@ DELETE localhost:8001/departments/3
 ###
 
 GET localhost:8001/departments/5/employees
+
+### Assign manager to department
+POST localhost:8001/departments/6/assign-manager/3
