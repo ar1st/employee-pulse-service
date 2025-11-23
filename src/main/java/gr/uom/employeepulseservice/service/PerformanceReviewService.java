@@ -22,7 +22,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -37,7 +39,7 @@ public class PerformanceReviewService {
     private final DepartmentRepository departmentRepository;
 
     @Transactional
-    public void createPerformanceReview(CreatePerformanceReviewDto dto) {
+    public List<SkillEntryDto> createPerformanceReview(CreatePerformanceReviewDto dto) {
         log.info("Creating performance review for {}", dto.employeeId());
 
         PerformanceReview performanceReview = performanceReviewMapper.toEntity(dto);
@@ -56,9 +58,14 @@ public class PerformanceReviewService {
         LocalDate now = LocalDate.now();
         LocalDateTime nowDateTime = LocalDateTime.now();
 
+        Map<Integer, Skill> skillMap = new HashMap<>();
         List<SkillEntryDto> dtos = generatedSkills.stream()
                 .map(generatedSkill -> {
                          Skill skill = skillRepository.findByEscoId(generatedSkill.getEscoSkillId());
+
+                         if (skill != null) {
+                             skillMap.put(skill.getId(), skill);
+                         }
 
                          return new SkillEntryDto(
                                  null,
@@ -72,21 +79,27 @@ public class PerformanceReviewService {
                      }
                 ).toList();
 
-        performanceReview.setSkillEntries(map(dtos, employee, nowDateTime));
+        performanceReview.setSkillEntries(map(dtos, employee, skillMap));
 
         performanceReview.setReviewDate(now);
         performanceReview.setReviewDateTime(nowDateTime);
 
         performanceReviewRepository.save(performanceReview);
+
+        log.info("Created performance review for {}", dto.employeeId());
+        return dtos;
     }
 
-    private List<SkillEntry> map(List<SkillEntryDto> dtos, Employee employee, LocalDateTime entryDateTime) {
+    private List<SkillEntry> map(List<SkillEntryDto> dtos, Employee employee, Map<Integer, Skill> skillMap) {
         return dtos.stream()
+                .filter(dto -> skillMap.get(dto.skillId()) != null)
                 .map(dto -> {
+                         Skill skill = skillMap.get(dto.skillId());
+                         
                          SkillEntry skillEntry = new SkillEntry();
-
+                         skillEntry.setSkill(skill);
                          skillEntry.setEntryDate(dto.entryDate());
-                         skillEntry.setEntryDateTime(dto.entryDateTime() != null ? dto.entryDateTime() : entryDateTime);
+                         skillEntry.setEntryDateTime(dto.entryDateTime());
                          skillEntry.setEmployee(employee);
                          skillEntry.setRating(dto.rating());
                          return skillEntry;
