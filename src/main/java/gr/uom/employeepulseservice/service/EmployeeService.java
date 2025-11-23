@@ -141,8 +141,6 @@ public class EmployeeService {
         skillEntryRepository.deleteById(skillEntryId);
     }
 
-    /* ===================== Helpers ===================== */
-
     private void setEmployeeRelations(SaveEmployeeDto dto, Employee employee) {
         Department department = findDepartmentById(dto.departmentId());
         Organization organization = findOrganizationById(dto.organizationId());
@@ -183,6 +181,5 @@ public class EmployeeService {
         findById(id);
     }
 
-    /* ===================== Helpers ===================== */
 
 }

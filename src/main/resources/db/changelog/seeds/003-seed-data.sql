@@ -26,10 +26,16 @@ VALUES (1, 4, '2020-10-12', 33553, 1, 'nikos.nikas@gmail.com', 'Nikos', 'Nikas')
        (5, 8, '2024-10-12', 32627, 3, 'elena.k@bestsecret.com', 'Elena', 'K.'),
        (6, 9, '2025-02-12', 35401, 3, 'thomas.m@bestsecret.com', 'Thomas', 'M.'),
        (7, 5, '2024-06-01', 35401, 1, 'anna.tech@uom.gr',   'Anna',   'Tech'),
-       (8, 5, '2024-09-15', 35401, 1, 'kostas.dev@uom.gr',  'Kostas', 'Dev');
+       (8, 5, '2024-09-15', 35401, 1, 'kostas.dev@uom.gr',  'Kostas', 'Dev'),
+       (9, 5, '2024-09-15', 33745, 1, 'minas.cto@uom.gr',  'Minas', 'CTO');
+
+update departments
+set manager_id = 9
+where id = 5;
+
 
 ALTER SEQUENCE IF EXISTS public.organizations_seq RESTART WITH 4;
 
 ALTER SEQUENCE IF EXISTS public.departments_seq RESTART WITH 10;
 
-ALTER SEQUENCE IF EXISTS public.employees_seq RESTART WITH 9;
+ALTER SEQUENCE IF EXISTS public.employees_seq RESTART WITH 10;
