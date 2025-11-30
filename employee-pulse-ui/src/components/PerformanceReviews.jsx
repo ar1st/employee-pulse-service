@@ -49,6 +49,11 @@ function PerformanceReviews() {
     return rating != null ? rating.toFixed(1) : 'N/A'
   }
 
+  const handleEdit = (reviewId) => {
+    // TODO: Implement edit functionality
+    console.log('Edit performance review:', reviewId)
+  }
+
   return (
     <div className="performance-reviews-wrapper">
       <h2>Performance Reviews</h2>
@@ -84,8 +89,8 @@ function PerformanceReviews() {
               <th>Reporter</th>
               <th>Overall Rating</th>
               <th>Review Date</th>
-
               <th>Skill Entries</th>
+              <th>Actions</th>
             </tr>
             </thead>
             <tbody>
@@ -109,6 +114,30 @@ function PerformanceReviews() {
                     ) : (
                       'No skills'
                     )}
+                  </td>
+                  <td>
+                    <button
+                      className="edit-button"
+                      onClick={() => handleEdit(review.id)}
+                      title="Edit performance review"
+                      aria-label="Edit performance review"
+                    >
+                      <svg
+                        width="16"
+                        height="16"
+                        viewBox="0 0 16 16"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M11.3333 2.00004C11.5084 1.82493 11.7163 1.68606 11.9447 1.59131C12.1731 1.49655 12.4173 1.44775 12.6667 1.44775C12.916 1.44775 13.1602 1.49655 13.3886 1.59131C13.617 1.68606 13.8249 1.82493 14 2.00004C14.1751 2.17515 14.314 2.38309 14.4087 2.61147C14.5035 2.83985 14.5523 3.08405 14.5523 3.33337C14.5523 3.5827 14.5035 3.8269 14.4087 4.05528C14.314 4.28366 14.1751 4.4916 14 4.66671L5.00001 13.6667L1.33334 14.6667L2.33334 11L11.3333 2.00004Z"
+                          stroke="currentColor"
+                          strokeWidth="1.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                    </button>
                   </td>
                 </tr>
               ))}

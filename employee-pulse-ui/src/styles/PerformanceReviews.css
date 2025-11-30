@@ -2,6 +2,7 @@
   display: flex;
   flex-direction: column;
   height: 100%;
+  min-height: 0;
 }
 
 .performance-reviews-table-container {
@@ -23,4 +24,30 @@
 
 .performance-reviews-table {
   margin-bottom: 0;
+}
+
+.edit-button {
+  background: none;
+  border: none;
+  padding: 0.5rem;
+  cursor: pointer;
+  color: #007bff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.25rem;
+  transition: all 0.2s ease;
+}
+
+.edit-button:hover {
+  background-color: #e7f3ff;
+  color: #0056b3;
+}
+
+.edit-button:active {
+  background-color: #cfe2ff;
+}
+
+.edit-button svg {
+  display: block;
 }
