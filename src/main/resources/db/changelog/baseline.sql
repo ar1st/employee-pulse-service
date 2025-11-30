@@ -52,6 +52,7 @@ CREATE TABLE "organizations" (
 
 CREATE TABLE "performance_reviews" (
     "employee_id"    INTEGER,
+    "department_id"  INTEGER,
     "id"             INTEGER NOT NULL,
     "overall_rating" float8,
     "reporter_id"    INTEGER,
@@ -123,6 +124,11 @@ ADD CONSTRAINT "fkh62l7gpgesex8wjd6himtb3e1" FOREIGN KEY ("organization_id") REF
 
 ALTER TABLE "performance_reviews"
 ADD CONSTRAINT "fkhv0lu3p1ar7x8aqbta2nxr8fv" FOREIGN KEY ("reporter_id") REFERENCES "employees" ("id")
+    ON UPDATE NO ACTION
+    ON DELETE NO ACTION;
+
+ALTER TABLE "performance_reviews"
+ADD CONSTRAINT "fk_performance_reviews_department" FOREIGN KEY ("department_id") REFERENCES "departments" ("id")
     ON UPDATE NO ACTION
     ON DELETE NO ACTION;
 

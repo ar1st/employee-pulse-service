@@ -46,6 +46,7 @@ public class PerformanceReviewService {
 
         Employee employee = findEmployeeById(dto.employeeId());
         performanceReview.setRefersTo(employee);
+        performanceReview.setDepartment(employee.getDepartment());
 
         Employee reporter = findEmployeeById(dto.reporterId());
         performanceReview.setReportedBy(reporter);
@@ -158,7 +159,7 @@ public class PerformanceReviewService {
     @Transactional(readOnly = true)
     public List<PerformanceReviewDto> findByDepartment(Integer departmentId) {
         return performanceReviewMapper.toDtos(
-                performanceReviewRepository.findAllByRefersToDepartmentId(departmentId)
+                performanceReviewRepository.findAllByDepartmentId(departmentId)
         );
     }
 

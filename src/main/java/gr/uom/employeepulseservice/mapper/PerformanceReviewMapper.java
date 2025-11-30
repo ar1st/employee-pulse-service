@@ -15,6 +15,7 @@ public interface PerformanceReviewMapper {
     @Mapping(target = "skillEntries", ignore = true)
     @Mapping(target = "reportedBy", ignore = true)
     @Mapping(target = "refersTo", ignore = true)
+    @Mapping(target = "department", ignore = true)
     @Mapping(target = "id", ignore = true)
     PerformanceReview toEntity(CreatePerformanceReviewDto dto);
 

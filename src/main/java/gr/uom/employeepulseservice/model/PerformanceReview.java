@@ -30,6 +30,10 @@ public class PerformanceReview {
     @JoinColumn(name = "employee_id")
     private Employee refersTo;
 
+    @ManyToOne
+    @JoinColumn(name = "department_id")
+    private Department department;
+
     private LocalDate reviewDate;
     private LocalDateTime reviewDateTime;
 
