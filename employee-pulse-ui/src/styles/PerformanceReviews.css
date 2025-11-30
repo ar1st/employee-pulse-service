@@ -1,8 +1,15 @@
+.performance-reviews-wrapper {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
 .performance-reviews-table-container {
   margin-top: 1rem;
   overflow-x: auto;
   overflow-y: auto;
-  height: calc(100vh - 150px);
+  flex: 1;
+  min-height: 0;
   border: 1px solid #dee2e6;
   border-radius: 0.25rem;
 }

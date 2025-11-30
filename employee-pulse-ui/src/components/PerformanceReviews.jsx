@@ -50,7 +50,7 @@ function PerformanceReviews() {
   }
 
   return (
-    <div>
+    <div className="performance-reviews-wrapper">
       <h2>Performance Reviews</h2>
       <p>Track and manage employee performance reviews by organization.</p>
 
