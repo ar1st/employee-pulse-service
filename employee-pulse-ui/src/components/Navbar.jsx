@@ -1,10 +1,10 @@
-import { Col, Nav, NavItem } from 'reactstrap'
+import { Nav, NavItem } from 'reactstrap'
 import { NavLink } from 'react-router-dom'
 
 function Navbar() {
   return (
-    <Col className="sidebar-col">
-      <Nav vertical className="sidebar-nav">
+    <div className="navbar-top">
+      <Nav className="navbar-nav">
         <NavItem>
           <NavLink
             to="/departments"
@@ -46,7 +46,7 @@ function Navbar() {
           </NavLink>
         </NavItem>
       </Nav>
-    </Col>
+    </div>
   )
 }
 
