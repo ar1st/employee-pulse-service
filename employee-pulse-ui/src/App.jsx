@@ -1,6 +1,6 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { Container, Row, Col } from 'reactstrap'
-import './App.css'
+import './styles/App.css'
 import Navbar from './components/Navbar'
 import Departments from './components/Departments'
 import Employees from './components/Employees'

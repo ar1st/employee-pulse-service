@@ -1,0 +1,19 @@
+.performance-reviews-table-container {
+  margin-top: 1rem;
+  overflow-x: auto;
+  overflow-y: auto;
+  height: calc(100vh - 150px);
+  border: 1px solid #dee2e6;
+  border-radius: 0.25rem;
+}
+
+.performance-reviews-table thead {
+  position: sticky;
+  top: 0;
+  background-color: #fff;
+  z-index: 10;
+}
+
+.performance-reviews-table {
+  margin-bottom: 0;
+}
