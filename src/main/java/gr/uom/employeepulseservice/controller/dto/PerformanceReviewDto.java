@@ -10,6 +10,9 @@ public record PerformanceReviewDto(
         Double overallRating,
 
         LocalDateTime reviewDateTime,
-        List<SkillEntryDto> skillEntryDtos
+        List<SkillEntryDto> skillEntryDtos,
+        String departmentName,
+        String reporterName,
+        String employeeName
         ) {
 }
