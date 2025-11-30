@@ -65,14 +65,15 @@ function PerformanceReviews() {
 
       {!loading && performanceReviews.length > 0 && (
         <div className="performance-reviews-table-container">
-          <Table striped bordered hover className="performance-reviews-table">
+          <Table striped bordered hover responsive className="performance-reviews-table">
             <thead>
               <tr>
                 <th>ID</th>
                 <th>Review Date</th>
+                <th>Department</th>
+                <th>Employee</th>
+                <th>Reporter</th>
                 <th>Overall Rating</th>
-                <th>Comments</th>
-                <th>Raw Text</th>
                 <th>Skill Entries</th>
               </tr>
             </thead>
@@ -81,13 +82,10 @@ function PerformanceReviews() {
                 <tr key={review.id}>
                   <td>{review.id}</td>
                   <td>{formatDateTime(review.reviewDateTime)}</td>
+                  <td>{review.departmentName || 'N/A'}</td>
+                  <td>{review.employeeName || 'N/A'}</td>
+                  <td>{review.reporterName || 'N/A'}</td>
                   <td>{formatRating(review.overallRating)}</td>
-                  <td>{review.comments || 'N/A'}</td>
-                  <td>
-                    <div style={{ maxWidth: '300px', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                      {review.rawText || 'N/A'}
-                    </div>
-                  </td>
                   <td>
                     {review.skillEntryDtos && review.skillEntryDtos.length > 0 ? (
                       <ul style={{ margin: 0, paddingLeft: '20px' }}>
