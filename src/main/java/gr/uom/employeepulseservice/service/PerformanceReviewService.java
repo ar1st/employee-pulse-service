@@ -164,6 +164,13 @@ public class PerformanceReviewService {
     }
 
     @Transactional(readOnly = true)
+    public List<PerformanceReviewDto> findByOrganization(Integer organizationId) {
+        return performanceReviewMapper.toDtos(
+                performanceReviewRepository.findAllByDepartmentOrganizationIdOrderByReviewDateDesc(organizationId)
+        );
+    }
+
+    @Transactional(readOnly = true)
     public List<PerformanceReviewDto> findBySkill(Integer skillId) {
         return performanceReviewMapper.toDtos(
                 performanceReviewRepository.findAllBySkillId(skillId)

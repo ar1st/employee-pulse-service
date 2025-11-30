@@ -60,6 +60,11 @@ public class PerformanceReviewController {
         return ResponseEntity.ok(performanceReviewService.findByDepartment(departmentId));
     }
 
+    @GetMapping("/organization/{organizationId}")
+    public ResponseEntity<List<PerformanceReviewDto>> getByOrganization(@PathVariable Integer organizationId) {
+        return ResponseEntity.ok(performanceReviewService.findByOrganization(organizationId));
+    }
+
     @GetMapping("/skill/{skillId}")
     public ResponseEntity<List<PerformanceReviewDto>> getBySkill(@PathVariable Integer skillId) {
         return ResponseEntity.ok(performanceReviewService.findBySkill(skillId));

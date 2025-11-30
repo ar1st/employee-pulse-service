@@ -26,6 +26,9 @@ public interface PerformanceReviewRepository extends JpaRepository<PerformanceRe
     // by department
     List<PerformanceReview> findAllByDepartmentId(Integer departmentId);
 
+    // by organization, ordered by date desc
+    List<PerformanceReview> findAllByDepartmentOrganizationIdOrderByReviewDateDesc(Integer organizationId);
+
     // by occupation (of reviewed employee)
     List<PerformanceReview> findAllByRefersToOccupationId(Integer occupationId);
 
