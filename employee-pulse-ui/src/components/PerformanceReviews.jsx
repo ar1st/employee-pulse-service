@@ -30,9 +30,19 @@ function PerformanceReviews() {
     }
   }
 
-  const formatDateTime = (dateTime) => {
-    if (!dateTime) return 'N/A'
-    return new Date(dateTime).toLocaleString()
+  function formatDateTime(dateTime) {
+    // dateTime is "2025,3,22,9,0"
+    const [year, month, day, hour, minute] = dateTime.map(Number);
+
+    const date = new Date(year, month - 1, day, hour, minute);
+
+    return date.toLocaleString('en', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
   }
 
   const formatRating = (rating) => {
@@ -67,28 +77,29 @@ function PerformanceReviews() {
         <div className="performance-reviews-table-container">
           <Table striped bordered hover responsive className="performance-reviews-table">
             <thead>
-              <tr>
-                <th>ID</th>
-                <th>Review Date</th>
-                <th>Department</th>
-                <th>Employee</th>
-                <th>Reporter</th>
-                <th>Overall Rating</th>
-                <th>Skill Entries</th>
-              </tr>
+            <tr>
+              <th>ID</th>
+              <th>Department</th>
+              <th>Employee</th>
+              <th>Reporter</th>
+              <th>Overall Rating</th>
+              <th>Review Date</th>
+
+              <th>Skill Entries</th>
+            </tr>
             </thead>
             <tbody>
               {performanceReviews.map((review) => (
                 <tr key={review.id}>
                   <td>{review.id}</td>
-                  <td>{formatDateTime(review.reviewDateTime)}</td>
                   <td>{review.departmentName || 'N/A'}</td>
                   <td>{review.employeeName || 'N/A'}</td>
                   <td>{review.reporterName || 'N/A'}</td>
                   <td>{formatRating(review.overallRating)}</td>
+                  <td>{formatDateTime(review.reviewDateTime)}</td>
                   <td>
                     {review.skillEntryDtos && review.skillEntryDtos.length > 0 ? (
-                      <ul style={{ margin: 0, paddingLeft: '20px' }}>
+                      <ul style={{margin: 0, paddingLeft: '20px'}}>
                         {review.skillEntryDtos.map((entry) => (
                           <li key={entry.id}>
                             {entry.skillName}: {formatRating(entry.rating)}
