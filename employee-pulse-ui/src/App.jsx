@@ -2,10 +2,10 @@ import { Routes, Route, Navigate } from 'react-router-dom'
 import { Container } from 'reactstrap'
 import './styles/App.css'
 import Navbar from './components/Navbar'
-import DepartmentsPage from './pages/DepartmentsPage.jsx'
-import EmployeesPage from './pages/EmployeesPage.jsx'
-import PerformanceReviewsPage from './pages/PerformanceReviewsPage.jsx'
-import ReportsPage from './pages/ReportsPage.jsx'
+import DepartmentsPage from './components/pages/DepartmentsPage.jsx'
+import EmployeesPage from './components/pages/EmployeesPage.jsx'
+import PerformanceReviewsPage from './components/pages/PerformanceReviewsPage.jsx'
+import ReportsPage from './components/pages/ReportsPage.jsx'
 
 function App() {
   return (
