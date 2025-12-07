@@ -1,9 +1,6 @@
 package gr.uom.employeepulseservice.service;
 
-import gr.uom.employeepulseservice.controller.dto.CreatePerformanceReviewDto;
-import gr.uom.employeepulseservice.controller.dto.PerformanceReviewDto;
-import gr.uom.employeepulseservice.controller.dto.SaveSkillEntryDto;
-import gr.uom.employeepulseservice.controller.dto.SkillEntryDto;
+import gr.uom.employeepulseservice.controller.dto.*;
 import gr.uom.employeepulseservice.llm.ChatGptClient;
 import gr.uom.employeepulseservice.llm.GeneratedSkill;
 import gr.uom.employeepulseservice.mapper.PerformanceReviewMapper;
@@ -22,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -39,7 +37,7 @@ public class PerformanceReviewService {
     private final DepartmentRepository departmentRepository;
 
     @Transactional
-    public List<SkillEntryDto> createPerformanceReview(CreatePerformanceReviewDto dto) {
+    public CreatePerformanceReviewResponseDto createPerformanceReview(CreatePerformanceReviewDto dto) {
         log.info("Creating performance review for {}", dto.employeeId());
 
         PerformanceReview performanceReview = performanceReviewMapper.toEntity(dto);
@@ -53,7 +51,8 @@ public class PerformanceReviewService {
 
         ensureReporterIsManagerOfEmployee(dto.reporterId(), dto.employeeId());
 
-        List<GeneratedSkill> generatedSkills = chatGptClient.analyzePerformanceReview(dto.rawText());
+        List<GeneratedSkill> generatedSkills = Collections.emptyList();
+//        List<GeneratedSkill> generatedSkills = chatGptClient.analyzePerformanceReview(dto.rawText());
         log.info("Generated skills:\n{}", formatGeneratedSkills(generatedSkills));
 
         LocalDate now = LocalDate.now();
@@ -85,10 +84,10 @@ public class PerformanceReviewService {
         performanceReview.setReviewDate(now);
         performanceReview.setReviewDateTime(nowDateTime);
 
-        performanceReviewRepository.save(performanceReview);
+        PerformanceReview createdPerformanceReview = performanceReviewRepository.save(performanceReview);
 
         log.info("Created performance review for {}", dto.employeeId());
-        return dtos;
+        return new CreatePerformanceReviewResponseDto(createdPerformanceReview.getId(), dtos);
     }
 
     private List<SkillEntry> map(List<SkillEntryDto> dtos, Employee employee, Map<Integer, Skill> skillMap) {
@@ -166,7 +165,7 @@ public class PerformanceReviewService {
     @Transactional(readOnly = true)
     public List<PerformanceReviewDto> findByOrganization(Integer organizationId) {
         return performanceReviewMapper.toDtos(
-                performanceReviewRepository.findAllByDepartmentOrganizationIdOrderByReviewDateDesc(organizationId)
+                performanceReviewRepository.findAllByDepartmentOrganizationIdOrderByReviewDateTimeDesc(organizationId)
         );
     }
 

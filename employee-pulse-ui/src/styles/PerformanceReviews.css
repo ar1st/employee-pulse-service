@@ -107,3 +107,25 @@
   word-wrap: break-word;
   max-width: 100% !important;
 }
+
+/* Skill entries section */
+.performance-reviews-wrapper table {
+  margin-top: 1rem;
+  width: 100%;
+  max-width: 100%;
+}
+
+.performance-reviews-wrapper table th {
+  background-color: #f8f9fa;
+  font-weight: 600;
+  border-bottom: 2px solid #dee2e6;
+}
+
+.performance-reviews-wrapper table td {
+  vertical-align: middle;
+}
+
+.performance-reviews-wrapper .btn-sm {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.875rem;
+}

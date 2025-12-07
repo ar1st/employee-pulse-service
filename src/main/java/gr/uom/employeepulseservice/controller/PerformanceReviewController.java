@@ -1,9 +1,6 @@
 package gr.uom.employeepulseservice.controller;
 
-import gr.uom.employeepulseservice.controller.dto.CreatePerformanceReviewDto;
-import gr.uom.employeepulseservice.controller.dto.PerformanceReviewDto;
-import gr.uom.employeepulseservice.controller.dto.SaveSkillEntryDto;
-import gr.uom.employeepulseservice.controller.dto.SkillEntryDto;
+import gr.uom.employeepulseservice.controller.dto.*;
 import gr.uom.employeepulseservice.service.PerformanceReviewService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -21,10 +18,10 @@ public class PerformanceReviewController {
     private final PerformanceReviewService performanceReviewService;
 
     @PostMapping
-    public ResponseEntity<List<SkillEntryDto>> createPerformanceReview(@RequestBody CreatePerformanceReviewDto dto) {
-        List<SkillEntryDto> skillEntries = performanceReviewService.createPerformanceReview(dto);
+    public ResponseEntity<CreatePerformanceReviewResponseDto> createPerformanceReview(@RequestBody CreatePerformanceReviewDto dto) {
+        CreatePerformanceReviewResponseDto response = performanceReviewService.createPerformanceReview(dto);
 
-        return ResponseEntity.ok(skillEntries);
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/{id}")
