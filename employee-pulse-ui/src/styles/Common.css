@@ -1,4 +1,4 @@
-.performance-reviews-wrapper {
+.page-wrapper {
   display: flex;
   flex-direction: column;
   height: 100%;
@@ -9,7 +9,7 @@
   overflow-x: hidden;
 }
 
-.performance-reviews-table-container {
+.table-container {
   margin-top: 1rem;
   overflow-x: auto;
   overflow-y: auto;
@@ -21,14 +21,14 @@
   border-radius: 0.25rem;
 }
 
-.performance-reviews-table thead {
+.data-table thead {
   position: sticky;
   top: 0;
   background-color: #fff;
   z-index: 10;
 }
 
-.performance-reviews-table {
+.data-table {
   margin-bottom: 0;
 }
 
@@ -59,41 +59,41 @@
 }
 
 /* Form width constraints */
-.performance-reviews-wrapper form {
+.page-wrapper form {
   width: 100%;
   max-width: 100%;
   min-width: 0;
   overflow-x: hidden;
 }
 
-.performance-reviews-wrapper .row {
+.page-wrapper .row {
   width: 100%;
   max-width: 100%;
   margin-left: 0 !important;
   margin-right: 0 !important;
 }
 
-.performance-reviews-wrapper .row > * {
+.page-wrapper .row > * {
   padding-left: 0.75rem;
   padding-right: 0.75rem;
   box-sizing: border-box;
 }
 
-.performance-reviews-wrapper .col,
-.performance-reviews-wrapper [class*="col-"] {
+.page-wrapper .col,
+.page-wrapper [class*="col-"] {
   min-width: 0;
   max-width: 100%;
 }
 
-.performance-reviews-wrapper .form-group,
-.performance-reviews-wrapper .form-group > * {
+.page-wrapper .form-group,
+.page-wrapper .form-group > * {
   max-width: 100%;
   min-width: 0;
 }
 
-.performance-reviews-wrapper input,
-.performance-reviews-wrapper textarea,
-.performance-reviews-wrapper select {
+.page-wrapper input,
+.page-wrapper textarea,
+.page-wrapper select {
   max-width: 100% !important;
   box-sizing: border-box;
   width: 100%;
@@ -101,31 +101,31 @@
   word-wrap: break-word;
 }
 
-.performance-reviews-wrapper input[readonly],
-.performance-reviews-wrapper input[disabled] {
+.page-wrapper input[readonly],
+.page-wrapper input[disabled] {
   overflow-wrap: break-word;
   word-wrap: break-word;
   max-width: 100% !important;
 }
 
-/* Skill entries section */
-.performance-reviews-wrapper table {
+/* Table sections */
+.page-wrapper table {
   margin-top: 1rem;
   width: 100%;
   max-width: 100%;
 }
 
-.performance-reviews-wrapper table th {
+.page-wrapper table th {
   background-color: #f8f9fa;
   font-weight: 600;
   border-bottom: 2px solid #dee2e6;
 }
 
-.performance-reviews-wrapper table td {
+.page-wrapper table td {
   vertical-align: middle;
 }
 
-.performance-reviews-wrapper .btn-sm {
+.page-wrapper .btn-sm {
   padding: 0.25rem 0.5rem;
   font-size: 0.875rem;
 }

@@ -10,8 +10,10 @@ export const DELETE_PERFORMANCE_REVIEW_URL = (reviewId) => `${API_BASE_URL}/perf
 
 export const GET_EMPLOYEES_BY_ORGANIZATION_URL = (organizationId) => `${API_BASE_URL}/organizations/${organizationId}/employees`
 export const GET_DEPARTMENTS_BY_ORGANIZATION_URL = (organizationId) => `${API_BASE_URL}/organizations/${organizationId}/departments`
-
 export const GET_DEPARTMENT_URL = (departmentId) => `${API_BASE_URL}/departments/${departmentId}`
+export const CREATE_DEPARTMENT_URL = () => `${API_BASE_URL}/departments`
+export const UPDATE_DEPARTMENT_URL = (departmentId) => `${API_BASE_URL}/departments/${departmentId}`
+export const DELETE_DEPARTMENT_URL = (departmentId) => `${API_BASE_URL}/departments/${departmentId}`
 
 export const GET_SKILLS_BY_ORGANIZATION_URL = (organizationId) => `${API_BASE_URL}/skills/organization/${organizationId}`
 export const SEARCH_SKILLS_URL = (searchTerm) => `${API_BASE_URL}/skills/search?q=${encodeURIComponent(searchTerm)}`

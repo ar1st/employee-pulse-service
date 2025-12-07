@@ -81,8 +81,8 @@ export default function PerformanceReviewsTable() {
     )}
 
     {!loading && performanceReviews.length > 0 && (
-      <div className="performance-reviews-table-container">
-        <Table striped bordered hover responsive className="performance-reviews-table">
+      <div className="table-container">
+        <Table striped bordered hover responsive className="data-table">
           <thead>
           <tr>
             <th>ID</th>
