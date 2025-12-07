@@ -2,15 +2,25 @@
   height: 100vh;
   margin: 0;
   padding: 0;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow-x: hidden;
+}
+
+* {
+  box-sizing: border-box;
 }
 
 .app-container {
   height: 100vh;
-  padding: 0;
-  margin: 0;
+  padding: 0 !important;
+  margin: 0 !important;
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  max-width: 100% !important;
+  width: 100% !important;
 }
 
 .navbar-top {
@@ -59,9 +69,12 @@
   flex: 1;
   min-width: 0;
   width: 100%;
+  max-width: 100%;
   overflow-y: auto;
+  overflow-x: hidden;
   display: flex;
   flex-direction: column;
+  box-sizing: border-box;
 }
 
 .content-area {
@@ -69,4 +82,13 @@
   display: flex;
   flex-direction: column;
   min-height: 0;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  overflow-x: hidden;
+}
+
+.content-area > * {
+  max-width: 100%;
+  min-width: 0;
 }
