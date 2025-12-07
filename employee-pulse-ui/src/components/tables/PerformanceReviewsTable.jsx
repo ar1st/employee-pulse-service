@@ -1,9 +1,10 @@
 import {useEffect, useState} from "react";
 import {DEFAULT_ORGANIZATION_ID, GET_PERFORMANCE_REVIEWS_URL, DELETE_PERFORMANCE_REVIEW_URL} from "../../lib/api/apiUrls.js";
-import {Alert, Spinner, Table, Modal, ModalHeader, ModalBody, ModalFooter, Button} from "reactstrap";
+import {Alert, Spinner, Table} from "reactstrap";
 import {axiosGet, axiosDelete} from "../../lib/api/client.js";
 import useCatch from "../../lib/api/useCatch.js";
 import {formatDateTime} from "../../lib/dateUtils.js";
+import ConfirmModal from "../ConfirmModal.jsx";
 
 export default function PerformanceReviewsTable() {
   const [performanceReviews, setPerformanceReviews] = useState([])
@@ -143,42 +144,27 @@ export default function PerformanceReviewsTable() {
       </div>
     )}
 
-    <Modal isOpen={deleteModalOpen} toggle={handleDeleteCancel}>
-      <ModalHeader toggle={handleDeleteCancel}>Confirm Delete</ModalHeader>
-      <ModalBody>
-        {reviewToDelete && (
-          <>
-            <p>Are you sure you want to delete this performance review?</p>
-            <div className="mt-3">
-              <strong>Review Details:</strong>
-              <ul className="mt-2">
-                <li>ID: {reviewToDelete.id}</li>
-                <li>Employee: {reviewToDelete.employeeName || 'N/A'}</li>
-                <li>Department: {reviewToDelete.departmentName || 'N/A'}</li>
-                <li>Date: {formatDateTime(reviewToDelete.reviewDateTime)}</li>
-              </ul>
-            </div>
-            <p className="text-danger mt-3">
-              <strong>This action cannot be undone.</strong>
-            </p>
-          </>
-        )}
-      </ModalBody>
-      <ModalFooter>
-        <Button color="secondary" onClick={handleDeleteCancel} disabled={deleting}>
-          Cancel
-        </Button>
-        <Button color="danger" onClick={handleDeleteConfirm} disabled={deleting}>
-          {deleting ? (
-            <>
-              <Spinner size="sm" className="me-2" />
-              Deleting...
-            </>
-          ) : (
-            'Delete'
-          )}
-        </Button>
-      </ModalFooter>
-    </Modal>
+    <ConfirmModal
+      isOpen={deleteModalOpen}
+      onToggle={handleDeleteCancel}
+      onConfirm={handleDeleteConfirm}
+      onCancel={handleDeleteCancel}
+      title="Confirm Delete"
+      message="Are you sure you want to delete this performance review?"
+      itemDetails={reviewToDelete ? {
+        'ID': reviewToDelete.id,
+        'Employee': reviewToDelete.employeeName || 'N/A',
+        'Department': reviewToDelete.departmentName || 'N/A',
+        'Date': formatDateTime(reviewToDelete.reviewDateTime)
+      } : null}
+      detailsLabel="Review Details"
+      loading={deleting}
+      loadingText="Deleting..."
+      confirmButtonText="Delete"
+      cancelButtonText="Cancel"
+      confirmButtonColor="danger"
+      showWarning={true}
+      warningMessage="This action cannot be undone."
+    />
   </>
 }
