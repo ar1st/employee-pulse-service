@@ -2,9 +2,10 @@ import {Button, Col, FormGroup, Input, Label, Row, Spinner, Table} from "reactst
 import {
   DEFAULT_ORGANIZATION_ID,
   GET_SKILLS_BY_ORGANIZATION_URL,
-  SEARCH_SKILLS_URL
+  SEARCH_SKILLS_URL,
+  GENERATE_SKILL_ENTRIES_URL
 } from "../../lib/api/apiUrls.js";
-import {axiosGet} from "../../lib/api/client.js";
+import {axiosGet, axiosPost} from "../../lib/api/client.js";
 import {useEffect, useState, useMemo, useRef} from "react";
 import useCatch from "../../lib/api/useCatch.js";
 
@@ -17,6 +18,7 @@ export default function SkillEntrySection({ rawText, onRawTextChange, skillEntri
   const [skillSearchTerm, setSkillSearchTerm] = useState('');
   const [selectedSkillId, setSelectedSkillId] = useState('');
   const [skillRating, setSkillRating] = useState('');
+  const [generatingSkills, setGeneratingSkills] = useState(false);
   const searchTimeoutRef = useRef(null);
 
   useEffect(() => {
@@ -99,6 +101,35 @@ export default function SkillEntrySection({ rawText, onRawTextChange, skillEntri
     onSkillEntriesChange(skillEntries.filter(entry => entry.tempId !== tempId));
   };
 
+  const handleGenerateSkillEntries = () => {
+    if (!rawText || !rawText.trim()) {
+      return;
+    }
+
+    setGeneratingSkills(true);
+
+    cWrapper(() =>
+      axiosPost(GENERATE_SKILL_ENTRIES_URL(), { rawText: rawText })
+        .then((response) => {
+          const generatedEntries = response.data || [];
+
+          const newEntries = generatedEntries.map((entry) => ({
+            skillId: entry.skillId,
+            skillName: entry.skillName,
+            rating: entry.rating,
+            tempId: Date.now() + Math.random() // Unique temporary ID
+          }));
+
+          // Filter out duplicates (skills already in the list)
+          const existingSkillIds = new Set(skillEntries.map(e => e.skillId));
+          const uniqueNewEntries = newEntries.filter(e => !existingSkillIds.has(e.skillId));
+
+          onSkillEntriesChange([...skillEntries, ...uniqueNewEntries]);
+        })
+        .finally(() => setGeneratingSkills(false))
+    );
+  };
+
   return (
     <>
       <FormGroup>
@@ -112,6 +143,31 @@ export default function SkillEntrySection({ rawText, onRawTextChange, skillEntri
           onChange={onRawTextChange}
           placeholder="Enter the performance review text. This will be analyzed to extract skills and ratings."
         />
+        <div className="mt-2">
+          <Button
+            type="button"
+            color="info"
+            onClick={handleGenerateSkillEntries}
+            disabled={!rawText || !rawText.trim() || generatingSkills}
+          >
+            {generatingSkills ? (
+              <>
+                <Spinner size="sm" className="me-2"/>
+                Generating...
+              </>
+            ) : (
+              <>
+                <i className="bi bi-magic me-2"></i>
+                Generate Skill Entries
+              </>
+            )}
+          </Button>
+          {!rawText || !rawText.trim() ? (
+            <small className="form-text text-muted ms-2">
+              Enter performance review text to generate skill entries
+            </small>
+          ) : null}
+        </div>
       </FormGroup>
 
       <FormGroup>

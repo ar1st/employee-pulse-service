@@ -19,10 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -51,35 +48,8 @@ public class PerformanceReviewService {
 
         ensureReporterIsManagerOfEmployee(dto.reporterId(), dto.employeeId());
 
-        List<GeneratedSkill> generatedSkills = Collections.emptyList();
-//        List<GeneratedSkill> generatedSkills = chatGptClient.analyzePerformanceReview(dto.rawText());
-        log.info("Generated skills:\n{}", formatGeneratedSkills(generatedSkills));
-
         LocalDate now = LocalDate.now();
         LocalDateTime nowDateTime = LocalDateTime.now();
-
-        Map<Integer, Skill> skillMap = new HashMap<>();
-        List<SkillEntryDto> dtos = generatedSkills.stream()
-                .map(generatedSkill -> {
-                         Skill skill = skillRepository.findByEscoId(generatedSkill.getEscoSkillId());
-
-                         if (skill != null) {
-                             skillMap.put(skill.getId(), skill);
-                         }
-
-                         return new SkillEntryDto(
-                                 null,
-                                 skill != null ? skill.getId() : null,
-                                 skill != null ? skill.getName() : null,
-                                 generatedSkill.getRating(),
-                                 now,
-                                 nowDateTime,
-                                 dto.employeeId()
-                         );
-                     }
-                ).toList();
-
-        performanceReview.setSkillEntries(map(dtos, employee, skillMap));
 
         performanceReview.setReviewDate(now);
         performanceReview.setReviewDateTime(nowDateTime);
@@ -87,25 +57,7 @@ public class PerformanceReviewService {
         PerformanceReview createdPerformanceReview = performanceReviewRepository.save(performanceReview);
 
         log.info("Created performance review for {}", dto.employeeId());
-        return new CreatePerformanceReviewResponseDto(createdPerformanceReview.getId(), dtos);
-    }
-
-    private List<SkillEntry> map(List<SkillEntryDto> dtos, Employee employee, Map<Integer, Skill> skillMap) {
-        return dtos.stream()
-                .filter(dto -> skillMap.get(dto.skillId()) != null)
-                .map(dto -> {
-                         Skill skill = skillMap.get(dto.skillId());
-                         
-                         SkillEntry skillEntry = new SkillEntry();
-                         skillEntry.setSkill(skill);
-                         skillEntry.setEntryDate(dto.entryDate());
-                         skillEntry.setEntryDateTime(dto.entryDateTime());
-                         skillEntry.setEmployee(employee);
-                         skillEntry.setRating(dto.rating());
-                         return skillEntry;
-                     }
-                )
-                .toList();
+        return new CreatePerformanceReviewResponseDto(createdPerformanceReview.getId());
     }
 
     private void ensureReporterIsManagerOfEmployee(Integer reporterId, Integer employeeId) {
@@ -248,6 +200,38 @@ public class PerformanceReviewService {
     @Transactional
     public void deletePerformanceReview(Integer reviewId) {
         performanceReviewRepository.deleteById(reviewId);
+    }
+
+    @Transactional(readOnly = true)
+    public List<GeneratedSkillEntryDto> generateSkillEntries(String rawText) {
+        log.info("Generating skill entries from performance review text");
+        
+        List<GeneratedSkill> generatedSkills = chatGptClient.analyzePerformanceReview(rawText);
+        
+        if (generatedSkills == null || generatedSkills.isEmpty()) {
+            log.info("No skills generated from performance review text");
+            return Collections.emptyList();
+        }
+        
+        log.info("Generated skills:\n{}", formatGeneratedSkills(generatedSkills));
+        
+        return generatedSkills.stream()
+                .map(generatedSkill -> {
+                    Skill skill = skillRepository.findByEscoId(generatedSkill.getEscoSkillId());
+                    
+                    if (skill == null) {
+                        log.warn("Skill not found for escoId: {}", generatedSkill.getEscoSkillId());
+                        return null;
+                    }
+                    
+                    return new GeneratedSkillEntryDto(
+                            skill.getId(),
+                            skill.getName(),
+                            generatedSkill.getRating()
+                    );
+                })
+                .filter(Objects::nonNull)
+                .toList();
     }
 
     private String formatGeneratedSkills(List<GeneratedSkill> skills) {

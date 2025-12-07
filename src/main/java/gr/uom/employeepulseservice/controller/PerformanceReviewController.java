@@ -109,4 +109,13 @@ public class PerformanceReviewController {
         return ResponseEntity.ok().build();
     }
 
+    @PostMapping("/generate-skill-entries")
+    public ResponseEntity<List<GeneratedSkillEntryDto>> generateSkillEntries(
+            @RequestBody GenerateSkillEntriesRequestDto dto
+    ) {
+        return ResponseEntity.ok(
+                performanceReviewService.generateSkillEntries(dto.rawText())
+        );
+    }
+
 }
