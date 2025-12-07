@@ -69,4 +69,11 @@ public class SkillController {
     public ResponseEntity<List<SkillDto>> findByDepartmentId(@PathVariable Integer departmentId) {
         return ResponseEntity.ok(skillService.findByDepartmentId(departmentId));
     }
+
+    @GetMapping("/search")
+    public ResponseEntity<List<SkillDto>> searchSkills(
+            @RequestParam String q
+    ) {
+        return ResponseEntity.ok(skillService.searchSkills(q));
+    }
 }

@@ -3,6 +3,7 @@ package gr.uom.employeepulseservice.repository;
 import gr.uom.employeepulseservice.model.Skill;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -27,5 +28,13 @@ public interface SkillRepository extends JpaRepository<Skill, Integer> {
     List<Skill> findSkillsByDepartmentId(Integer departmentId);
 
     Skill findByEscoId(String escoId);
+
+    @Query("""
+        SELECT s
+        FROM Skill s
+        WHERE LOWER(s.name) LIKE LOWER(CONCAT('%', :searchTerm, '%'))
+        ORDER BY s.name
+    """)
+    List<Skill> searchSkills(@Param("searchTerm") String searchTerm);
 
 }

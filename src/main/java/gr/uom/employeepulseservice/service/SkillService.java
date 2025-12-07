@@ -88,5 +88,28 @@ public class SkillService {
         );
     }
 
+    @Transactional(readOnly = true)
+    public List<SkillDto> searchSkills(String searchTerm) {
+        if (searchTerm == null || searchTerm.trim().isEmpty()) {
+            return List.of();
+        }
+        
+        String trimmedTerm = searchTerm.trim();
+        List<Skill> results = skillRepository.searchSkills(trimmedTerm);
+        
+        // Also check if search term is a numeric ID
+        try {
+            Integer id = Integer.parseInt(trimmedTerm);
+            skillRepository.findById(id).ifPresent(skill -> {
+                if (!results.contains(skill)) {
+                    results.addFirst(skill);
+                }
+            });
+        } catch (NumberFormatException e) {
+            // Not a number, ignore
+        }
+        
+        return skillMapper.toDtos(results);
+    }
 
 }

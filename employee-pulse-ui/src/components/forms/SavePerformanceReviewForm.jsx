@@ -3,10 +3,10 @@ import {
   CREATE_PERFORMANCE_REVIEW_URL, DEFAULT_ORGANIZATION_ID,
   GET_DEPARTMENT_URL, GET_DEPARTMENTS_BY_ORGANIZATION_URL,
   GET_EMPLOYEES_BY_ORGANIZATION_URL, GET_SKILLS_BY_ORGANIZATION_URL,
-  ADD_SKILL_ENTRY_TO_REVIEW_URL
+  SEARCH_SKILLS_URL, ADD_SKILL_ENTRY_TO_REVIEW_URL
 } from "../../lib/api/apiUrls.js";
 import {axiosGet, axiosPost} from "../../lib/api/client.js";
-import {useEffect, useState, useMemo} from "react";
+import {useEffect, useState, useMemo, useRef} from "react";
 import useCatch from "../../lib/api/useCatch.js";
 import {useNavigate} from "react-router-dom";
 import {handleChange} from "../../lib/formUtils.js";
@@ -23,11 +23,14 @@ export default function SavePerformanceReviewForm() {
   const [loadingDepartment, setLoadingDepartment] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
-  const [skills, setSkills] = useState([]);
+  const [organizationSkills, setOrganizationSkills] = useState([]);
+  const [searchedSkills, setSearchedSkills] = useState([]);
+  const [searchingSkills, setSearchingSkills] = useState(false);
   const [skillSearchTerm, setSkillSearchTerm] = useState('');
   const [selectedSkillId, setSelectedSkillId] = useState('');
   const [skillRating, setSkillRating] = useState('');
   const [skillEntries, setSkillEntries] = useState([]);
+  const searchTimeoutRef = useRef(null);
 
   const [formData, setFormData] = useState({
     departmentId: '',
@@ -51,22 +54,53 @@ export default function SavePerformanceReviewForm() {
         .then(([departmentsResponse, employeesResponse, skillsResponse]) => {
           setDepartments(departmentsResponse.data);
           setAllEmployees(employeesResponse.data);
-          setSkills(skillsResponse.data);
+          setOrganizationSkills(skillsResponse.data);
         })
         .finally(() => setLoading(false))
     );
 
   }, [cWrapper]);
 
-  const filteredSkills = useMemo(() => {
-    if (!skillSearchTerm) return skills;
-    const searchLower = skillSearchTerm.toLowerCase();
-    return skills.filter(skill =>
-      skill.name.toLowerCase().includes(searchLower) ||
-      skill.id.toString().includes(searchLower) ||
-      (skill.description && skill.description.toLowerCase().includes(searchLower))
-    );
-  }, [skills, skillSearchTerm]);
+  // Search skills when user types (with debouncing)
+  useEffect(() => {
+    // Clear previous timeout
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+    }
+
+    // If search term is empty, clear searched skills and show organization skills
+    if (!skillSearchTerm.trim()) {
+      setSearchedSkills([]);
+      return;
+    }
+
+    // Debounce the search - wait 300ms after user stops typing
+    setSearchingSkills(true);
+    searchTimeoutRef.current = setTimeout(() => {
+      cWrapper(() =>
+        axiosGet(SEARCH_SKILLS_URL(skillSearchTerm.trim()))
+          .then((response) => {
+            setSearchedSkills(response.data || []);
+          })
+          .finally(() => setSearchingSkills(false))
+      );
+    }, 300);
+
+    // Cleanup timeout on unmount or when search term changes
+    return () => {
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current);
+      }
+    };
+  }, [skillSearchTerm, cWrapper]);
+
+  // Determine which skills to show: searched skills if searching, otherwise organization skills
+  const skillsToShow = useMemo(() => {
+    if (skillSearchTerm.trim()) {
+      return searchedSkills;
+    }
+    return organizationSkills;
+  }, [skillSearchTerm, searchedSkills, organizationSkills]);
 
   const handleDepartmentChange = (e) => {
     const departmentId = e.target.value;
@@ -113,7 +147,7 @@ export default function SavePerformanceReviewForm() {
       return;
     }
 
-    const skill = skills.find(s => s.id === parseInt(selectedSkillId));
+    const skill = skillsToShow.find(s => s.id === parseInt(selectedSkillId));
     if (!skill) return;
 
     // Check if skill already added
@@ -287,6 +321,8 @@ export default function SavePerformanceReviewForm() {
 
     </Row>
 
+    <hr className="my-3"/>
+
     <FormGroup>
       <Label for="rawText">Performance Review Text</Label>
       <Input
@@ -307,13 +343,25 @@ export default function SavePerformanceReviewForm() {
       <Row className="mb-3">
         <Col md={6}>
           <Label for="skillSearch">Search Skill (by name or ID)</Label>
-          <Input
-            type="text"
-            id="skillSearch"
-            value={skillSearchTerm}
-            onChange={(e) => setSkillSearchTerm(e.target.value)}
-            placeholder="Type to search skills..."
-          />
+          <div className="position-relative">
+            <Input
+              type="text"
+              id="skillSearch"
+              value={skillSearchTerm}
+              onChange={(e) => setSkillSearchTerm(e.target.value)}
+              placeholder="Type to search skills..."
+            />
+            {searchingSkills && (
+              <div className="position-absolute top-50 end-0 translate-middle-y pe-3">
+                <Spinner size="sm" color="primary" />
+              </div>
+            )}
+          </div>
+          {skillSearchTerm && !searchingSkills && searchedSkills.length === 0 && (
+            <small className="form-text text-muted">
+              No skills found matching "{skillSearchTerm}"
+            </small>
+          )}
         </Col>
         <Col md={4}>
           <Label for="selectedSkill">Select Skill *</Label>
@@ -322,24 +370,21 @@ export default function SavePerformanceReviewForm() {
             id="selectedSkill"
             value={selectedSkillId}
             onChange={(e) => setSelectedSkillId(e.target.value)}
-            disabled={filteredSkills.length === 0}
+            disabled={searchingSkills || skillsToShow.length === 0}
           >
             <option value="">Choose a skill...</option>
-            {filteredSkills.length === 0 && skillSearchTerm ? (
-              <option value="" disabled>No skills found matching "{skillSearchTerm}"</option>
+            {searchingSkills ? (
+              <option value="" disabled>Searching...</option>
+            ) : skillsToShow.length === 0 && skillSearchTerm ? (
+              <option value="" disabled>No skills found</option>
             ) : (
-              filteredSkills.map((skill) => (
+              skillsToShow.map((skill) => (
                 <option key={skill.id} value={skill.id}>
                   {skill.name} (ID: {skill.id})
                 </option>
               ))
             )}
           </Input>
-          {skillSearchTerm && filteredSkills.length === 0 && (
-            <small className="form-text text-muted">
-              No skills found. Try a different search term.
-            </small>
-          )}
         </Col>
         <Col md={2}>
           <Label for="skillRating">Rating *</Label>
@@ -404,8 +449,7 @@ export default function SavePerformanceReviewForm() {
       )}
     </FormGroup>
 
-    <hr className="my-4"/>
-
+    <hr className="my-3"/>
 
     <FormGroup>
       <Label for="comments">Comments</Label>
