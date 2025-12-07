@@ -1,4 +1,4 @@
-function Reports() {
+function ReportsPage() {
   return (
     <div>
       <h2>Reports</h2>
@@ -7,5 +7,5 @@ function Reports() {
   )
 }
 
-export default Reports
+export default ReportsPage
 

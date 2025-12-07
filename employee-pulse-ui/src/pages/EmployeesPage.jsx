@@ -1,4 +1,4 @@
-function Employees() {
+function EmployeesPage() {
   return (
     <div>
       <h2>Employees</h2>
@@ -7,5 +7,5 @@ function Employees() {
   )
 }
 
-export default Employees
+export default EmployeesPage
 

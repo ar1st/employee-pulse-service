@@ -2,10 +2,10 @@ import { Routes, Route, Navigate } from 'react-router-dom'
 import { Container } from 'reactstrap'
 import './styles/App.css'
 import Navbar from './components/Navbar'
-import Departments from './components/Departments'
-import Employees from './components/Employees'
-import PerformanceReviews from './components/PerformanceReviews'
-import Reports from './components/Reports'
+import DepartmentsPage from './pages/DepartmentsPage.jsx'
+import EmployeesPage from './pages/EmployeesPage.jsx'
+import PerformanceReviewsPage from './pages/PerformanceReviewsPage.jsx'
+import ReportsPage from './pages/ReportsPage.jsx'
 
 function App() {
   return (
@@ -15,10 +15,10 @@ function App() {
         <div className="content-area">
           <Routes>
             <Route path="/" element={<Navigate to="/departments" replace />} />
-            <Route path="/departments" element={<Departments />} />
-            <Route path="/employees" element={<Employees />} />
-            <Route path="/performance-reviews" element={<PerformanceReviews />} />
-            <Route path="/reports" element={<Reports />} />
+            <Route path="/departments" element={<DepartmentsPage />} />
+            <Route path="/employees" element={<EmployeesPage />} />
+            <Route path="/performance-reviews" element={<PerformanceReviewsPage />} />
+            <Route path="/reports" element={<ReportsPage />} />
           </Routes>
         </div>
       </div>

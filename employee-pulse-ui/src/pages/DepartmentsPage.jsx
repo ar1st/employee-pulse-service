@@ -1,4 +1,4 @@
-function Departments() {
+function DepartmentsPage() {
   return (
     <div>
       <h2>Departments</h2>
@@ -7,5 +7,5 @@ function Departments() {
   )
 }
 
-export default Departments
+export default DepartmentsPage
 
