@@ -8,6 +8,7 @@ import {axiosGet, axiosPost} from "../../lib/api/client.js";
 import {useEffect, useState} from "react";
 import useCatch from "../../lib/api/useCatch.js";
 import {useNavigate} from "react-router-dom";
+import {handleChange} from "../../lib/formUtils.js";
 
 export default function SavePerformanceReviewForm() {
   const navigate = useNavigate();
@@ -48,13 +49,6 @@ export default function SavePerformanceReviewForm() {
 
   }, [cWrapper]);
 
-  const handleChange = (e) => {
-    const {name, value} = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
 
   const handleDepartmentChange = (e) => {
     const departmentId = e.target.value;
@@ -215,7 +209,7 @@ export default function SavePerformanceReviewForm() {
               name="employeeId"
               id="employeeId"
               value={formData.employeeId}
-              onChange={handleChange}
+              onChange={(e) => handleChange(e, setFormData)}
               required
               disabled={!formData.departmentId}
             >
@@ -245,7 +239,7 @@ export default function SavePerformanceReviewForm() {
         id="rawText"
         rows="6"
         value={formData.rawText}
-        onChange={handleChange}
+        onChange={(e) => handleChange(e, setFormData)}
         placeholder="Enter the performance review text. This will be analyzed to extract skills and ratings."
         required
       />
@@ -259,7 +253,7 @@ export default function SavePerformanceReviewForm() {
         id="comments"
         rows="4"
         value={formData.comments}
-        onChange={handleChange}
+        onChange={(e) => handleChange(e, setFormData)}
         placeholder="Enter any additional comments"
       />
     </FormGroup>
@@ -272,9 +266,9 @@ export default function SavePerformanceReviewForm() {
         id="overallRating"
         min="0"
         max="10"
-        step="0.1"
+        step="0.5"
         value={formData.overallRating}
-        onChange={handleChange}
+        onChange={(e) => handleChange(e, setFormData)}
         placeholder="Enter overall rating (0-10)"
         required
       />
