@@ -134,7 +134,7 @@ export default function SavePerformanceReviewForm() {
 
   return <Form onSubmit={handleSubmit} className="mt-4">
     <Row>
-      <Col md={12}>
+      <Col md={12} style={{paddingLeft: 0}}>
         <FormGroup>
           <Label for="departmentId">Department *</Label>
           <Input
@@ -157,7 +157,7 @@ export default function SavePerformanceReviewForm() {
     </Row>
 
     <Row>
-      <Col md={6}>
+      <Col md={6} style={{paddingLeft: 0}}>
         <FormGroup>
           <Label for="reporterId">Reporter *</Label>
           {departmentManager ? (
