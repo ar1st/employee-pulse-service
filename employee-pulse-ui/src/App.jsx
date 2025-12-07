@@ -5,6 +5,7 @@ import Navbar from './components/Navbar'
 import DepartmentsPage from './components/pages/DepartmentsPage.jsx'
 import EmployeesPage from './components/pages/EmployeesPage.jsx'
 import PerformanceReviewsPage from './components/pages/PerformanceReviewsPage.jsx'
+import SavePerformanceReviewPage from './components/pages/SavePerformanceReviewPage.jsx'
 import ReportsPage from './components/pages/ReportsPage.jsx'
 
 function App() {
@@ -18,6 +19,7 @@ function App() {
             <Route path="/departments" element={<DepartmentsPage />} />
             <Route path="/employees" element={<EmployeesPage />} />
             <Route path="/performance-reviews" element={<PerformanceReviewsPage />} />
+            <Route path="/performance-reviews/save" element={<SavePerformanceReviewPage />} />
             <Route path="/reports" element={<ReportsPage />} />
           </Routes>
         </div>
