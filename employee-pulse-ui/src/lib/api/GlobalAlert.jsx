@@ -1,42 +1,67 @@
-import { createContext, useContext, useEffect, useState } from 'react'
-import {Alert} from "reactstrap";
+import { createContext, useContext, useEffect, useState, useCallback, useMemo } from 'react'
+import { Alert } from "reactstrap";
 
 const AlertContext = createContext()
 
 export const useAlert = () => {
-  const setAlert = useContext(AlertContext)
-
-  return { setAlert }
+  const context = useContext(AlertContext)
+  if (!context) {
+    throw new Error('useAlert must be used within an AlertProvider')
+  }
+  return context
 }
 
 export const AlertProvider = ({ children }) => {
-  const [alert, setAlert] = useState({})
+  const [alert, setAlert] = useState(null)
 
+  const showAlert = useCallback((alertData) => {
+    setAlert(alertData)
+  }, [])
 
   useEffect(() => {
-    let timer
-    if (alert.message) {
-      timer = setTimeout(() => {
-        setAlert({ message: '' })
-      }, 5000)
+    if (!alert?.message) {
+      return
     }
 
-    return () => clearTimeout(timer)
-  }, [alert.message])
+    const timer = setTimeout(() => {
+      setAlert(null)
+    }, 5000)
+
+    return () => {
+      clearTimeout(timer)
+    }
+  }, [alert?.message])
+
+  const handleDismiss = useCallback(() => {
+    setAlert(null)
+  }, [])
+
+  const contextValue = useMemo(() => ({ setAlert: showAlert }), [showAlert])
 
   return (
-    <AlertContext.Provider value={setAlert}>
-      {alert.message &&
-        <div className="fixed-bottom d-flex justify-content-center p-2 pe-none">
-          <Alert className="fixed-alert pe-auto" variant={alert.status} onClose={() => setAlert({ message: '' })}
-                 dismissible>
-            {alert.status === 'danger' && <Alert.Heading>Something went wrong</Alert.Heading>}
-            <p>
-              This is the error
-            </p>
+    <AlertContext.Provider value={contextValue}>
+      {alert?.message && (
+        <div 
+          className="position-fixed top-0 start-50 translate-middle-x mt-3"
+          style={{ zIndex: 9999, maxWidth: '600px', width: '90%' }}
+        >
+          <Alert 
+            color={alert.status || 'danger'} 
+            toggle={handleDismiss}
+            fade
+            className="shadow-lg"
+          >
+            <strong>
+              {alert.status === 'danger' ? 'Something went wrong!' :
+               alert.status === 'success' ? 'Success' : 
+               alert.status === 'warning' ? 'Warning' : 'Info'}
+            </strong>
+            <div className="mt-2">
+              {alert.message}
+            </div>
           </Alert>
         </div>
-      }
+      )}
       {children}
     </AlertContext.Provider>
   )

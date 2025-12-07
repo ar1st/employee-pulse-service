@@ -17,6 +17,7 @@ public interface DepartmentMapper {
     Department toEntity(CreateDepartmentDto dto);
 
     @Mapping(target = "organizationId", source = "organization.id")
+    @Mapping(target = "managerId", source = "manager.id")
     DepartmentDto toDto(Department organization);
 
     List<DepartmentDto> toDtos(List<Department> organizations);
