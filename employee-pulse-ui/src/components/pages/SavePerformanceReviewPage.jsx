@@ -1,14 +1,18 @@
 import '../../styles/PerformanceReviews.css';
 import SavePerformanceReviewForm from "../forms/SavePerformanceReviewForm.jsx";
+import {useSearchParams} from "react-router-dom";
 
 export default function SavePerformanceReviewPage() {
+  const [searchParams] = useSearchParams();
+  const reviewId = searchParams.get('id');
+  const isEditMode = !!reviewId;
 
   return (
     <div className="performance-reviews-wrapper">
-      <h2>Create Performance Review</h2>
-      <p>Fill in the details to create a new performance review.</p>
+      <h2>{isEditMode ? 'Edit Performance Review' : 'Create Performance Review'}</h2>
+      <p>{isEditMode ? 'Update the details of the performance review.' : 'Fill in the details to create a new performance review.'}</p>
 
-      <SavePerformanceReviewForm />
+      <SavePerformanceReviewForm reviewId={reviewId ? parseInt(reviewId) : null} />
     </div>
   );
 }

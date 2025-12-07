@@ -5,8 +5,10 @@ import {axiosGet, axiosDelete} from "../../lib/api/client.js";
 import useCatch from "../../lib/api/useCatch.js";
 import {formatDateTime} from "../../lib/dateUtils.js";
 import ConfirmModal from "../ConfirmModal.jsx";
+import {useNavigate} from "react-router-dom";
 
 export default function PerformanceReviewsTable() {
+  const navigate = useNavigate()
   const [performanceReviews, setPerformanceReviews] = useState([])
   const [loading, setLoading] = useState(false)
   const [deleteModalOpen, setDeleteModalOpen] = useState(false)
@@ -36,8 +38,7 @@ export default function PerformanceReviewsTable() {
   }, [cWrapper])
 
   const handleEdit = (reviewId) => {
-    // TODO: Implement edit functionality
-    console.log('Edit performance review:', reviewId)
+    navigate(`/performance-reviews/save?id=${reviewId}`)
   }
 
   const handleDeleteClick = (review) => {

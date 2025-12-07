@@ -103,6 +103,16 @@ public class PerformanceReviewController {
         );
     }
 
+    @PutMapping("/{id}")
+    public ResponseEntity<PerformanceReviewDto> updatePerformanceReview(
+            @PathVariable Integer id,
+            @RequestBody UpdatePerformanceReviewDto dto
+    ) {
+        return ResponseEntity.ok(
+                performanceReviewService.updatePerformanceReview(id, dto)
+        );
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletePerformanceReview(@PathVariable Integer id) {
         performanceReviewService.deletePerformanceReview(id);

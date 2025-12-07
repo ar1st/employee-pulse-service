@@ -3,16 +3,20 @@ import {
   CREATE_PERFORMANCE_REVIEW_URL, DEFAULT_ORGANIZATION_ID,
   GET_DEPARTMENT_URL, GET_DEPARTMENTS_BY_ORGANIZATION_URL,
   GET_EMPLOYEES_BY_ORGANIZATION_URL,
-  ADD_SKILL_ENTRY_TO_REVIEW_URL
+  GET_PERFORMANCE_REVIEW_URL,
+  UPDATE_PERFORMANCE_REVIEW_URL,
+  ADD_SKILL_ENTRY_TO_REVIEW_URL,
+  DELETE_SKILL_ENTRY_FROM_REVIEW_URL
 } from "../../lib/api/apiUrls.js";
-import {axiosGet, axiosPost} from "../../lib/api/client.js";
+import {axiosGet, axiosPost, axiosPut, axiosDelete} from "../../lib/api/client.js";
 import {useEffect, useState} from "react";
 import useCatch from "../../lib/api/useCatch.js";
 import {useNavigate} from "react-router-dom";
 import {handleChange} from "../../lib/formUtils.js";
 import SkillEntrySection from "./SkillEntrySection.jsx";
 
-export default function SavePerformanceReviewForm() {
+export default function SavePerformanceReviewForm({ reviewId = null }) {
+  const isEditMode = !!reviewId;
   const navigate = useNavigate();
   const {cWrapper} = useCatch();
 
@@ -22,9 +26,11 @@ export default function SavePerformanceReviewForm() {
   const [departmentManager, setDepartmentManager] = useState(null);
   const [loading, setLoading] = useState(false);
   const [loadingDepartment, setLoadingDepartment] = useState(false);
+  const [loadingReview, setLoadingReview] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
   const [skillEntries, setSkillEntries] = useState([]);
+  const [existingSkillEntryIds, setExistingSkillEntryIds] = useState([]);
 
   const [formData, setFormData] = useState({
     departmentId: '',
@@ -53,7 +59,93 @@ export default function SavePerformanceReviewForm() {
 
   }, [cWrapper]);
 
+  useEffect(() => {
+    if (isEditMode && reviewId && departments.length > 0 && allEmployees.length > 0) {
+      setLoadingReview(true);
+      cWrapper(() =>
+        axiosGet(GET_PERFORMANCE_REVIEW_URL(reviewId))
+          .then((response) => {
+            const review = response.data;
+            const department = departments.find(d => d.name === review.departmentName);
+            const departmentId = department ? department.id.toString() : '';
+
+            setFormData({
+              departmentId: departmentId,
+              employeeId: '',
+              reporterId: '',
+              rawText: review.rawText || '',
+              comments: review.comments || '',
+              overallRating: review.overallRating?.toString() || ''
+            });
+
+            // Load department and employee info
+            if (department) {
+              loadDepartmentData(department.id, review);
+            }
+
+            // Load skill entries
+            if (review.skillEntryDtos && review.skillEntryDtos.length > 0) {
+              const entries = review.skillEntryDtos.map(entry => ({
+                skillId: entry.skillId,
+                skillName: entry.skillName,
+                rating: entry.rating,
+                tempId: entry.id || Date.now() + Math.random(),
+                entryId: entry.id // Store the actual entry ID for deletion
+              }));
+              setSkillEntries(entries);
+              setExistingSkillEntryIds(entries.filter(e => e.entryId).map(e => e.entryId));
+            }
+          })
+          .finally(() => setLoadingReview(false))
+      );
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isEditMode, reviewId, departments, allEmployees, cWrapper]);
+
+  const loadDepartmentData = (departmentId, review = null) => {
+    setLoadingDepartment(true);
+    cWrapper(() =>
+      axiosGet(GET_DEPARTMENT_URL(departmentId))
+        .then((departmentResponse) => {
+          const department = departmentResponse.data;
+          setDepartmentEmployees(allEmployees.filter(it => (it.departmentId === department.id) && it.id !== department.managerId));
+
+          let manager = null;
+          if (department.managerId) {
+            manager = allEmployees.find(emp => emp.id === department.managerId);
+          }
+
+          if (manager) {
+            setDepartmentManager(manager);
+            setFormData(prev => ({
+              ...prev,
+              departmentId: department.id.toString(),
+              reporterId: manager.id.toString()
+            }));
+          }
+
+          // If editing, set the employee
+          if (review && review.employeeName) {
+            const employee = allEmployees.find(emp => 
+              `${emp.firstName} ${emp.lastName}` === review.employeeName
+            );
+            if (employee) {
+              setFormData(prev => ({
+                ...prev,
+                employeeId: employee.id.toString()
+              }));
+            }
+          }
+        })
+        .finally(() => setLoadingDepartment(false))
+    );
+  };
+
   const handleDepartmentChange = (e) => {
+    if (isEditMode) {
+      return; // Don't allow changing department in edit mode
+    }
+
     const departmentId = e.target.value;
     setFormData(prev => ({
       ...prev,
@@ -68,30 +160,7 @@ export default function SavePerformanceReviewForm() {
       return;
     }
 
-    setLoadingDepartment(true);
-
-    cWrapper(() =>
-      axiosGet(GET_DEPARTMENT_URL(departmentId))
-        .then((departmentResponse) => {
-          const department = departmentResponse.data;
-          console.log('department ', department)
-          setDepartmentEmployees(allEmployees.filter(it => (it.departmentId === department.id) && it.id !== department.managerId));
-
-          let manager = null;
-          if (department.managerId) {
-            manager = allEmployees.find(emp => emp.id === department.managerId);
-          }
-
-          if (manager) {
-            setDepartmentManager(manager);
-            setFormData(prev => ({
-              ...prev,
-              reporterId: manager.id.toString()
-            }));
-          }
-        })
-        .finally(() => setLoadingDepartment(false))
-    );
+    loadDepartmentData(departmentId);
   };
 
 
@@ -99,42 +168,73 @@ export default function SavePerformanceReviewForm() {
     e.preventDefault();
     setSubmitting(true);
 
-    const payload = {
-      employeeId: parseInt(formData.employeeId),
-      reporterId: parseInt(formData.reporterId),
-      rawText: formData.rawText,
-      comments: formData.comments,
-      overallRating: parseFloat(formData.overallRating)
-    };
+    if (isEditMode) {
+      // Update existing performance review
+      const payload = {
+        rawText: formData.rawText,
+        comments: formData.comments,
+        overallRating: parseFloat(formData.overallRating)
+      };
 
-    cWrapper(async () => {
-      axiosPost(CREATE_PERFORMANCE_REVIEW_URL(), payload)
-        .then((createPerformanceReviewResponse) => {
-          const performanceReviewId = createPerformanceReviewResponse.data.performanceReviewId
+      cWrapper(async () => {
+        // Update the performance review
+        await axiosPut(UPDATE_PERFORMANCE_REVIEW_URL(reviewId), payload);
 
-          skillEntries.map(entry =>
-            axiosPost(ADD_SKILL_ENTRY_TO_REVIEW_URL(performanceReviewId), {
-              skillId: entry.skillId,
-              rating: entry.rating
-            })
-          );
+        // Delete all existing skill entries
+        const deletePromises = existingSkillEntryIds.map(entryId =>
+          axiosDelete(DELETE_SKILL_ENTRY_FROM_REVIEW_URL(reviewId, entryId))
+        );
+        await Promise.all(deletePromises);
 
-          navigate('/performance-reviews');
-        })
+        // Add all new skill entries
+        const addPromises = skillEntries.map(entry =>
+          axiosPost(ADD_SKILL_ENTRY_TO_REVIEW_URL(reviewId), {
+            skillId: entry.skillId,
+            rating: entry.rating
+          })
+        );
+        await Promise.all(addPromises);
+
+        navigate('/performance-reviews');
+      })
         .finally(() => setSubmitting(false));
+    } else {
+      // Create new performance review
+      const payload = {
+        employeeId: parseInt(formData.employeeId),
+        reporterId: parseInt(formData.reporterId),
+        rawText: formData.rawText,
+        comments: formData.comments,
+        overallRating: parseFloat(formData.overallRating)
+      };
 
-    });
+      cWrapper(async () => {
+        const createPerformanceReviewResponse = await axiosPost(CREATE_PERFORMANCE_REVIEW_URL(), payload);
+        const performanceReviewId = createPerformanceReviewResponse.data.performanceReviewId;
+
+        const addPromises = skillEntries.map(entry =>
+          axiosPost(ADD_SKILL_ENTRY_TO_REVIEW_URL(performanceReviewId), {
+            skillId: entry.skillId,
+            rating: entry.rating
+          })
+        );
+        await Promise.all(addPromises);
+
+        navigate('/performance-reviews');
+      })
+        .finally(() => setSubmitting(false));
+    }
   };
 
   const handleCancel = () => {
     navigate('/performance-reviews');
   };
 
-  if (loading) {
+  if (loading || loadingReview) {
     return (
       <div className="text-center mt-3">
         <Spinner color="primary"/>
-        <p>Loading employees...</p>
+        <p>{loadingReview ? 'Loading performance review...' : 'Loading employees...'}</p>
       </div>
     );
   }
@@ -151,6 +251,9 @@ export default function SavePerformanceReviewForm() {
             value={formData.departmentId}
             onChange={handleDepartmentChange}
             required
+            disabled={isEditMode}
+            readOnly={isEditMode}
+            className={isEditMode ? "bg-light" : ""}
           >
             <option value="">Select a department</option>
             {departments.map((department) => (
@@ -224,7 +327,9 @@ export default function SavePerformanceReviewForm() {
               value={formData.employeeId}
               onChange={(e) => handleChange(e, setFormData)}
               required
-              disabled={!formData.departmentId}
+              disabled={!formData.departmentId || isEditMode}
+              readOnly={isEditMode}
+              className={isEditMode ? "bg-light" : ""}
             >
               <option value="">Select an employee</option>
               {departmentEmployees.map((employee) => (
@@ -296,10 +401,10 @@ export default function SavePerformanceReviewForm() {
         {submitting ? (
           <>
             <Spinner size="sm" className="me-2"/>
-            Creating...
+            {isEditMode ? 'Updating...' : 'Creating...'}
           </>
         ) : (
-          'Create Performance Review'
+          isEditMode ? 'Update Performance Review' : 'Create Performance Review'
         )}
       </Button>
       <Button

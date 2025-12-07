@@ -60,6 +60,23 @@ public class PerformanceReviewService {
         return new CreatePerformanceReviewResponseDto(createdPerformanceReview.getId());
     }
 
+    @Transactional
+    public PerformanceReviewDto updatePerformanceReview(Integer reviewId, UpdatePerformanceReviewDto dto) {
+        log.info("Updating performance review {}", reviewId);
+
+        PerformanceReview performanceReview = performanceReviewRepository.findById(reviewId)
+                .orElseThrow(() -> new RuntimeException("Performance review not found"));
+
+        performanceReview.setRawText(dto.rawText());
+        performanceReview.setComments(dto.comments());
+        performanceReview.setOverallRating(dto.overallRating());
+
+        PerformanceReview updatedPerformanceReview = performanceReviewRepository.save(performanceReview);
+
+        log.info("Updated performance review {}", reviewId);
+        return performanceReviewMapper.toDto(updatedPerformanceReview);
+    }
+
     private void ensureReporterIsManagerOfEmployee(Integer reporterId, Integer employeeId) {
         boolean isManager = departmentRepository.isManagerOfEmployee(reporterId, employeeId);
         if (!isManager) {
