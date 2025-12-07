@@ -245,6 +245,11 @@ public class PerformanceReviewService {
         );
     }
 
+    @Transactional
+    public void deletePerformanceReview(Integer reviewId) {
+        performanceReviewRepository.deleteById(reviewId);
+    }
+
     private String formatGeneratedSkills(List<GeneratedSkill> skills) {
         if (skills == null || skills.isEmpty()) {
             return "[]";

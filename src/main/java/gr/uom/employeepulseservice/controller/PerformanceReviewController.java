@@ -103,4 +103,10 @@ public class PerformanceReviewController {
         );
     }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deletePerformanceReview(@PathVariable Integer id) {
+        performanceReviewService.deletePerformanceReview(id);
+        return ResponseEntity.ok().build();
+    }
+
 }

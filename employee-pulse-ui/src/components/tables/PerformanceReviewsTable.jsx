@@ -1,19 +1,24 @@
 import {useEffect, useState} from "react";
-import {DEFAULT_ORGANIZATION_ID, GET_PERFORMANCE_REVIEWS_URL} from "../../lib/api/apiUrls.js";
-import {Alert, Spinner, Table} from "reactstrap";
-import {axiosGet} from "../../lib/api/client.js";
+import {DEFAULT_ORGANIZATION_ID, GET_PERFORMANCE_REVIEWS_URL, DELETE_PERFORMANCE_REVIEW_URL} from "../../lib/api/apiUrls.js";
+import {Alert, Spinner, Table, Modal, ModalHeader, ModalBody, ModalFooter, Button} from "reactstrap";
+import {axiosGet, axiosDelete} from "../../lib/api/client.js";
 import useCatch from "../../lib/api/useCatch.js";
 import {formatDateTime} from "../../lib/dateUtils.js";
 
 export default function PerformanceReviewsTable() {
   const [performanceReviews, setPerformanceReviews] = useState([])
   const [loading, setLoading] = useState(false)
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false)
+  const [reviewToDelete, setReviewToDelete] = useState(null)
+  const [deleting, setDeleting] = useState(false)
   const {cWrapper} = useCatch()
 
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setLoading(true)
+  const formatRating = (rating) => {
+    return rating != null ? rating.toFixed(1) : 'N/A'
+  }
 
+  const loadPerformanceReviews = () => {
+    setLoading(true)
     cWrapper(() =>
       axiosGet(
         GET_PERFORMANCE_REVIEWS_URL(DEFAULT_ORGANIZATION_ID),
@@ -22,16 +27,41 @@ export default function PerformanceReviewsTable() {
       })
         .finally(() => setLoading(false)),
     )
-
-  }, [cWrapper])
-
-  const formatRating = (rating) => {
-    return rating != null ? rating.toFixed(1) : 'N/A'
   }
+
+  useEffect(() => {
+    loadPerformanceReviews()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cWrapper])
 
   const handleEdit = (reviewId) => {
     // TODO: Implement edit functionality
     console.log('Edit performance review:', reviewId)
+  }
+
+  const handleDeleteClick = (review) => {
+    setReviewToDelete(review)
+    setDeleteModalOpen(true)
+  }
+
+  const handleDeleteConfirm = () => {
+    if (!reviewToDelete) return
+
+    setDeleting(true)
+    cWrapper(() =>
+      axiosDelete(DELETE_PERFORMANCE_REVIEW_URL(reviewToDelete.id))
+        .then(() => {
+          setDeleteModalOpen(false)
+          setReviewToDelete(null)
+          loadPerformanceReviews()
+        })
+        .finally(() => setDeleting(false))
+    )
+  }
+
+  const handleDeleteCancel = () => {
+    setDeleteModalOpen(false)
+    setReviewToDelete(null)
   }
 
   return <>
@@ -86,19 +116,69 @@ export default function PerformanceReviewsTable() {
                 )}
               </td>
               <td>
-                <button
-                  className="edit-button"
-                  onClick={() => handleEdit(review.id)}
-                  title="Edit performance review"
-                  aria-label="Edit performance review"
-                >
-                  <i className="bi bi-pencil"></i>
-                </button>
+                <div className="d-flex gap-2">
+                  <button
+                    className="edit-button"
+                    onClick={() => handleEdit(review.id)}
+                    title="Edit performance review"
+                    aria-label="Edit performance review"
+                  >
+                    <i className="bi bi-pencil"></i>
+                  </button>
+                  <button
+                    className="edit-button"
+                    onClick={() => handleDeleteClick(review)}
+                    title="Delete performance review"
+                    aria-label="Delete performance review"
+                    style={{ color: '#dc3545' }}
+                  >
+                    <i className="bi bi-trash"></i>
+                  </button>
+                </div>
               </td>
             </tr>
           ))}
           </tbody>
         </Table>
       </div>
-    )}</>
+    )}
+
+    <Modal isOpen={deleteModalOpen} toggle={handleDeleteCancel}>
+      <ModalHeader toggle={handleDeleteCancel}>Confirm Delete</ModalHeader>
+      <ModalBody>
+        {reviewToDelete && (
+          <>
+            <p>Are you sure you want to delete this performance review?</p>
+            <div className="mt-3">
+              <strong>Review Details:</strong>
+              <ul className="mt-2">
+                <li>ID: {reviewToDelete.id}</li>
+                <li>Employee: {reviewToDelete.employeeName || 'N/A'}</li>
+                <li>Department: {reviewToDelete.departmentName || 'N/A'}</li>
+                <li>Date: {formatDateTime(reviewToDelete.reviewDateTime)}</li>
+              </ul>
+            </div>
+            <p className="text-danger mt-3">
+              <strong>This action cannot be undone.</strong>
+            </p>
+          </>
+        )}
+      </ModalBody>
+      <ModalFooter>
+        <Button color="secondary" onClick={handleDeleteCancel} disabled={deleting}>
+          Cancel
+        </Button>
+        <Button color="danger" onClick={handleDeleteConfirm} disabled={deleting}>
+          {deleting ? (
+            <>
+              <Spinner size="sm" className="me-2" />
+              Deleting...
+            </>
+          ) : (
+            'Delete'
+          )}
+        </Button>
+      </ModalFooter>
+    </Modal>
+  </>
 }

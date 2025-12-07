@@ -4,6 +4,7 @@ export const DEFAULT_ORGANIZATION_ID = 1
 
 export const GET_PERFORMANCE_REVIEWS_URL = (organizationId) => `${API_BASE_URL}/performance-reviews/organization/${organizationId}`
 export const CREATE_PERFORMANCE_REVIEW_URL = () => `${API_BASE_URL}/performance-reviews`
+export const DELETE_PERFORMANCE_REVIEW_URL = (reviewId) => `${API_BASE_URL}/performance-reviews/${reviewId}`
 
 export const GET_EMPLOYEES_BY_ORGANIZATION_URL = (organizationId) => `${API_BASE_URL}/organizations/${organizationId}/employees`
 export const GET_DEPARTMENTS_BY_ORGANIZATION_URL = (organizationId) => `${API_BASE_URL}/organizations/${organizationId}/departments`
