@@ -3,13 +3,15 @@ import {DEFAULT_ORGANIZATION_ID, GET_PERFORMANCE_REVIEWS_URL} from "../../lib/ap
 import {Alert, Spinner, Table} from "reactstrap";
 import {axiosGet} from "../../lib/api/client.js";
 import useCatch from "../../lib/api/useCatch.js";
+import {formatDateTime} from "../../lib/dateUtils.js";
 
 export default function PerformanceReviewsTable() {
   const [performanceReviews, setPerformanceReviews] = useState([])
   const [loading, setLoading] = useState(false)
   const {cWrapper} = useCatch()
 
-  const fetchPerformanceReviews = async () => {
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setLoading(true)
 
     cWrapper(() =>
@@ -21,27 +23,7 @@ export default function PerformanceReviewsTable() {
         .finally(() => setLoading(false)),
     )
 
-  }
-
-  useEffect(() => {
-    fetchPerformanceReviews()
-  }, [])
-
-
-  function formatDateTime(dateTime) {
-    // dateTime is "2025,3,22,9,0"
-    const [year, month, day, hour, minute] = dateTime.map(Number);
-
-    const date = new Date(year, month - 1, day, hour, minute);
-
-    return date.toLocaleString('en', {
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-  }
+  }, [cWrapper])
 
   const formatRating = (rating) => {
     return rating != null ? rating.toFixed(1) : 'N/A'
@@ -51,7 +33,6 @@ export default function PerformanceReviewsTable() {
     // TODO: Implement edit functionality
     console.log('Edit performance review:', reviewId)
   }
-
 
   return <>
     {loading && (
