@@ -74,7 +74,8 @@ export default function SavePerformanceReviewForm() {
       axiosGet(GET_DEPARTMENT_URL(departmentId))
         .then((departmentResponse) => {
           const department = departmentResponse.data;
-          setDepartmentEmployees(allEmployees.filter(it => it.departmentId === department.id));
+          console.log('department ', department)
+          setDepartmentEmployees(allEmployees.filter(it => (it.departmentId === department.id) && it.id !== department.managerId));
 
           let manager = null;
           if (department.managerId) {
