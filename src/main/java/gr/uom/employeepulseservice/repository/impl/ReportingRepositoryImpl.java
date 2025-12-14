@@ -66,10 +66,21 @@ public class ReportingRepositoryImpl implements ReportingRepository {
         // Default period type if missing
         periodType = periodType == null ? PeriodType.QUARTER : periodType;
 
-        String baseSql = """
+        String periodStart = periodStartExpression(periodType);
+        String periodValueWhere = periodValuePredicate(periodType, periodValue);
+        String yearWhere = yearPredicate(year);
+
+        // Build SELECT clause - conditionally include department_name
+        StringBuilder selectBuilder = new StringBuilder("""
                 SELECT
                     organization_name,
-                    department_name,
+                """);
+        if (departmentId != null) {
+            selectBuilder.append("department_name,\n");
+        } else {
+            selectBuilder.append("NULL AS department_name,\n");
+        }
+        selectBuilder.append(String.format("""
                     skill_name,
                     %s AS period_start,
                     avg(rating) AS avg_rating,
@@ -79,16 +90,10 @@ public class ReportingRepositoryImpl implements ReportingRepository {
                     COUNT(DISTINCT employee_id)     AS employee_count
                 FROM v_org_department_skill_period
                 WHERE organization_id = :orgId
-                """;
+                """, periodStart));
 
         // Build SQL with conditional filters
-        StringBuilder sqlBuilder = new StringBuilder();
-        String periodStart = periodStartExpression(periodType);
-        String periodValueWhere = periodValuePredicate(periodType, periodValue);
-        String yearWhere = yearPredicate(year);
-
-        String sqlTemplate = baseSql.formatted(periodStart);
-        sqlBuilder.append(sqlTemplate);
+        StringBuilder sqlBuilder = new StringBuilder(selectBuilder);
 
         // Add department filter only when departmentId is provided
         if (departmentId != null) {
@@ -102,10 +107,14 @@ public class ReportingRepositoryImpl implements ReportingRepository {
 
         sqlBuilder.append(" AND ").append(periodValueWhere);
         sqlBuilder.append(" AND ").append(yearWhere);
-        sqlBuilder.append("""
-                                  GROUP BY organization_name, department_name, skill_name, period_start
-                                  ORDER BY skill_name, period_start DESC;
-                                  """);
+        
+        // Build GROUP BY clause - conditionally include department_name
+        sqlBuilder.append(" GROUP BY organization_name");
+        if (departmentId != null) {
+            sqlBuilder.append(", department_name");
+        }
+        sqlBuilder.append(", skill_name, period_start");
+        sqlBuilder.append(" ORDER BY skill_name, period_start DESC;");
 
         String sql = sqlBuilder.toString();
 
