@@ -28,3 +28,30 @@ export const SEARCH_SKILLS_URL = (searchTerm) => `${API_BASE_URL}/skills/search?
 export const ADD_SKILL_ENTRY_TO_REVIEW_URL = (reviewId) => `${API_BASE_URL}/performance-reviews/${reviewId}/skill-entries`
 export const DELETE_SKILL_ENTRY_FROM_REVIEW_URL = (reviewId, entryId) => `${API_BASE_URL}/performance-reviews/${reviewId}/skill-entries/${entryId}`
 export const GENERATE_SKILL_ENTRIES_URL = () => `${API_BASE_URL}/performance-reviews/generate-skill-entries`
+
+// Reporting endpoints
+export const GET_ORG_DEPT_REPORT_URL = (orgId, deptId, periodType, periodValue, year) => {
+  const params = new URLSearchParams({ periodType });
+  if (periodValue !== null && periodValue !== undefined) params.append('periodValue', periodValue);
+  if (year !== null && year !== undefined) params.append('year', year);
+  return `${API_BASE_URL}/reports/org/${orgId}/dept/${deptId}?${params.toString()}`;
+}
+export const GET_EMPLOYEE_REPORT_URL = (employeeId, periodType, periodValue, year) => {
+  const params = new URLSearchParams({ periodType });
+  if (periodValue !== null && periodValue !== undefined) params.append('periodValue', periodValue);
+  if (year !== null && year !== undefined) params.append('year', year);
+  return `${API_BASE_URL}/reports/employee/${employeeId}?${params.toString()}`;
+}
+export const GET_EMPLOYEE_SKILL_TIMELINE_URL = (employeeId, skillId) => {
+  const params = new URLSearchParams();
+  if (skillId !== null && skillId !== undefined) params.append('skillId', skillId);
+  const queryString = params.toString();
+  return `${API_BASE_URL}/reports/employees/${employeeId}/skills/timeline${queryString ? `?${queryString}` : ''}`;
+}
+export const GET_ORG_DEPT_SKILL_TIMELINE_URL = (organizationId, departmentId, skillId) => {
+  const params = new URLSearchParams();
+  if (departmentId !== null && departmentId !== undefined) params.append('departmentId', departmentId);
+  if (skillId !== null && skillId !== undefined) params.append('skillId', skillId);
+  const queryString = params.toString();
+  return `${API_BASE_URL}/reports/organizations/${organizationId}/skills/timeline${queryString ? `?${queryString}` : ''}`;
+}
