@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Card, CardBody, CardHeader, Form, FormGroup, Label, Input, Button, Row, Col, Spinner, Collapse } from 'reactstrap';
+import { Card, CardBody, CardHeader, Form, FormGroup, Label, Input, Button, Row, Col, Spinner, Collapse, Table } from 'reactstrap';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { DEFAULT_ORGANIZATION_ID, GET_SKILLS_BY_ORGANIZATION_URL, GET_DEPARTMENTS_BY_ORGANIZATION_URL, GET_ORG_DEPT_REPORT_URL } from '../../lib/api/apiUrls.js';
 import { axiosGet } from '../../lib/api/client.js';
@@ -242,6 +242,18 @@ function OrganizationPerformanceReviewsSection() {
                 <Bar dataKey="minRating" fill="#ffc658" name="Min Rating" />
               </BarChart>
             </ResponsiveContainer>
+            
+            {/* Employee Count */}
+            <div className="mt-4">
+              <h6>Employee Count by Quarter</h6>
+              <div className="d-flex flex-wrap gap-3 align-items-center">
+                {chartData.map((data, index) => (
+                  <span key={index} className="p-2 border rounded">
+                    <span className="fw-bold">{data.quarter}:</span> {data.employeeCount || 0}
+                  </span>
+                ))}
+              </div>
+            </div>
           </div>
         )}
 
