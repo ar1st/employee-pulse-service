@@ -1,7 +1,13 @@
-import { Nav, NavItem } from 'reactstrap'
-import { NavLink } from 'react-router-dom'
+import { useState } from 'react';
+import { Nav, NavItem, Dropdown, DropdownToggle, DropdownMenu, DropdownItem } from 'reactstrap'
+import { NavLink, useLocation } from 'react-router-dom'
 
 function Navbar() {
+  const [reportsDropdownOpen, setReportsDropdownOpen] = useState(false);
+  const location = useLocation();
+  
+  const isReportsActive = location.pathname.startsWith('/reports');
+
   return (
     <div className="navbar-top">
       <Nav className="navbar-nav">
@@ -36,14 +42,43 @@ function Navbar() {
           </NavLink>
         </NavItem>
         <NavItem>
-          <NavLink
-            to="/reports"
-            className={({ isActive }) => 
-              `nav-link-custom ${isActive ? 'active' : ''}`
-            }
+          <Dropdown 
+            isOpen={reportsDropdownOpen} 
+            toggle={() => setReportsDropdownOpen(!reportsDropdownOpen)}
+            className="nav-dropdown"
           >
-            Reports
-          </NavLink>
+            <DropdownToggle 
+              className={`nav-link-custom ${isReportsActive ? 'active' : ''}`}
+              tag="div"
+              style={{ cursor: 'pointer' }}
+            >
+              Reports <i className={`bi bi-chevron-down ms-1 dropdown-arrow ${reportsDropdownOpen ? 'open' : ''}`} style={{ fontSize: '0.75rem' }}></i>
+            </DropdownToggle>
+            <DropdownMenu>
+              <DropdownItem>
+                <NavLink
+                  to="/reports/organization"
+                  className={({ isActive }) => 
+                    `dropdown-link ${isActive ? 'active' : ''}`
+                  }
+                  onClick={() => setReportsDropdownOpen(false)}
+                >
+                  Organization
+                </NavLink>
+              </DropdownItem>
+              <DropdownItem>
+                <NavLink
+                  to="/reports/employee"
+                  className={({ isActive }) => 
+                    `dropdown-link ${isActive ? 'active' : ''}`
+                  }
+                  onClick={() => setReportsDropdownOpen(false)}
+                >
+                  Employee
+                </NavLink>
+              </DropdownItem>
+            </DropdownMenu>
+          </Dropdown>
         </NavItem>
       </Nav>
     </div>

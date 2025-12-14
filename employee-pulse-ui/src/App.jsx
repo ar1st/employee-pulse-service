@@ -8,7 +8,8 @@ import EmployeesPage from './components/pages/EmployeesPage.jsx'
 import SaveEmployeePage from './components/pages/SaveEmployeePage.jsx'
 import PerformanceReviewsPage from './components/pages/PerformanceReviewsPage.jsx'
 import SavePerformanceReviewPage from './components/pages/SavePerformanceReviewPage.jsx'
-import ReportsPage from './components/pages/ReportsPage.jsx'
+import OrganizationReportsPage from "./components/pages/OrganizationReportsPage.jsx";
+import EmployeeReportsPage from "./components/pages/EmployeeReportsPage.jsx";
 
 function App() {
   return (
@@ -24,7 +25,8 @@ function App() {
             <Route path="/employees/save" element={<SaveEmployeePage />} />
             <Route path="/performance-reviews" element={<PerformanceReviewsPage />} />
             <Route path="/performance-reviews/save" element={<SavePerformanceReviewPage />} />
-            <Route path="/reports" element={<ReportsPage />} />
+            <Route path="/reports/organization" element={<OrganizationReportsPage />} />
+            <Route path="/reports/employee" element={<EmployeeReportsPage />} />
           </Routes>
         </div>
       </div>
