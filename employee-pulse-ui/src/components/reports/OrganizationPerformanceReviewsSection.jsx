@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Card, CardBody, CardHeader, Form, FormGroup, Label, Input, Button, Row, Col, Spinner } from 'reactstrap';
+import { Card, CardBody, CardHeader, Form, FormGroup, Label, Input, Button, Row, Col, Spinner, Collapse } from 'reactstrap';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { DEFAULT_ORGANIZATION_ID, GET_SKILLS_BY_ORGANIZATION_URL, GET_DEPARTMENTS_BY_ORGANIZATION_URL, GET_ORG_DEPT_REPORT_URL } from '../../lib/api/apiUrls.js';
 import { axiosGet } from '../../lib/api/client.js';
@@ -8,6 +8,7 @@ import { handleChange } from '../../lib/formUtils.js';
 
 function OrganizationPerformanceReviewsSection() {
   const { cWrapper } = useCatch();
+  const [isOpen, setIsOpen] = useState(true);
   const [skills, setSkills] = useState([]);
   const [departments, setDepartments] = useState([]);
   const [loadingSkills, setLoadingSkills] = useState(false);
@@ -114,10 +115,17 @@ function OrganizationPerformanceReviewsSection() {
 
   return (
     <Card className="mb-4">
-      <CardHeader>
-        <h4>Organization Performance Reviews Report</h4>
+      <CardHeader 
+        style={{ cursor: 'pointer' }}
+        onClick={() => setIsOpen(!isOpen)}
+      >
+        <div className="d-flex justify-content-between align-items-center">
+          <h4 className="mb-0">Organization Performance Reviews Report</h4>
+          <i className={`bi bi-chevron-${isOpen ? 'up' : 'down'}`}></i>
+        </div>
       </CardHeader>
-      <CardBody>
+      <Collapse isOpen={isOpen}>
+        <CardBody>
         <Form onSubmit={handleSubmit}>
           <Row>
             <Col md={3}>
@@ -235,7 +243,8 @@ function OrganizationPerformanceReviewsSection() {
             <p>No data available for the selected skill and year.</p>
           </div>
         )}
-      </CardBody>
+        </CardBody>
+      </Collapse>
     </Card>
   );
 }
