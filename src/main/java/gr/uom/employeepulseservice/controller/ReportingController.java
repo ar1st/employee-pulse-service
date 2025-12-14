@@ -22,11 +22,12 @@ public class ReportingController {
             @PathVariable Integer orgId,
             @RequestParam PeriodType periodType,
             @RequestParam(required = false) Integer deptId,
+            @RequestParam(required = false) Integer skillId,
             @RequestParam(required = false) Integer periodValue,
             @RequestParam(required = false) Integer year
     ) {
         return ResponseEntity.ok(
-                reportingRepository.getReportByOrganizationAndDepartment(periodType, orgId, deptId, periodValue, year)
+                reportingRepository.getReportByOrganizationAndDepartment(periodType, orgId, deptId, skillId, periodValue, year)
         );
     }
 

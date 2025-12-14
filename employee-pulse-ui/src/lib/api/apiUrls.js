@@ -30,11 +30,13 @@ export const DELETE_SKILL_ENTRY_FROM_REVIEW_URL = (reviewId, entryId) => `${API_
 export const GENERATE_SKILL_ENTRIES_URL = () => `${API_BASE_URL}/performance-reviews/generate-skill-entries`
 
 // Reporting endpoints
-export const GET_ORG_DEPT_REPORT_URL = (orgId, deptId, periodType, periodValue, year) => {
+export const GET_ORG_DEPT_REPORT_URL = (orgId, deptId, skillId, periodType, periodValue, year) => {
   const params = new URLSearchParams({ periodType });
+  if (deptId !== null && deptId !== undefined) params.append('deptId', deptId);
+  if (skillId !== null && skillId !== undefined) params.append('skillId', skillId);
   if (periodValue !== null && periodValue !== undefined) params.append('periodValue', periodValue);
   if (year !== null && year !== undefined) params.append('year', year);
-  return `${API_BASE_URL}/reports/org/${orgId}/dept/${deptId}?${params.toString()}`;
+  return `${API_BASE_URL}/reports/org/${orgId}?${params.toString()}`;
 }
 export const GET_EMPLOYEE_REPORT_URL = (employeeId, periodType, periodValue, year) => {
   const params = new URLSearchParams({ periodType });

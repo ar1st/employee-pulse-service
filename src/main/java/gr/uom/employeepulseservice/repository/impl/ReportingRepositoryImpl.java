@@ -59,6 +59,7 @@ public class ReportingRepositoryImpl implements ReportingRepository {
             PeriodType periodType,
             Integer organizationId,
             Integer departmentId,
+            Integer skillId,
             Integer periodValue,
             Integer year
     ) {
@@ -80,7 +81,7 @@ public class ReportingRepositoryImpl implements ReportingRepository {
                 WHERE organization_id = :orgId
                 """;
 
-        // Build SQL with conditional department filter
+        // Build SQL with conditional filters
         StringBuilder sqlBuilder = new StringBuilder();
         String periodStart = periodStartExpression(periodType);
         String periodValueWhere = periodValuePredicate(periodType, periodValue);
@@ -92,6 +93,11 @@ public class ReportingRepositoryImpl implements ReportingRepository {
         // Add department filter only when departmentId is provided
         if (departmentId != null) {
             sqlBuilder.append(" AND department_id = :deptId");
+        }
+
+        // Add skill filter only when skillId is provided
+        if (skillId != null) {
+            sqlBuilder.append(" AND skill_id = :skillId");
         }
 
         sqlBuilder.append(" AND ").append(periodValueWhere);
@@ -107,6 +113,7 @@ public class ReportingRepositoryImpl implements ReportingRepository {
                 .addValue("orgId", organizationId);
 
         if (departmentId != null) params.addValue("deptId", departmentId);
+        if (skillId != null) params.addValue("skillId", skillId);
         if (periodValue != null) params.addValue("periodValue", periodValue);
         if (year != null) params.addValue("year", year);
 

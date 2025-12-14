@@ -12,6 +12,7 @@ public interface ReportingRepository {
     OrgDeptReportingResponseDto getReportByOrganizationAndDepartment(PeriodType periodType,
                                                                      Integer organizationId,
                                                                      Integer departmentId,
+                                                                     Integer skillId,
                                                                      Integer periodValue,
                                                                      Integer year);
 

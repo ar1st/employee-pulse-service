@@ -1,21 +1,243 @@
-import { Card, CardBody, CardHeader } from 'reactstrap';
+import { useState, useEffect } from 'react';
+import { Card, CardBody, CardHeader, Form, FormGroup, Label, Input, Button, Row, Col, Spinner } from 'reactstrap';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { DEFAULT_ORGANIZATION_ID, GET_SKILLS_BY_ORGANIZATION_URL, GET_DEPARTMENTS_BY_ORGANIZATION_URL, GET_ORG_DEPT_REPORT_URL } from '../../lib/api/apiUrls.js';
+import { axiosGet } from '../../lib/api/client.js';
+import useCatch from '../../lib/api/useCatch.js';
+import { handleChange } from '../../lib/formUtils.js';
 
 function OrganizationPerformanceReviewsSection() {
+  const { cWrapper } = useCatch();
+  const [skills, setSkills] = useState([]);
+  const [departments, setDepartments] = useState([]);
+  const [loadingSkills, setLoadingSkills] = useState(false);
+  const [loadingDepartments, setLoadingDepartments] = useState(false);
+  const [loadingReport, setLoadingReport] = useState(false);
+  const [reportData, setReportData] = useState(null);
+  const [chartData, setChartData] = useState([]);
+
+  const [formData, setFormData] = useState({
+    skillId: '',
+    departmentId: '',
+    year: new Date().getFullYear().toString()
+  });
+
+  // Load skills and departments on mount
+  useEffect(() => {
+    setLoadingSkills(true);
+    setLoadingDepartments(true);
+    
+    cWrapper(() =>
+      Promise.all([
+        axiosGet(GET_SKILLS_BY_ORGANIZATION_URL(DEFAULT_ORGANIZATION_ID)),
+        axiosGet(GET_DEPARTMENTS_BY_ORGANIZATION_URL(DEFAULT_ORGANIZATION_ID))
+      ])
+        .then(([skillsResponse, departmentsResponse]) => {
+          setSkills(skillsResponse.data || []);
+          const depts = departmentsResponse.data.content || departmentsResponse.data || [];
+          setDepartments(Array.isArray(depts) ? depts : []);
+        })
+        .finally(() => {
+          setLoadingSkills(false);
+          setLoadingDepartments(false);
+        })
+    );
+  }, [cWrapper]);
+
+  // Process report data into chart format
+  useEffect(() => {
+    if (!reportData || !formData.skillId) {
+      setChartData([]);
+      return;
+    }
+
+    // Since we're filtering by skillId on the backend, there should be at most one skill in the response
+    const selectedSkill = reportData.skills?.[0];
+
+    if (!selectedSkill || !selectedSkill.periods || selectedSkill.periods.length === 0) {
+      setChartData([]);
+      return;
+    }
+
+    // Transform periods into chart data
+    const chartDataPoints = selectedSkill.periods.map(period => {
+      const date = new Date(period.periodStart);
+      const quarter = `Q${Math.floor(date.getMonth() / 3) + 1} ${date.getFullYear()}`;
+      
+      return {
+        quarter,
+        avgRating: period.avgRating || 0,
+        employeeCount: period.employeeCount || 0
+      };
+    });
+
+    // Sort by date (oldest first)
+    chartDataPoints.sort((a, b) => {
+      const [qA, yA] = a.quarter.split(' ');
+      const [qB, yB] = b.quarter.split(' ');
+      if (yA !== yB) return parseInt(yA) - parseInt(yB);
+      return parseInt(qA[1]) - parseInt(qB[1]);
+    });
+
+    setChartData(chartDataPoints);
+  }, [reportData, formData.skillId]);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!formData.skillId || !formData.year) {
+      return;
+    }
+
+    setLoadingReport(true);
+    cWrapper(() =>
+      axiosGet(GET_ORG_DEPT_REPORT_URL(
+        DEFAULT_ORGANIZATION_ID,
+        formData.departmentId ? parseInt(formData.departmentId) : null, // deptId
+        parseInt(formData.skillId), // skillId
+        'QUARTER', // periodType
+        null, // periodValue - null to get all quarters
+        parseInt(formData.year)
+      ))
+        .then((response) => {
+          setReportData(response.data);
+        })
+        .finally(() => setLoadingReport(false))
+    );
+  };
+
+  const selectedSkillName = reportData?.skills?.[0]?.skillName || 
+    skills.find(s => s.id === parseInt(formData.skillId))?.name || '';
+  
+  const selectedDepartmentName = formData.departmentId 
+    ? departments.find(d => d.id === parseInt(formData.departmentId))?.name 
+    : null;
+
   return (
     <Card className="mb-4">
       <CardHeader>
-        <h4>Organization & Department Report</h4>
-        <p className="mb-0 text-muted">
-          Generate aggregated reports for skills and performance metrics by organization and department.
-        </p>
+        <h4>Organization Performance Reviews Report</h4>
       </CardHeader>
       <CardBody>
-        {/* Report form and results will be implemented here */}
-        <p className="text-muted">Report form coming soon...</p>
+        <Form onSubmit={handleSubmit}>
+          <Row>
+            <Col md={3}>
+              <FormGroup>
+                <Label for="departmentId">Department</Label>
+                <Input
+                  type="select"
+                  name="departmentId"
+                  id="departmentId"
+                  value={formData.departmentId}
+                  onChange={(e) => handleChange(e, setFormData)}
+                  disabled={loadingDepartments}
+                >
+                  <option value="">All Departments</option>
+                  {departments.map((department) => (
+                    <option key={department.id} value={department.id}>
+                      {department.name}
+                    </option>
+                  ))}
+                </Input>
+                {loadingDepartments && (
+                  <small className="text-muted">
+                    <Spinner size="sm" className="me-1" />
+                    Loading departments...
+                  </small>
+                )}
+              </FormGroup>
+            </Col>
+
+            <Col md={3}>
+              <FormGroup>
+                <Label for="skillId">Skill *</Label>
+                <Input
+                  type="select"
+                  name="skillId"
+                  id="skillId"
+                  value={formData.skillId}
+                  onChange={(e) => handleChange(e, setFormData)}
+                  required
+                  disabled={loadingSkills}
+                >
+                  <option value="">Select a skill</option>
+                  {skills.map((skill) => (
+                    <option key={skill.id} value={skill.id}>
+                      {skill.name}
+                    </option>
+                  ))}
+                </Input>
+                {loadingSkills && (
+                  <small className="text-muted">
+                    <Spinner size="sm" className="me-1" />
+                    Loading skills...
+                  </small>
+                )}
+              </FormGroup>
+            </Col>
+            <Col md={3}>
+              <FormGroup>
+                <Label for="year">Year *</Label>
+                <Input
+                  type="number"
+                  name="year"
+                  id="year"
+                  value={formData.year}
+                  onChange={(e) => handleChange(e, setFormData)}
+                  min="2000"
+                  max={new Date().getFullYear() + 1}
+                  required
+                />
+              </FormGroup>
+            </Col>
+            <Col md={3} className="d-flex align-items-end" style={{marginBottom: '17px'}}>
+              <Button
+                type="submit"
+                color="primary"
+                disabled={loadingReport || !formData.skillId || !formData.year}
+              >
+                {loadingReport ? (
+                  <>
+                    <Spinner size="sm" className="me-2" />
+                    Loading...
+                  </>
+                ) : (
+                  'Generate Report'
+                )}
+              </Button>
+            </Col>
+          </Row>
+        </Form>
+
+        {chartData.length > 0 && (
+          <div className="mt-4">
+            <h5 className="mb-3">
+              {selectedSkillName}
+              {selectedDepartmentName && ` - ${selectedDepartmentName}`}
+              {` - ${formData.year}`}
+            </h5>
+            <ResponsiveContainer width="100%" height={400}>
+              <BarChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="quarter" />
+                <YAxis yAxisId="left" label={{ value: 'Average Rating', angle: -90, position: 'insideLeft' }} />
+                <YAxis yAxisId="right" orientation="right" label={{ value: 'Employee Count', angle: 90, position: 'insideRight' }} />
+                <Tooltip />
+                <Legend />
+                <Bar yAxisId="left" dataKey="avgRating" fill="#8884d8" name="Average Rating" />
+                <Bar yAxisId="right" dataKey="employeeCount" fill="#82ca9d" name="Employee Count" />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        )}
+
+        {reportData && chartData.length === 0 && (
+          <div className="mt-4 text-muted">
+            <p>No data available for the selected skill and year.</p>
+          </div>
+        )}
       </CardBody>
     </Card>
   );
 }
 
 export default OrganizationPerformanceReviewsSection;
-
