@@ -17,11 +17,11 @@ public class ReportingController {
 
     private final ReportingRepository reportingRepository;
 
-    @GetMapping("/org/{orgId}/dept/{deptId}")
+    @GetMapping("/org/{orgId}")
     public ResponseEntity<OrgDeptReportingResponseDto> getReportByOrganizationAndDepartment(
             @PathVariable Integer orgId,
-            @PathVariable Integer deptId,
             @RequestParam PeriodType periodType,
+            @RequestParam(required = false) Integer deptId,
             @RequestParam(required = false) Integer periodValue,
             @RequestParam(required = false) Integer year
     ) {

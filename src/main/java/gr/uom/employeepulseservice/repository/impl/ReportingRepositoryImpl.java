@@ -50,7 +50,7 @@ public class ReportingRepositoryImpl implements ReportingRepository {
 
     // Returns SQL predicate for filtering by year
     private String yearPredicate(Integer year) {
-        return (year == null) ? "TRUE" : "EXTRACT(year FROM entry_date)::int = :year";
+        return (year == null) ? "TRUE" : "EXTRACT(year FROM entry_date)::int = :year ";
     }
 
     @Override
@@ -65,8 +65,7 @@ public class ReportingRepositoryImpl implements ReportingRepository {
         // Default period type if missing
         periodType = periodType == null ? PeriodType.QUARTER : periodType;
 
-        // SQL expression for period grouping (month, quarter, etc.)
-        String sql = constructSqlStatement(periodType, periodValue, year, """
+        String baseSql = """
                 SELECT
                     organization_name,
                     department_name,
@@ -79,21 +78,37 @@ public class ReportingRepositoryImpl implements ReportingRepository {
                     COUNT(DISTINCT employee_id)     AS employee_count
                 FROM v_org_department_skill_period
                 WHERE organization_id = :orgId
-                  AND department_id   = :deptId
-                  AND %s              -- period filter
-                  AND %s              -- year filter
-                GROUP BY organization_name, department_name, skill_name, period_start
-                ORDER BY skill_name, period_start DESC;
-                """);
+                """;
 
-        // Mandatory parameters
+        // Build SQL with conditional department filter
+        StringBuilder sqlBuilder = new StringBuilder();
+        String periodStart = periodStartExpression(periodType);
+        String periodValueWhere = periodValuePredicate(periodType, periodValue);
+        String yearWhere = yearPredicate(year);
+
+        String sqlTemplate = baseSql.formatted(periodStart);
+        sqlBuilder.append(sqlTemplate);
+
+        // Add department filter only when departmentId is provided
+        if (departmentId != null) {
+            sqlBuilder.append(" AND department_id = :deptId");
+        }
+
+        sqlBuilder.append(" AND ").append(periodValueWhere);
+        sqlBuilder.append(" AND ").append(yearWhere);
+        sqlBuilder.append("""
+                                  GROUP BY organization_name, department_name, skill_name, period_start
+                                  ORDER BY skill_name, period_start DESC;
+                                  """);
+
+        String sql = sqlBuilder.toString();
+
         MapSqlParameterSource params = new MapSqlParameterSource()
-                .addValue("orgId", organizationId)
-                .addValue("deptId", departmentId);
+                .addValue("orgId", organizationId);
 
-        // Optional parameters
+        if (departmentId != null) params.addValue("deptId", departmentId);
         if (periodValue != null) params.addValue("periodValue", periodValue);
-        if (year != null)        params.addValue("year", year);
+        if (year != null) params.addValue("year", year);
 
         // Execute SQL & map each row to a statistics DTO
         List<OrgDeptReportingStatsDto> rows = jdbc.query(sql, params, (rs, rn) ->
@@ -110,7 +125,6 @@ public class ReportingRepositoryImpl implements ReportingRepository {
                 )
         );
 
-        // No results found
         if (rows.isEmpty()) {
             return null;
         }
@@ -141,19 +155,17 @@ public class ReportingRepositoryImpl implements ReportingRepository {
                 ));
             }
 
-            // Add final skill entry
             skills.add(new OrgDeptReportingSkillDto(skillName, periods));
         }
 
         // Extract parent org/dept info from first row
         OrgDeptReportingStatsDto first = rows.getFirst();
 
-        // Build the final parent DTO
         return new OrgDeptReportingResponseDto(
                 organizationId,
                 first.organizationName(),
                 departmentId,
-                first.departmentName(),
+                (departmentId != null) ? first.departmentName() : null,
                 skills
         );
     }
@@ -206,7 +218,7 @@ public class ReportingRepositoryImpl implements ReportingRepository {
 
         // Optional parameters
         if (periodValue != null) params.addValue("periodValue", periodValue);
-        if (year != null)        params.addValue("year", year);
+        if (year != null) params.addValue("year", year);
 
         // Execute SQL & map each row to a statistics DTO
         List<EmployeeReportingStatsDto> rows = jdbc.query(sql, params, (rs, rn) ->
@@ -274,20 +286,20 @@ public class ReportingRepositoryImpl implements ReportingRepository {
 
         // Base SQL selecting all skill entries for the employee with window-based min/max/avg
         String baseSql = """
-            SELECT
-                employee_id,
-                first_name,
-                last_name,
-                skill_id,
-                skill_name,
-                entry_date,
-                rating,
-                MIN(rating) OVER (PARTITION BY employee_id, skill_id) AS min_rating,
-                MAX(rating) OVER (PARTITION BY employee_id, skill_id) AS max_rating,
-                AVG(rating) OVER (PARTITION BY employee_id, skill_id) AS avg_rating
-            FROM v_employee_skill_period
-            WHERE employee_id = :employeeId
-            """;
+                SELECT
+                    employee_id,
+                    first_name,
+                    last_name,
+                    skill_id,
+                    skill_name,
+                    entry_date,
+                    rating,
+                    MIN(rating) OVER (PARTITION BY employee_id, skill_id) AS min_rating,
+                    MAX(rating) OVER (PARTITION BY employee_id, skill_id) AS max_rating,
+                    AVG(rating) OVER (PARTITION BY employee_id, skill_id) AS avg_rating
+                FROM v_employee_skill_period
+                WHERE employee_id = :employeeId
+                """;
 
         // Add skill filter only when a specific skillId is requested
         String sql = (skillId != null)
@@ -375,20 +387,20 @@ public class ReportingRepositoryImpl implements ReportingRepository {
 
         // Base SQL selecting aggregated ratings per day for org/department
         String baseSql = """
-            SELECT
-                organization_id,
-                organization_name,
-                department_id,
-                department_name,
-                skill_id,
-                skill_name,
-                entry_date::date AS date,
-                MIN(rating) AS min_rating,
-                MAX(rating) AS max_rating,
-                AVG(rating) AS avg_rating
-            FROM v_org_department_skill_period
-            WHERE organization_id = :orgId
-            """;
+                SELECT
+                    organization_id,
+                    organization_name,
+                    department_id,
+                    department_name,
+                    skill_id,
+                    skill_name,
+                    entry_date::date AS date,
+                    MIN(rating) AS min_rating,
+                    MAX(rating) AS max_rating,
+                    AVG(rating) AS avg_rating
+                FROM v_org_department_skill_period
+                WHERE organization_id = :orgId
+                """;
 
         // Use StringBuilder to conditionally append filters
         StringBuilder sqlBuilder = new StringBuilder(baseSql);
@@ -404,11 +416,11 @@ public class ReportingRepositoryImpl implements ReportingRepository {
 
         // Group by org/dept/skill/date and order by skill then date
         sqlBuilder.append("""
-             GROUP BY organization_id, organization_name,
-                     department_id, department_name,
-                     skill_id, skill_name, date
-            ORDER BY skill_name, date
-            """);
+                                   GROUP BY organization_id, organization_name,
+                                           department_id, department_name,
+                                           skill_id, skill_name, date
+                                  ORDER BY skill_name, date
+                                  """);
 
         // Final SQL string
         String sql = sqlBuilder.toString();
@@ -451,8 +463,8 @@ public class ReportingRepositoryImpl implements ReportingRepository {
         OrgDeptSkillTimelineRowDto first = rows.getFirst();
 
         // When department is not filtered, do not expose department details in the response
-        Integer deptIdForResponse   = (departmentId != null) ? first.departmentId()   : null;
-        String  deptNameForResponse = (departmentId != null) ? first.departmentName() : null;
+        Integer deptIdForResponse = (departmentId != null) ? first.departmentId() : null;
+        String deptNameForResponse = (departmentId != null) ? first.departmentName() : null;
 
         List<OrgDeptSkillTimelineSkillDto> skills = new ArrayList<>();
 
