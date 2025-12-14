@@ -38,7 +38,8 @@ export default function SavePerformanceReviewForm({ reviewId = null }) {
     reporterId: '',
     rawText: '',
     comments: '',
-    overallRating: ''
+    overallRating: '',
+    reviewDate: new Date().toISOString().split('T')[0] // Default to today's date
   });
 
   useEffect(() => {
@@ -69,13 +70,24 @@ export default function SavePerformanceReviewForm({ reviewId = null }) {
             const department = departments.find(d => d.name === review.departmentName);
             const departmentId = department ? department.id.toString() : '';
 
+            // Format reviewDate for HTML date input (YYYY-MM-DD)
+            let formattedReviewDate = '';
+            if (review.reviewDate) {
+              const date = new Date(review.reviewDate);
+              formattedReviewDate = date.toISOString().split('T')[0];
+            } else if (review.reviewDateTime) {
+              const date = new Date(review.reviewDateTime);
+              formattedReviewDate = date.toISOString().split('T')[0];
+            }
+
             setFormData({
               departmentId: departmentId,
               employeeId: '',
               reporterId: '',
               rawText: review.rawText || '',
               comments: review.comments || '',
-              overallRating: review.overallRating?.toString() || ''
+              overallRating: review.overallRating?.toString() || '',
+              reviewDate: formattedReviewDate
             });
 
             // Load department and employee info
@@ -173,7 +185,8 @@ export default function SavePerformanceReviewForm({ reviewId = null }) {
       const payload = {
         rawText: formData.rawText,
         comments: formData.comments,
-        overallRating: parseFloat(formData.overallRating)
+        overallRating: parseFloat(formData.overallRating),
+        reviewDate: formData.reviewDate || null
       };
 
       cWrapper(async () => {
@@ -205,7 +218,8 @@ export default function SavePerformanceReviewForm({ reviewId = null }) {
         reporterId: parseInt(formData.reporterId),
         rawText: formData.rawText,
         comments: formData.comments,
-        overallRating: parseFloat(formData.overallRating)
+        overallRating: parseFloat(formData.overallRating),
+        reviewDate: formData.reviewDate || null
       };
 
       cWrapper(async () => {
@@ -359,6 +373,21 @@ export default function SavePerformanceReviewForm({ reviewId = null }) {
     />
 
     <hr className="my-3"/>
+
+    <FormGroup>
+      <Label for="reviewDate">Review Date *</Label>
+      <Input
+        type="date"
+        name="reviewDate"
+        id="reviewDate"
+        value={formData.reviewDate}
+        onChange={(e) => handleChange(e, setFormData)}
+        required
+      />
+      <small className="form-text text-muted">
+        Select the date of the performance review
+      </small>
+    </FormGroup>
 
     <FormGroup>
       <Label for="comments">Comments</Label>

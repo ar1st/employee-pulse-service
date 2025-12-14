@@ -48,11 +48,11 @@ public class PerformanceReviewService {
 
         ensureReporterIsManagerOfEmployee(dto.reporterId(), dto.employeeId());
 
-        LocalDate now = LocalDate.now();
-        LocalDateTime nowDateTime = LocalDateTime.now();
+        LocalDate reviewDate = dto.reviewDate() != null ? dto.reviewDate() : LocalDate.now();
+        LocalDateTime reviewDateTime = reviewDate.atStartOfDay();
 
-        performanceReview.setReviewDate(now);
-        performanceReview.setReviewDateTime(nowDateTime);
+        performanceReview.setReviewDate(reviewDate);
+        performanceReview.setReviewDateTime(reviewDateTime);
 
         PerformanceReview createdPerformanceReview = performanceReviewRepository.save(performanceReview);
 
@@ -70,6 +70,11 @@ public class PerformanceReviewService {
         performanceReview.setRawText(dto.rawText());
         performanceReview.setComments(dto.comments());
         performanceReview.setOverallRating(dto.overallRating());
+        
+        if (dto.reviewDate() != null) {
+            performanceReview.setReviewDate(dto.reviewDate());
+            performanceReview.setReviewDateTime(dto.reviewDate().atStartOfDay());
+        }
 
         PerformanceReview updatedPerformanceReview = performanceReviewRepository.save(performanceReview);
 

@@ -1,5 +1,6 @@
 package gr.uom.employeepulseservice.controller.dto;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -8,7 +9,7 @@ public record PerformanceReviewDto(
         String rawText,
         String comments,
         Double overallRating,
-
+        LocalDate reviewDate,
         LocalDateTime reviewDateTime,
         List<SkillEntryDto> skillEntryDtos,
         String departmentName,
