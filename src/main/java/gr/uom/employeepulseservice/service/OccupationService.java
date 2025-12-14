@@ -66,12 +66,43 @@ public class OccupationService {
     @Transactional
     public void bulkCreateOccupations(String json) {
         List<SaveOccupationDto> dtos = objectMapper.readValue(json, new TypeReference<>() {});
-
+        
         List<Occupation> toSave = dtos.stream()
                 .map(occupationMapper::toEntity)
                 .toList();
-
+        
         occupationRepository.saveAll(toSave);
+    }
+
+    @Transactional(readOnly = true)
+    public List<OccupationDto> findByOrganizationId(Integer organizationId) {
+        return occupationMapper.toDtos(
+                occupationRepository.findOccupationsByOrganizationId(organizationId)
+        );
+    }
+
+    @Transactional(readOnly = true)
+    public List<OccupationDto> searchOccupations(String searchTerm) {
+        if (searchTerm == null || searchTerm.trim().isEmpty()) {
+            return List.of();
+        }
+        
+        String trimmedTerm = searchTerm.trim();
+        List<Occupation> results = occupationRepository.searchOccupations(trimmedTerm);
+        
+        // Also check if search term is a numeric ID
+        try {
+            Integer id = Integer.parseInt(trimmedTerm);
+            occupationRepository.findById(id).ifPresent(occupation -> {
+                if (!results.contains(occupation)) {
+                    results.addFirst(occupation);
+                }
+            });
+        } catch (NumberFormatException e) {
+            // Not a number, ignore
+        }
+        
+        return occupationMapper.toDtos(results);
     }
 
 }

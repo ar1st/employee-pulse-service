@@ -48,6 +48,8 @@ public class EmployeeService {
 
     @Transactional
     public void createEmployee(SaveEmployeeDto dto) {
+        checkIfDuplicateEmailExists(dto.email());
+
         Employee employee = employeeMapper.toEntity(dto);
 
         setEmployeeRelations(dto, employee);
@@ -57,6 +59,8 @@ public class EmployeeService {
 
     @Transactional
     public void updateEmployee(Integer id, SaveEmployeeDto dto) {
+        checkIfDuplicateEmailExists(dto.email());
+
         Employee employee = findById(id);
 
         employeeMapper.updateFromDto(employee, dto);
@@ -183,5 +187,9 @@ public class EmployeeService {
         findById(id);
     }
 
-
+    private void checkIfDuplicateEmailExists(String email) {
+        if (employeeRepository.existsByEmail(email)) {
+            throw new IllegalArgumentException("Employee already exists with the provided email");
+        }
+    }
 }

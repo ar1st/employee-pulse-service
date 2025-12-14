@@ -10,6 +10,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("occupations")
 @RequiredArgsConstructor
@@ -56,6 +58,18 @@ public class OccupationController {
     public ResponseEntity<Void> bulkCreateOccupations(@RequestBody String json) {
         occupationService.bulkCreateOccupations(json);
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/organization/{organizationId}")
+    public ResponseEntity<List<OccupationDto>> findByOrganizationId(@PathVariable Integer organizationId) {
+        return ResponseEntity.ok(occupationService.findByOrganizationId(organizationId));
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<List<OccupationDto>> searchOccupations(
+            @RequestParam String q
+    ) {
+        return ResponseEntity.ok(occupationService.searchOccupations(q));
     }
 
 }

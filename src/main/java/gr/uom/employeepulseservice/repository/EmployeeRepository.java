@@ -15,5 +15,6 @@ public interface EmployeeRepository extends JpaRepository<Employee, Integer> {
 
     List<Employee> findByOrganizationIdOrderByHireDateDesc(Integer organizationId);
 
+    boolean existsByEmail(String email);
 
 }
