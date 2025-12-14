@@ -46,6 +46,7 @@ function Navbar() {
             isOpen={reportsDropdownOpen} 
             toggle={() => setReportsDropdownOpen(!reportsDropdownOpen)}
             className="nav-dropdown"
+            direction="down"
           >
             <DropdownToggle 
               className={`nav-link-custom ${isReportsActive ? 'active' : ''}`}
@@ -54,7 +55,7 @@ function Navbar() {
             >
               Reports <i className={`bi bi-chevron-down ms-1 dropdown-arrow ${reportsDropdownOpen ? 'open' : ''}`} style={{ fontSize: '0.75rem' }}></i>
             </DropdownToggle>
-            <DropdownMenu>
+            <DropdownMenu className="nav-dropdown-menu">
               <DropdownItem>
                 <NavLink
                   to="/reports/organization"
