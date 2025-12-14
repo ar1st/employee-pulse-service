@@ -68,6 +68,8 @@ function OrganizationPerformanceReviewsSection() {
       return {
         quarter,
         avgRating: period.avgRating || 0,
+        minRating: period.minRating || 0,
+        maxRating: period.maxRating || 0,
         employeeCount: period.employeeCount || 0
       };
     });
@@ -227,12 +229,17 @@ function OrganizationPerformanceReviewsSection() {
               <BarChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="quarter" />
-                <YAxis yAxisId="left" label={{ value: 'Average Rating', angle: -90, position: 'insideLeft' }} />
-                <YAxis yAxisId="right" orientation="right" label={{ value: 'Employee Count', angle: 90, position: 'insideRight' }} />
+                <YAxis 
+                  label={{ value: 'Rating', angle: -90, position: 'insideLeft' }}
+                  domain={[0, 5]}
+                  ticks={[0, 1, 2, 3, 4, 5]}
+                />
                 <Tooltip />
                 <Legend />
-                <Bar yAxisId="left" dataKey="avgRating" fill="#8884d8" name="Average Rating" />
-                <Bar yAxisId="right" dataKey="employeeCount" fill="#82ca9d" name="Employee Count" />
+                <Bar dataKey="avgRating" fill="#8884d8" name="Average Rating" />
+                <Bar dataKey="maxRating" fill="#ff7300" name="Max Rating" />
+                
+                <Bar dataKey="minRating" fill="#ffc658" name="Min Rating" />
               </BarChart>
             </ResponsiveContainer>
           </div>
