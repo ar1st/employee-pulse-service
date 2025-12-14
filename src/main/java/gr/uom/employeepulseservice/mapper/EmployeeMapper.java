@@ -27,7 +27,9 @@ public interface EmployeeMapper {
 
     @Mapping(target = "skillEntryIds", source = "skillEntries")
     @Mapping(target = "occupationId", source = "occupation.id")
+    @Mapping(target = "occupationTitle", source = "occupation.title")
     @Mapping(target = "departmentId", source = "department.id")
+    @Mapping(target = "departmentName", source = "department.name")
     @Mapping(target = "organizationId", source = "organization.id")
     EmployeeDto toDto(Employee employee);
 

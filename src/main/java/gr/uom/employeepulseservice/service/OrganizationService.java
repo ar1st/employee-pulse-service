@@ -72,7 +72,7 @@ public class OrganizationService {
 
     @Transactional(readOnly = true)
     public List<EmployeeDto> findEmployeesById(Integer id) {
-        List<Employee> employees = employeeRepository.findByOrganizationId(id);
+        List<Employee> employees = employeeRepository.findByOrganizationIdOrderByHireDate(id);
 
         return employeeMapper.toDtos(employees);
     }

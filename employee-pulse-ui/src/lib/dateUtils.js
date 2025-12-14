@@ -12,3 +12,8 @@ export function formatDateTime(dateTime) {
     minute: '2-digit',
   });
 }
+
+export const formatDate = (date) => {
+  if (!date) return 'N/A'
+  return new Date(date).toLocaleDateString()
+}
