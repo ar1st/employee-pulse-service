@@ -13,7 +13,7 @@ public interface EmployeeRepository extends JpaRepository<Employee, Integer> {
 
     List<Employee> findByDepartmentId(Integer departmentId);
 
-    List<Employee> findByOrganizationIdOrderByHireDate(Integer organizationId);
+    List<Employee> findByOrganizationIdOrderByHireDateDesc(Integer organizationId);
 
 
 }
