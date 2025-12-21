@@ -168,9 +168,12 @@ public class PerformanceReviewService {
         SkillEntry entry = new SkillEntry();
         entry.setSkill(skill);
         entry.setRating(dto.rating());
-        LocalDate entryDate = LocalDate.now();
+        
+        LocalDate entryDate = dto.entryDate() != null
+            ? dto.entryDate() 
+            : (review.getReviewDate() != null ? review.getReviewDate() : LocalDate.now());
         entry.setEntryDate(entryDate);
-        entry.setEntryDateTime(LocalDateTime.now());
+        entry.setEntryDateTime(entryDate.atStartOfDay());
         entry.setEmployee(review.getRefersTo());
 
         review.getSkillEntries().add(entry);
@@ -197,8 +200,13 @@ public class PerformanceReviewService {
         }
 
         if (dto.rating() != null) entry.setRating(dto.rating());
-        entry.setEntryDate(LocalDate.now());
-        entry.setEntryDateTime(LocalDateTime.now());
+        
+        // Use entryDate from DTO if provided, otherwise use review's reviewDate, or fall back to now()
+        LocalDate entryDate = dto.entryDate() != null 
+            ? dto.entryDate() 
+            : (review.getReviewDate() != null ? review.getReviewDate() : LocalDate.now());
+        entry.setEntryDate(entryDate);
+        entry.setEntryDateTime(entryDate.atStartOfDay());
 
         return performanceReviewMapper.toDto(review);
     }

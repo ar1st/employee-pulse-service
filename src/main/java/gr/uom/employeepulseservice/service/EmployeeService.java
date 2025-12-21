@@ -133,8 +133,10 @@ public class EmployeeService {
         se.setEmployee(employee);
         se.setSkill(skill);
         se.setRating(dto.rating());
-        se.setEntryDate(LocalDate.now());
-        se.setEntryDateTime(LocalDateTime.now());
+        
+        LocalDate entryDate = dto.entryDate() != null ? dto.entryDate() : LocalDate.now();
+        se.setEntryDate(entryDate);
+        se.setEntryDateTime(entryDate.atStartOfDay());
         skillEntryRepository.save(se);
     }
 

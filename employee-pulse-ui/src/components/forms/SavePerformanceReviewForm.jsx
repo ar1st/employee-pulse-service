@@ -203,7 +203,8 @@ export default function SavePerformanceReviewForm({ reviewId = null }) {
         const addPromises = skillEntries.map(entry =>
           axiosPost(ADD_SKILL_ENTRY_TO_REVIEW_URL(reviewId), {
             skillId: entry.skillId,
-            rating: entry.rating
+            rating: entry.rating,
+            entryDate: formData.reviewDate || null
           })
         );
         await Promise.all(addPromises);
@@ -229,7 +230,8 @@ export default function SavePerformanceReviewForm({ reviewId = null }) {
         const addPromises = skillEntries.map(entry =>
           axiosPost(ADD_SKILL_ENTRY_TO_REVIEW_URL(performanceReviewId), {
             skillId: entry.skillId,
-            rating: entry.rating
+            rating: entry.rating,
+            entryDate: formData.reviewDate || null
           })
         );
         await Promise.all(addPromises);
