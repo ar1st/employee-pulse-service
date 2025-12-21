@@ -10,6 +10,7 @@ export const DELETE_PERFORMANCE_REVIEW_URL = (reviewId) => `${API_BASE_URL}/perf
 
 export const GET_EMPLOYEE_URL = (employeeId) => `${API_BASE_URL}/employees/${employeeId}`
 export const GET_EMPLOYEES_BY_ORGANIZATION_URL = (organizationId) => `${API_BASE_URL}/organizations/${organizationId}/employees`
+export const GET_EMPLOYEE_LATEST_SKILL_ENTRIES_URL = (employeeId) => `${API_BASE_URL}/employees/${employeeId}/skill-entries/latest`
 export const CREATE_EMPLOYEE_URL = () => `${API_BASE_URL}/employees`
 export const UPDATE_EMPLOYEE_URL = (employeeId) => `${API_BASE_URL}/employees/${employeeId}`
 export const DELETE_EMPLOYEE_URL = (employeeId) => `${API_BASE_URL}/employees/${employeeId}`

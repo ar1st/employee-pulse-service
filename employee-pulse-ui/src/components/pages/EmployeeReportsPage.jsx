@@ -1,14 +1,14 @@
 import '../../styles/Common.css';
+import EmployeePerformanceReviewsSection from '../reports/EmployeePerformanceReviewsSection.jsx';
 
 function EmployeeReportsPage() {
 
   return (
     <div className="page-wrapper">
-      <h3>Employee Reports</h3>
-      <p>Visualize reports for individual employee skills and performance metrics.</p>
+      <h2>Employee Reports</h2>
+      <p className="mb-4">Visualize reports for individual employee skills and performance metrics.</p>
 
-
-
+      <EmployeePerformanceReviewsSection />
     </div>
   );
 }
