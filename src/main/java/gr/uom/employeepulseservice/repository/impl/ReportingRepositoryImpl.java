@@ -398,9 +398,10 @@ public class ReportingRepositoryImpl implements ReportingRepository {
     public OrgDeptSkillTimelineResponseDto getSkillTimelineByOrganizationAndDepartment(
             Integer organizationId,
             Integer departmentId,
-            Integer skillId
+            Integer skillId,
+            LocalDate startDate,
+            LocalDate endDate
     ) {
-
         // Base SQL selecting aggregated ratings per day for org/department
         String baseSql = """
                 SELECT
@@ -418,10 +419,15 @@ public class ReportingRepositoryImpl implements ReportingRepository {
                 WHERE organization_id = :orgId
                 """;
 
-        // Use StringBuilder to conditionally append filters
         StringBuilder sqlBuilder = new StringBuilder(baseSql);
 
-        // Add department filter when provided
+        if (startDate != null) {
+            sqlBuilder.append(" AND entry_date::date >= :startDate ");
+        }
+        if (endDate != null) {
+            sqlBuilder.append(" AND entry_date::date <= :endDate ");
+        }
+
         if (departmentId != null) {
             sqlBuilder.append(" AND department_id = :deptId ");
         }
@@ -444,9 +450,11 @@ public class ReportingRepositoryImpl implements ReportingRepository {
         // Set mandatory organizationId parameter
         MapSqlParameterSource params = new MapSqlParameterSource()
                 .addValue("orgId", organizationId);
-        // Optionally set department and skill parameters
+
         if (departmentId != null) params.addValue("deptId", departmentId);
         if (skillId != null) params.addValue("skillId", skillId);
+        if (startDate != null) params.addValue("startDate", startDate);
+        if (endDate != null) params.addValue("endDate", endDate);
 
         // Execute query and map each row to a flat org/dept timeline row DTO
         List<OrgDeptSkillTimelineRowDto> rows = jdbc.query(sql, params, (rs, rn) ->

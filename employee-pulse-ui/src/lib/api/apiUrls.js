@@ -50,10 +50,12 @@ export const GET_EMPLOYEE_SKILL_TIMELINE_URL = (employeeId, skillId) => {
   const queryString = params.toString();
   return `${API_BASE_URL}/reports/employees/${employeeId}/skills/timeline${queryString ? `?${queryString}` : ''}`;
 }
-export const GET_ORG_DEPT_SKILL_TIMELINE_URL = (organizationId, departmentId, skillId) => {
+export const GET_ORG_DEPT_SKILL_TIMELINE_URL = (organizationId, departmentId, skillId, startDate, endDate) => {
   const params = new URLSearchParams();
   if (departmentId !== null && departmentId !== undefined) params.append('departmentId', departmentId);
   if (skillId !== null && skillId !== undefined) params.append('skillId', skillId);
+  if (startDate !== null && startDate !== undefined) params.append('startDate', startDate);
+  if (endDate !== null && endDate !== undefined) params.append('endDate', endDate);
   const queryString = params.toString();
   return `${API_BASE_URL}/reports/organizations/${organizationId}/skills/timeline${queryString ? `?${queryString}` : ''}`;
 }

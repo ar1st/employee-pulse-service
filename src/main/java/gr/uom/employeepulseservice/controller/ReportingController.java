@@ -7,8 +7,11 @@ import gr.uom.employeepulseservice.controller.dto.reportingDto.orgdept.OrgDeptSk
 import gr.uom.employeepulseservice.model.PeriodType;
 import gr.uom.employeepulseservice.repository.ReportingRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDate;
 
 @RestController
 @RequestMapping("/reports")
@@ -55,12 +58,16 @@ public class ReportingController {
     public OrgDeptSkillTimelineResponseDto getSkillTimelineByOrganizationAndDepartment(
             @PathVariable Integer organizationId,
             @RequestParam(required = false) Integer departmentId,
-            @RequestParam(required = false) Integer skillId
+            @RequestParam(required = false) Integer skillId,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate
     ) {
         return reportingRepository.getSkillTimelineByOrganizationAndDepartment(
                 organizationId,
                 departmentId,
-                skillId
+                skillId,
+                startDate,
+                endDate
         );
     }
 

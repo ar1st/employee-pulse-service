@@ -6,6 +6,8 @@ import gr.uom.employeepulseservice.controller.dto.reportingDto.orgdept.OrgDeptRe
 import gr.uom.employeepulseservice.controller.dto.reportingDto.orgdept.OrgDeptSkillTimelineResponseDto;
 import gr.uom.employeepulseservice.model.PeriodType;
 
+import java.time.LocalDate;
+
 public interface ReportingRepository {
 
     // Returns aggregated reporting stats for an organization and department
@@ -29,7 +31,9 @@ public interface ReportingRepository {
     OrgDeptSkillTimelineResponseDto getSkillTimelineByOrganizationAndDepartment(
             Integer organizationId,
             Integer departmentId,
-            Integer skillId
+            Integer skillId,
+            LocalDate startDate,
+            LocalDate endDate
     );
 
 }
