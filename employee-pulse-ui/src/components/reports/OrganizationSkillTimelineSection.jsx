@@ -267,26 +267,11 @@ function OrganizationSkillTimelineSection() {
                           type="monotone" 
                           dataKey="avgRating" 
                           stroke="#8884d8" 
-                          name="Average Rating"
+                          name="Rating"
                           strokeWidth={2}
                           dot={{ r: 4 }}
                         />
-                        <Line 
-                          type="monotone" 
-                          dataKey="maxRating" 
-                          stroke="#82ca9d" 
-                          name="Max Rating"
-                          strokeWidth={2}
-                          dot={{ r: 4 }}
-                        />
-                        <Line 
-                          type="monotone" 
-                          dataKey="minRating" 
-                          stroke="#ffc658" 
-                          name="Min Rating"
-                          strokeWidth={2}
-                          dot={{ r: 4 }}
-                        />
+
                       </LineChart>
                     </ResponsiveContainer>
                   </div>
