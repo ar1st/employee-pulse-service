@@ -45,9 +45,11 @@ export const GET_EMPLOYEE_REPORT_URL = (employeeId, periodType, periodValue, yea
   if (year !== null && year !== undefined) params.append('year', year);
   return `${API_BASE_URL}/reports/employee/${employeeId}?${params.toString()}`;
 }
-export const GET_EMPLOYEE_SKILL_TIMELINE_URL = (employeeId, skillId) => {
+export const GET_EMPLOYEE_SKILL_TIMELINE_URL = (employeeId, skillId, startDate, endDate) => {
   const params = new URLSearchParams();
   if (skillId !== null && skillId !== undefined) params.append('skillId', skillId);
+  if (startDate !== null && startDate !== undefined) params.append('startDate', startDate);
+  if (endDate !== null && endDate !== undefined) params.append('endDate', endDate);
   const queryString = params.toString();
   return `${API_BASE_URL}/reports/employees/${employeeId}/skills/timeline${queryString ? `?${queryString}` : ''}`;
 }

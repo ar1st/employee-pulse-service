@@ -298,7 +298,7 @@ public class ReportingRepositoryImpl implements ReportingRepository {
 
     @Override
     @Transactional(readOnly = true)
-    public EmployeeSkillTimelineResponseDto getSkillTimelineByEmployee(Integer employeeId, Integer skillId) {
+    public EmployeeSkillTimelineResponseDto getSkillTimelineByEmployee(Integer employeeId, Integer skillId, LocalDate startDate, LocalDate endDate) {
 
         // Base SQL selecting all skill entries for the employee with window-based min/max/avg
         String baseSql = """
@@ -317,18 +317,29 @@ public class ReportingRepositoryImpl implements ReportingRepository {
                 WHERE employee_id = :employeeId
                 """;
 
-        // Add skill filter only when a specific skillId is requested
-        String sql = (skillId != null)
-                ? baseSql + " AND skill_id = :skillId ORDER BY skill_name, entry_date"
-                : baseSql + " ORDER BY skill_name, entry_date";
+        StringBuilder sqlBuilder = new StringBuilder(baseSql);
 
-        // Set mandatory employeeId parameter
+        if (startDate != null) {
+            sqlBuilder.append(" AND entry_date >= :startDate ");
+        }
+        if (endDate != null) {
+            sqlBuilder.append(" AND entry_date <= :endDate ");
+        }
+
+        if (skillId != null) {
+            sqlBuilder.append(" AND skill_id = :skillId ");
+        }
+
+        sqlBuilder.append(" ORDER BY skill_name, entry_date");
+
+        String sql = sqlBuilder.toString();
+
         MapSqlParameterSource params = new MapSqlParameterSource()
                 .addValue("employeeId", employeeId);
-        // Optionally set skillId parameter
         if (skillId != null) params.addValue("skillId", skillId);
+        if (startDate != null) params.addValue("startDate", startDate);
+        if (endDate != null) params.addValue("endDate", endDate);
 
-        // Execute query and map each row to a flat timeline row DTO
         List<EmployeeSkillTimelineRowDto> rows = jdbc.query(sql, params, (rs, rn) ->
                 new EmployeeSkillTimelineRowDto(
                         rs.getInt("employee_id"),
@@ -344,7 +355,6 @@ public class ReportingRepositoryImpl implements ReportingRepository {
                 )
         );
 
-        // When no data exists return null (or could return an empty response)
         if (rows.isEmpty()) {
             return null;
         }

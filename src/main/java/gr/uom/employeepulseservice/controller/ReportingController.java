@@ -49,9 +49,11 @@ public class ReportingController {
     @GetMapping("/employees/{employeeId}/skills/timeline")
     public EmployeeSkillTimelineResponseDto getSkillTimelineByEmployee(
             @PathVariable Integer employeeId,
-            @RequestParam(required = false) Integer skillId
+            @RequestParam(required = false) Integer skillId,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate
     ) {
-        return reportingRepository.getSkillTimelineByEmployee(employeeId, skillId);
+        return reportingRepository.getSkillTimelineByEmployee(employeeId, skillId, startDate, endDate);
     }
 
     @GetMapping("/organizations/{organizationId}/skills/timeline")

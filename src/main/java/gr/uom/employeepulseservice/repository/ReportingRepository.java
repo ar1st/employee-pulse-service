@@ -25,7 +25,7 @@ public interface ReportingRepository {
                                                      Integer year);
 
     // Returns timeline data for all skills of an employee
-    EmployeeSkillTimelineResponseDto getSkillTimelineByEmployee(Integer employeeId, Integer skillId);
+    EmployeeSkillTimelineResponseDto getSkillTimelineByEmployee(Integer employeeId, Integer skillId, LocalDate startDate, LocalDate endDate);
 
     // Returns timeline data for all skills in an organization/department
     OrgDeptSkillTimelineResponseDto getSkillTimelineByOrganizationAndDepartment(

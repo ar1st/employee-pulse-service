@@ -1,5 +1,6 @@
 import '../../styles/Common.css';
 import EmployeePerformanceReviewsSection from '../reports/EmployeePerformanceReviewsSection.jsx';
+import EmployeeSkillTimelineSection from '../reports/EmployeeSkillTimelineSection.jsx';
 
 function EmployeeReportsPage() {
 
@@ -9,6 +10,8 @@ function EmployeeReportsPage() {
       <p className="mb-4">Visualize reports for individual employee skills and performance metrics.</p>
 
       <EmployeePerformanceReviewsSection />
+
+      <EmployeeSkillTimelineSection />
     </div>
   );
 }

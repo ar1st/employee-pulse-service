@@ -1,26 +1,26 @@
 import { useState, useEffect } from 'react';
 import { Card, CardBody, CardHeader, Collapse, Form, FormGroup, Label, Input, Button, Row, Col, Spinner } from 'reactstrap';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { DEFAULT_ORGANIZATION_ID, GET_SKILLS_BY_ORGANIZATION_URL, GET_DEPARTMENTS_BY_ORGANIZATION_URL, GET_ORG_DEPT_SKILL_TIMELINE_URL } from '../../lib/api/apiUrls.js';
+import { DEFAULT_ORGANIZATION_ID, GET_EMPLOYEES_BY_ORGANIZATION_URL, GET_EMPLOYEE_SKILL_TIMELINE_URL, GET_EMPLOYEE_LATEST_SKILL_ENTRIES_URL } from '../../lib/api/apiUrls.js';
 import { axiosGet } from '../../lib/api/client.js';
 import useCatch from '../../lib/api/useCatch.js';
 import { handleChange } from '../../lib/formUtils.js';
 import {formatDateForInput} from "../../lib/dateUtils.js";
 
-function OrganizationSkillTimelineSection() {
+function EmployeeSkillTimelineSection() {
   const { cWrapper } = useCatch();
   const [isOpen, setIsOpen] = useState(true);
   const [skills, setSkills] = useState([]);
-  const [departments, setDepartments] = useState([]);
+  const [employees, setEmployees] = useState([]);
   const [loadingSkills, setLoadingSkills] = useState(false);
-  const [loadingDepartments, setLoadingDepartments] = useState(false);
+  const [loadingEmployees, setLoadingEmployees] = useState(false);
   const [loadingReport, setLoadingReport] = useState(false);
   const [reportData, setReportData] = useState(null);
+  const [hasAttemptedReport, setHasAttemptedReport] = useState(false);
 
-  // Default to January 1st, 2025 to today
   const getDefaultDates = () => {
     const endDate = new Date(2025, 11, 31);
-    const startDate = new Date(2025, 0, 1); // January 1st, 2025 (month is 0-indexed)
+    const startDate = new Date(2025, 0, 1);
     return {
       startDate: formatDateForInput(startDate),
       endDate: formatDateForInput(endDate)
@@ -28,46 +28,76 @@ function OrganizationSkillTimelineSection() {
   };
 
   const [formData, setFormData] = useState({
-    departmentId: '',
+    employeeId: '',
     skillId: '',
     ...getDefaultDates()
   });
 
-  // Load skills and departments on mount
   useEffect(() => {
-    setLoadingSkills(true);
-    setLoadingDepartments(true);
+    setLoadingEmployees(true);
     
     cWrapper(() =>
-      Promise.all([
-        axiosGet(GET_SKILLS_BY_ORGANIZATION_URL(DEFAULT_ORGANIZATION_ID)),
-        axiosGet(GET_DEPARTMENTS_BY_ORGANIZATION_URL(DEFAULT_ORGANIZATION_ID))
-      ])
-        .then(([skillsResponse, departmentsResponse]) => {
-          setSkills(skillsResponse.data || []);
-          const depts = departmentsResponse.data.content || departmentsResponse.data || [];
-          setDepartments(Array.isArray(depts) ? depts : []);
+      axiosGet(GET_EMPLOYEES_BY_ORGANIZATION_URL(DEFAULT_ORGANIZATION_ID))
+        .then((employeesResponse) => {
+          const emps = employeesResponse.data.content || employeesResponse.data || [];
+          setEmployees(Array.isArray(emps) ? emps : []);
         })
         .finally(() => {
-          setLoadingSkills(false);
-          setLoadingDepartments(false);
+          setLoadingEmployees(false);
         })
     );
   }, [cWrapper]);
 
+  // Load skills when employee is selected
+  useEffect(() => {
+    if (!formData.employeeId) {
+      setSkills([]);
+      setFormData(prev => ({ ...prev, skillId: '' }));
+      return;
+    }
+
+    setLoadingSkills(true);
+    cWrapper(() =>
+      axiosGet(GET_EMPLOYEE_LATEST_SKILL_ENTRIES_URL(parseInt(formData.employeeId)))
+        .then((response) => {
+          // Convert SkillToRatingDto to skill format with id and name
+          const employeeSkills = (response.data || []).map(skillEntry => ({
+            id: skillEntry.skillId,
+            name: skillEntry.skillName
+          }));
+          setSkills(employeeSkills);
+          // Clear skill selection when employee changes
+          setFormData(prev => ({ ...prev, skillId: '' }));
+        })
+        .catch(() => {
+          setSkills([]);
+        })
+        .finally(() => {
+          setLoadingSkills(false);
+        })
+    );
+  }, [formData.employeeId, cWrapper]);
+
   const handleSubmit = (e) => {
     e.preventDefault();
+    if (!formData.employeeId) {
+      return;
+    }
+
     setLoadingReport(true);
+    setHasAttemptedReport(true);
     cWrapper(() =>
-      axiosGet(GET_ORG_DEPT_SKILL_TIMELINE_URL(
-        DEFAULT_ORGANIZATION_ID,
-        formData.departmentId ? parseInt(formData.departmentId) : null,
+      axiosGet(GET_EMPLOYEE_SKILL_TIMELINE_URL(
+        parseInt(formData.employeeId),
         formData.skillId ? parseInt(formData.skillId) : null,
         formData.startDate || null,
         formData.endDate || null
       ))
         .then((response) => {
           setReportData(response.data);
+        })
+        .catch(() => {
+          setReportData(null);
         })
         .finally(() => setLoadingReport(false))
     );
@@ -89,13 +119,12 @@ function OrganizationSkillTimelineSection() {
           day: 'numeric' 
         }),
         dateValue: date.getTime(),
-        avgRating: point.avgRating || 0,
-        minRating: point.minRating || 0,
-        maxRating: point.maxRating || 0
+        rating: point.rating || 0
       };
     }).sort((a, b) => a.dateValue - b.dateValue);
   };
 
+  const selectedEmployee = employees.find(e => e.id === parseInt(formData.employeeId));
   const selectedSkillName = formData.skillId
     ? skills.find(s => s.id === parseInt(formData.skillId))?.name
     : null;
@@ -108,7 +137,7 @@ function OrganizationSkillTimelineSection() {
       >
         <div className="d-flex justify-content-between align-items-center">
           <div>
-            <h4 className="mb-0">Organization Skill Timeline</h4>
+            <h4 className="mb-0">Employee Skill Timeline</h4>
           </div>
           <i className={`bi bi-chevron-${isOpen ? 'up' : 'down'}`}></i>
         </div>
@@ -119,26 +148,27 @@ function OrganizationSkillTimelineSection() {
             <Row>
               <Col md={3}>
                 <FormGroup>
-                  <Label for="departmentId">Department</Label>
+                  <Label for="employeeId">Employee *</Label>
                   <Input
                     type="select"
-                    name="departmentId"
-                    id="departmentId"
-                    value={formData.departmentId}
+                    name="employeeId"
+                    id="employeeId"
+                    value={formData.employeeId}
                     onChange={(e) => handleChange(e, setFormData)}
-                    disabled={loadingDepartments}
+                    required
+                    disabled={loadingEmployees}
                   >
-                    <option value="">All Departments</option>
-                    {departments.map((department) => (
-                      <option key={department.id} value={department.id}>
-                        {department.name}
+                    <option value="">Select an employee</option>
+                    {employees.map((employee) => (
+                      <option key={employee.id} value={employee.id}>
+                        {employee.firstName} {employee.lastName}
                       </option>
                     ))}
                   </Input>
-                  {loadingDepartments && (
+                  {loadingEmployees && (
                     <small className="text-muted">
                       <Spinner size="sm" className="me-1" />
-                      Loading departments...
+                      Loading employees...
                     </small>
                   )}
                 </FormGroup>
@@ -153,7 +183,7 @@ function OrganizationSkillTimelineSection() {
                     id="skillId"
                     value={formData.skillId}
                     onChange={(e) => handleChange(e, setFormData)}
-                    disabled={loadingSkills}
+                    disabled={loadingSkills || !formData.employeeId || skills.length === 0}
                   >
                     <option value="">All Skills</option>
                     {skills.map((skill) => (
@@ -166,6 +196,11 @@ function OrganizationSkillTimelineSection() {
                     <small className="text-muted">
                       <Spinner size="sm" className="me-1" />
                       Loading skills...
+                    </small>
+                  )}
+                  {!loadingSkills && formData.employeeId && skills.length === 0 && (
+                    <small className="text-muted">
+                      No skills found for this employee.
                     </small>
                   )}
                 </FormGroup>
@@ -202,7 +237,7 @@ function OrganizationSkillTimelineSection() {
                 <Button
                   type="submit"
                   color="primary"
-                  disabled={loadingReport}
+                  disabled={loadingReport || !formData.employeeId}
                 >
                   {loadingReport ? (
                     <>
@@ -220,8 +255,7 @@ function OrganizationSkillTimelineSection() {
           {reportData && reportData.skills && reportData.skills.length > 0 && (
             <div className="mt-4">
               <h5 className="mb-3">
-                {reportData.organizationName}
-                {reportData.departmentName && ` - ${reportData.departmentName}`}
+                {reportData.firstName} {reportData.lastName}
                 {selectedSkillName && ` - ${selectedSkillName}`}
               </h5>
 
@@ -229,21 +263,13 @@ function OrganizationSkillTimelineSection() {
                 const chartData = getChartDataForSkill(skill);
                 if (chartData.length === 0) return null;
 
-                // Calculate min/max/avg from the timeline points for the selected range
-                const ratings = skill.timeline.map(point => point.avgRating).filter(r => r != null);
-                const minRating = ratings.length > 0 ? Math.min(...ratings) : null;
-                const maxRating = ratings.length > 0 ? Math.max(...ratings) : null;
-                const avgRating = ratings.length > 0 
-                  ? ratings.reduce((sum, r) => sum + r, 0) / ratings.length 
-                  : null;
-
                 return (
                   <div key={skill.skillId} className="mb-5">
                     <h6 className="mb-3">
                       {skill.skillName}
-                      {avgRating !== null && (
+                      {skill.avgRating !== null && skill.avgRating !== undefined && (
                         <span className="ms-3 text-muted" style={{ fontSize: '0.9rem' }}>
-                          (Avg: {avgRating.toFixed(2)}, Min: {minRating?.toFixed(2) || 'N/A'}, Max: {maxRating?.toFixed(2) || 'N/A'})
+                          (Avg: {skill.avgRating.toFixed(2)}, Min: {skill.minRating?.toFixed(2) || 'N/A'}, Max: {skill.maxRating?.toFixed(2) || 'N/A'})
                         </span>
                       )}
                     </h6>
@@ -265,25 +291,9 @@ function OrganizationSkillTimelineSection() {
                         <Legend />
                         <Line 
                           type="monotone" 
-                          dataKey="avgRating" 
+                          dataKey="rating" 
                           stroke="#8884d8" 
-                          name="Average Rating"
-                          strokeWidth={2}
-                          dot={{ r: 4 }}
-                        />
-                        <Line 
-                          type="monotone" 
-                          dataKey="maxRating" 
-                          stroke="#82ca9d" 
-                          name="Max Rating"
-                          strokeWidth={2}
-                          dot={{ r: 4 }}
-                        />
-                        <Line 
-                          type="monotone" 
-                          dataKey="minRating" 
-                          stroke="#ffc658" 
-                          name="Min Rating"
+                          name="Rating"
                           strokeWidth={2}
                           dot={{ r: 4 }}
                         />
@@ -295,10 +305,20 @@ function OrganizationSkillTimelineSection() {
             </div>
           )}
 
-          {reportData && (!reportData.skills || reportData.skills.length === 0) && (
-            <div className="mt-4 text-muted">
-              <p>No timeline data available for the selected filters.</p>
-            </div>
+          {hasAttemptedReport && !loadingReport && (
+            <>
+              {reportData && (!reportData.skills || reportData.skills.length === 0) && (
+                <div className="mt-4 text-muted">
+                  <p>No timeline data available for {selectedEmployee ? `${selectedEmployee.firstName} ${selectedEmployee.lastName}` : 'the selected employee'}{selectedSkillName ? ` - ${selectedSkillName}` : ''}.</p>
+                </div>
+              )}
+
+              {!reportData && (
+                <div className="mt-4 text-muted">
+                  <p>No timeline data found for {selectedEmployee ? `${selectedEmployee.firstName} ${selectedEmployee.lastName}` : 'the selected employee'}{selectedSkillName ? ` - ${selectedSkillName}` : ''}. Please try a different employee or skill.</p>
+                </div>
+              )}
+            </>
           )}
         </CardBody>
       </Collapse>
@@ -306,5 +326,5 @@ function OrganizationSkillTimelineSection() {
   );
 }
 
-export default OrganizationSkillTimelineSection;
+export default EmployeeSkillTimelineSection;
 
