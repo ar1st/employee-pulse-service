@@ -147,6 +147,23 @@ export default function SaveEmployeeForm({ employeeId = null }) {
     [occupationOptions, formData.occupationId]
   );
 
+  const departmentOptions = useMemo(
+    () =>
+      departments.map((department) => ({
+        value: department.id,
+        label: department.name
+      })),
+    [departments]
+  );
+
+  const selectedDepartmentOption = useMemo(
+    () =>
+      departmentOptions.find(
+        (opt) => opt.value?.toString() === formData.departmentId
+      ) || null,
+    [departmentOptions, formData.departmentId]
+  );
+
   const handleSubmit = (e) => {
     e.preventDefault();
     setSubmitting(true);
@@ -259,21 +276,23 @@ export default function SaveEmployeeForm({ employeeId = null }) {
       <Col md={6} style={{paddingLeft: 0}}>
         <FormGroup>
           <Label for="departmentId">Department *</Label>
-          <Input
-            type="select"
-            name="departmentId"
-            id="departmentId"
-            value={formData.departmentId}
-            onChange={(e) => handleChange(e, setFormData)}
-            required
-          >
-            <option value="">No department</option>
-            {departments.map((department) => (
-              <option key={department.id} value={department.id}>
-                {department.name}
-              </option>
-            ))}
-          </Input>
+          <Select
+            inputId="departmentId"
+            options={departmentOptions}
+            value={selectedDepartmentOption}
+            onChange={(selected) => {
+              setFormData((prev) => ({
+                ...prev,
+                departmentId: selected ? selected.value.toString() : ''
+              }));
+            }}
+            isClearable
+            placeholder="Select a department..."
+            menuPortalTarget={typeof document !== 'undefined' ? document.body : null}
+            styles={{
+              menuPortal: (base) => ({ ...base, zIndex: 9999 })
+            }}
+          />
         </FormGroup>
       </Col>
       <Col md={6}>
