@@ -40,10 +40,11 @@ export const GET_ORG_DEPT_REPORT_URL = (orgId, deptId, skillId, startDate, endDa
   if (endDate !== null && endDate !== undefined) params.append('endDate', endDate);
   return `${API_BASE_URL}/reports/org/${orgId}?${params.toString()}`;
 }
-export const GET_EMPLOYEE_REPORT_URL = (employeeId, periodType, periodValue, year) => {
-  const params = new URLSearchParams({ periodType });
-  if (periodValue !== null && periodValue !== undefined) params.append('periodValue', periodValue);
-  if (year !== null && year !== undefined) params.append('year', year);
+export const GET_EMPLOYEE_REPORT_URL = (employeeId, startDate, endDate) => {
+  const params = new URLSearchParams();
+  // periodType defaults to QUARTER on backend, so we don't need to pass it
+  if (startDate !== null && startDate !== undefined) params.append('startDate', startDate);
+  if (endDate !== null && endDate !== undefined) params.append('endDate', endDate);
   return `${API_BASE_URL}/reports/employee/${employeeId}?${params.toString()}`;
 }
 export const GET_EMPLOYEE_SKILL_TIMELINE_URL = (employeeId, skillId, startDate, endDate) => {

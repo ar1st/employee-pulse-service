@@ -5,6 +5,7 @@ import { DEFAULT_ORGANIZATION_ID, GET_EMPLOYEES_BY_ORGANIZATION_URL, GET_EMPLOYE
 import { axiosGet } from '../../lib/api/client.js';
 import useCatch from '../../lib/api/useCatch.js';
 import { handleChange } from '../../lib/formUtils.js';
+import { getDefaultDates } from '../../lib/dateUtils.js';
 
 function EmployeePerformanceReviewsSection() {
   const { cWrapper } = useCatch();
@@ -21,7 +22,7 @@ function EmployeePerformanceReviewsSection() {
   const [formData, setFormData] = useState({
     employeeId: '',
     skillId: '',
-    year: new Date().getFullYear().toString()
+    ...getDefaultDates()
   });
 
   // Load employees on mount
@@ -111,7 +112,7 @@ function EmployeePerformanceReviewsSection() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!formData.employeeId || !formData.skillId || !formData.year) {
+    if (!formData.employeeId || !formData.skillId || !formData.startDate || !formData.endDate) {
       return;
     }
 
@@ -120,9 +121,8 @@ function EmployeePerformanceReviewsSection() {
     cWrapper(() =>
       axiosGet(GET_EMPLOYEE_REPORT_URL(
         parseInt(formData.employeeId),
-        'QUARTER',
-        null,
-        parseInt(formData.year)
+        formData.startDate || null,
+        formData.endDate || null
       ))
         .then((response) => {
           setReportData(response.data || null);
@@ -210,24 +210,37 @@ function EmployeePerformanceReviewsSection() {
             </Col>
             <Col md={3}>
               <FormGroup>
-                <Label for="year">Year *</Label>
+                <Label for="startDate">Start Date *</Label>
                 <Input
-                  type="number"
-                  name="year"
-                  id="year"
-                  value={formData.year}
+                  type="date"
+                  name="startDate"
+                  id="startDate"
+                  value={formData.startDate}
                   onChange={(e) => handleChange(e, setFormData)}
-                  min="2000"
-                  max={new Date().getFullYear() + 1}
                   required
                 />
               </FormGroup>
             </Col>
-            <Col md={3} className="d-flex align-items-end" style={{marginBottom: '17px'}}>
+            <Col md={3}>
+              <FormGroup>
+                <Label for="endDate">End Date *</Label>
+                <Input
+                  type="date"
+                  name="endDate"
+                  id="endDate"
+                  value={formData.endDate}
+                  onChange={(e) => handleChange(e, setFormData)}
+                  required
+                />
+              </FormGroup>
+            </Col>
+          </Row>
+          <Row>
+            <Col md={12} className="d-flex justify-content-end">
               <Button
                 type="submit"
                 color="primary"
-                disabled={loadingReport || !formData.employeeId || !formData.skillId || !formData.year}
+                disabled={loadingReport || !formData.employeeId || !formData.skillId || !formData.startDate || !formData.endDate}
               >
                 {loadingReport ? (
                   <>
@@ -247,7 +260,7 @@ function EmployeePerformanceReviewsSection() {
             <h5 className="mb-3">
               {selectedEmployee && `${selectedEmployee.firstName} ${selectedEmployee.lastName}`}
               {selectedSkillName && ` - ${selectedSkillName}`}
-              {` - ${formData.year}`}
+              {` - ${formData.startDate} to ${formData.endDate}`}
             </h5>
             <ResponsiveContainer width="100%" height={400}>
               <BarChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
@@ -272,12 +285,12 @@ function EmployeePerformanceReviewsSection() {
           <>
             {reportData && chartData.length === 0 && (
               <div className="mt-4 text-muted">
-                <p>No review data available for {selectedEmployee ? `${selectedEmployee.firstName} ${selectedEmployee.lastName}` : 'the selected employee'}{selectedSkillName ? ` - ${selectedSkillName}` : ''} for the year {formData.year}.</p>
+                <p>No review data available for {selectedEmployee ? `${selectedEmployee.firstName} ${selectedEmployee.lastName}` : 'the selected employee'}{selectedSkillName ? ` - ${selectedSkillName}` : ''} for the selected date range.</p>
               </div>
             )}
             {!reportData && (
               <div className="mt-4 text-muted">
-                <p>No review data found for {selectedEmployee ? `${selectedEmployee.firstName} ${selectedEmployee.lastName}` : 'the selected employee'}{selectedSkillName ? ` - ${selectedSkillName}` : ''} for the year {formData.year}. Please try a different employee, skill, or year.</p>
+                <p>No review data found for {selectedEmployee ? `${selectedEmployee.firstName} ${selectedEmployee.lastName}` : 'the selected employee'}{selectedSkillName ? ` - ${selectedSkillName}` : ''} for the selected date range. Please try a different employee, skill, or date range.</p>
               </div>
             )}
           </>

@@ -44,12 +44,12 @@ public class ReportingController {
     @GetMapping("/employee/{employeeId}")
     public ResponseEntity<EmployeeReportingResponseDto> getReportByEmployee(
             @PathVariable Integer employeeId,
-            @RequestParam PeriodType periodType,
-            @RequestParam(required = false) Integer periodValue,
-            @RequestParam(required = false) Integer year
+            @RequestParam(required = false) PeriodType periodType,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate
     ) {
         return ResponseEntity.ok(
-                reportingRepository.getReportByEmployee(periodType, employeeId, periodValue, year)
+                reportingRepository.getReportByEmployee(periodType, employeeId, startDate, endDate)
         );
     }
 

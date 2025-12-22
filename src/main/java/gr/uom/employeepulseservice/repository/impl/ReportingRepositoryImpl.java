@@ -215,14 +215,17 @@ public class ReportingRepositoryImpl implements ReportingRepository {
     public EmployeeReportingResponseDto getReportByEmployee(
             PeriodType periodType,
             Integer employeeId,
-            Integer periodValue,
-            Integer year
+            LocalDate startDate,
+            LocalDate endDate
     ) {
         // Default period type if missing
-        periodType = periodType == null ? PeriodType.MONTH : periodType;
+        periodType = periodType == null ? PeriodType.QUARTER : periodType;
+
+        String periodStart = periodStartExpression(periodType);
+        String dateRangeWhere = dateRangePredicate(startDate, endDate);
 
         // SQL expression for period grouping (month, quarter, etc.)
-        String sql = constructSqlStatement(periodType, periodValue, year, """
+        String sql = String.format("""
                 SELECT
                     employee_id,
                     first_name,
@@ -234,19 +237,18 @@ public class ReportingRepositoryImpl implements ReportingRepository {
                     max(rating) AS max_rating
                 FROM v_employee_skill_period
                 WHERE employee_id = :employeeId
-                  AND %s          -- period filter
-                  AND %s          -- year filter
+                  AND %s
                 GROUP BY employee_id, first_name, last_name, skill_name, period_start
                 ORDER BY skill_name, period_start DESC;
-                """);
+                """, periodStart, dateRangeWhere);
 
         // Mandatory employee parameter
         MapSqlParameterSource params = new MapSqlParameterSource()
                 .addValue("employeeId", employeeId);
 
-        // Optional parameters
-        if (periodValue != null) params.addValue("periodValue", periodValue);
-        if (year != null) params.addValue("year", year);
+        // Optional date range parameters
+        if (startDate != null) params.addValue("startDate", startDate);
+        if (endDate != null) params.addValue("endDate", endDate);
 
         // Execute SQL & map each row to a statistics DTO
         List<EmployeeReportingStatsDto> rows = jdbc.query(sql, params, (rs, rn) ->

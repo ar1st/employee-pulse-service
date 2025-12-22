@@ -21,8 +21,8 @@ public interface ReportingRepository {
     // Returns aggregated reporting stats for an employee
     EmployeeReportingResponseDto getReportByEmployee(PeriodType periodType,
                                                      Integer employeeId,
-                                                     Integer periodValue,
-                                                     Integer year);
+                                                     LocalDate startDate,
+                                                     LocalDate endDate);
 
     // Returns timeline data for all skills of an employee
     EmployeeSkillTimelineResponseDto getSkillTimelineByEmployee(Integer employeeId, Integer skillId, LocalDate startDate, LocalDate endDate);
