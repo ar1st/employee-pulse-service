@@ -1,15 +1,15 @@
 import {Button, Col, Form, FormGroup, Input, Label, Row, Spinner} from "reactstrap";
 import {
+  CREATE_EMPLOYEE_URL,
   DEFAULT_ORGANIZATION_ID,
-  GET_EMPLOYEE_URL,
   GET_DEPARTMENTS_BY_ORGANIZATION_URL,
+  GET_EMPLOYEE_URL,
   GET_OCCUPATIONS_BY_ORGANIZATION_URL,
   SEARCH_OCCUPATIONS_URL,
-  CREATE_EMPLOYEE_URL,
   UPDATE_EMPLOYEE_URL
 } from "../../lib/api/apiUrls.js";
 import {axiosGet, axiosPost, axiosPut} from "../../lib/api/client.js";
-import {useEffect, useState, useMemo, useRef} from "react";
+import {useEffect, useMemo, useRef, useState} from "react";
 import useCatch from "../../lib/api/useCatch.js";
 import {useNavigate} from "react-router-dom";
 import {handleChange} from "../../lib/formUtils.js";
@@ -285,8 +285,15 @@ export default function SaveEmployeeForm({ employeeId = null }) {
             value={formData.occupationId}
             onChange={(e) => {
               handleChange(e, setFormData);
-              // Clear search when an occupation is selected
-              setOccupationSearchTerm('');
+
+              const selectedId = e.target.value;
+              const selectedOccupation = occupationsToShow.find(
+                (occupation) => occupation.id?.toString() === selectedId
+              );
+
+              if (selectedOccupation) {
+                setOccupationSearchTerm(selectedOccupation.title || '');
+              }
             }}
             required
 
