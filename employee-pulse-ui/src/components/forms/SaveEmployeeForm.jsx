@@ -1,4 +1,5 @@
 import {Button, Col, Form, FormGroup, Input, Label, Row, Spinner} from "reactstrap";
+import Select from 'react-select';
 import {
   CREATE_EMPLOYEE_URL,
   DEFAULT_ORGANIZATION_ID,
@@ -107,7 +108,9 @@ export default function SaveEmployeeForm({ employeeId = null }) {
           .then((response) => {
             setSearchedOccupations(response.data || []);
           })
-          .finally(() => setSearchingOccupations(false))
+          .finally(() => {
+            setSearchingOccupations(false);
+          })
       );
     }, 300);
 
@@ -126,6 +129,23 @@ export default function SaveEmployeeForm({ employeeId = null }) {
     }
     return organizationOccupations;
   }, [occupationSearchTerm, searchedOccupations, organizationOccupations]);
+
+  const occupationOptions = useMemo(
+    () =>
+      occupationsToShow.map((occupation) => ({
+        value: occupation.id,
+        label: occupation.title
+      })),
+    [occupationsToShow]
+  );
+
+  const selectedOccupationOption = useMemo(
+    () =>
+      occupationOptions.find(
+        (opt) => opt.value?.toString() === formData.occupationId
+      ) || null,
+    [occupationOptions, formData.occupationId]
+  );
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -259,52 +279,29 @@ export default function SaveEmployeeForm({ employeeId = null }) {
       <Col md={6}>
         <FormGroup>
           <Label for="occupationSearch">Occupation *</Label>
-          <div className="position-relative mb-2">
-            <Input
-              type="text"
-              id="occupationSearch"
-              value={occupationSearchTerm}
-              onChange={(e) => setOccupationSearchTerm(e.target.value)}
-              placeholder="Type to search occupations..."
-            />
-            {searchingOccupations && (
-              <div className="position-absolute top-50 end-0 translate-middle-y pe-3">
-                <Spinner size="sm" color="primary" />
-              </div>
-            )}
-          </div>
-          {occupationSearchTerm && !searchingOccupations && searchedOccupations.length === 0 && (
-            <small className="form-text text-muted mb-2 d-block">
-              No occupations found matching "{occupationSearchTerm}"
-            </small>
-          )}
-          <Input
-            type="select"
-            name="occupationId"
-            id="occupationId"
-            value={formData.occupationId}
-            onChange={(e) => {
-              handleChange(e, setFormData);
-
-              const selectedId = e.target.value;
-              const selectedOccupation = occupationsToShow.find(
-                (occupation) => occupation.id?.toString() === selectedId
-              );
-
-              if (selectedOccupation) {
-                setOccupationSearchTerm(selectedOccupation.title || '');
+          <Select
+            inputId="occupationSearch"
+            options={occupationOptions}
+            value={selectedOccupationOption}
+            onChange={(selected) => {
+              setFormData((prev) => ({
+                ...prev,
+                occupationId: selected ? selected.value.toString() : ''
+              }));
+            }}
+            onInputChange={(value, actionMeta) => {
+              if (actionMeta.action === 'input-change') {
+                setOccupationSearchTerm(value);
               }
             }}
-            required
-
-          >
-            <option value="">No occupation</option>
-            {occupationsToShow.map((occupation) => (
-              <option key={occupation.id} value={occupation.id}>
-                {occupation.title}
-              </option>
-            ))}
-          </Input>
+            isLoading={searchingOccupations}
+            isClearable
+            placeholder="Type to search occupations..."
+            menuPortalTarget={typeof document !== 'undefined' ? document.body : null}
+            styles={{
+              menuPortal: (base) => ({ ...base, zIndex: 9999 })
+            }}
+          />
         </FormGroup>
       </Col>
     </Row>
