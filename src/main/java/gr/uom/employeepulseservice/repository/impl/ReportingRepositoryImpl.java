@@ -53,6 +53,20 @@ public class ReportingRepositoryImpl implements ReportingRepository {
         return (year == null) ? "TRUE" : "EXTRACT(year FROM entry_date)::int = :year ";
     }
 
+    // Returns SQL predicate for filtering by an optional date range
+    private String dateRangePredicate(LocalDate startDate, LocalDate endDate) {
+        StringBuilder predicate = new StringBuilder("TRUE");
+
+        if (startDate != null) {
+            predicate.append(" AND entry_date::date >= :startDate");
+        }
+        if (endDate != null) {
+            predicate.append(" AND entry_date::date <= :endDate");
+        }
+
+        return predicate.toString();
+    }
+
     @Override
     @Transactional(readOnly = true)
     public OrgDeptReportingResponseDto getReportByOrganizationAndDepartment(
@@ -60,15 +74,14 @@ public class ReportingRepositoryImpl implements ReportingRepository {
             Integer organizationId,
             Integer departmentId,
             Integer skillId,
-            Integer periodValue,
-            Integer year
+            LocalDate startDate,
+            LocalDate endDate
     ) {
         // Default period type if missing
         periodType = periodType == null ? PeriodType.QUARTER : periodType;
 
         String periodStart = periodStartExpression(periodType);
-        String periodValueWhere = periodValuePredicate(periodType, periodValue);
-        String yearWhere = yearPredicate(year);
+        String dateRangeWhere = dateRangePredicate(startDate, endDate);
 
         // Build SELECT clause - conditionally include department_name
         StringBuilder selectBuilder = new StringBuilder("""
@@ -105,8 +118,7 @@ public class ReportingRepositoryImpl implements ReportingRepository {
             sqlBuilder.append(" AND skill_id = :skillId");
         }
 
-        sqlBuilder.append(" AND ").append(periodValueWhere);
-        sqlBuilder.append(" AND ").append(yearWhere);
+        sqlBuilder.append(" AND ").append(dateRangeWhere);
         
         // Build GROUP BY clause - conditionally include department_name
         sqlBuilder.append(" GROUP BY organization_name");
@@ -123,8 +135,8 @@ public class ReportingRepositoryImpl implements ReportingRepository {
 
         if (departmentId != null) params.addValue("deptId", departmentId);
         if (skillId != null) params.addValue("skillId", skillId);
-        if (periodValue != null) params.addValue("periodValue", periodValue);
-        if (year != null) params.addValue("year", year);
+        if (startDate != null) params.addValue("startDate", startDate);
+        if (endDate != null) params.addValue("endDate", endDate);
 
         // Execute SQL & map each row to a statistics DTO
         List<OrgDeptReportingStatsDto> rows = jdbc.query(sql, params, (rs, rn) ->

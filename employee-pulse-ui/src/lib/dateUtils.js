@@ -1,3 +1,6 @@
+import {useEffect, useState} from "react";
+import {axiosGet} from "./api/client.js";
+
 export function formatDateTime(dateTime) {
   // dateTime is "2025,3,22,9,0"
   const [year, month, day, hour, minute] = dateTime.map(Number);
@@ -25,4 +28,16 @@ export const formatDateForInput = (date) => {
   const month = String(d.getMonth() + 1).padStart(2, '0');
   const day = String(d.getDate()).padStart(2, '0');
   return `${year}-${month}-${day}`;
+};
+
+export const getDefaultDates = () => {
+  const now = new Date();
+  const currentYear = now.getFullYear();
+  const startDate = new Date(currentYear, 0, 1);
+  const endDate = new Date(currentYear, 11, 31);
+
+  return {
+    startDate: formatDateForInput(startDate),
+    endDate: formatDateForInput(endDate)
+  };
 };

@@ -15,8 +15,8 @@ public interface ReportingRepository {
                                                                      Integer organizationId,
                                                                      Integer departmentId,
                                                                      Integer skillId,
-                                                                     Integer periodValue,
-                                                                     Integer year);
+                                                                     LocalDate startDate,
+                                                                     LocalDate endDate);
 
     // Returns aggregated reporting stats for an employee
     EmployeeReportingResponseDto getReportByEmployee(PeriodType periodType,

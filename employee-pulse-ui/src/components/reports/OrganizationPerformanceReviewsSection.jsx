@@ -5,6 +5,7 @@ import { DEFAULT_ORGANIZATION_ID, GET_SKILLS_BY_ORGANIZATION_URL, GET_DEPARTMENT
 import { axiosGet } from '../../lib/api/client.js';
 import useCatch from '../../lib/api/useCatch.js';
 import { handleChange } from '../../lib/formUtils.js';
+import {getDefaultDates} from '../../lib/dateUtils.js';
 
 function OrganizationPerformanceReviewsSection() {
   const { cWrapper } = useCatch();
@@ -20,14 +21,14 @@ function OrganizationPerformanceReviewsSection() {
   const [formData, setFormData] = useState({
     skillId: '',
     departmentId: '',
-    year: new Date().getFullYear().toString()
+    ...getDefaultDates()
   });
 
   // Load skills and departments on mount
   useEffect(() => {
     setLoadingSkills(true);
     setLoadingDepartments(true);
-    
+
     cWrapper(() =>
       Promise.all([
         axiosGet(GET_SKILLS_BY_ORGANIZATION_URL(DEFAULT_ORGANIZATION_ID)),
@@ -64,7 +65,7 @@ function OrganizationPerformanceReviewsSection() {
     const chartDataPoints = selectedSkill.periods.map(period => {
       const date = new Date(period.periodStart);
       const quarter = `Q${Math.floor(date.getMonth() / 3) + 1} ${date.getFullYear()}`;
-      
+
       return {
         quarter,
         avgRating: period.avgRating || 0,
@@ -87,7 +88,7 @@ function OrganizationPerformanceReviewsSection() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!formData.skillId || !formData.year) {
+    if (!formData.skillId || !formData.startDate || !formData.endDate) {
       return;
     }
 
@@ -97,9 +98,8 @@ function OrganizationPerformanceReviewsSection() {
         DEFAULT_ORGANIZATION_ID,
         formData.departmentId ? parseInt(formData.departmentId) : null, // deptId
         parseInt(formData.skillId), // skillId
-        'QUARTER', // periodType
-        null, // periodValue - null to get all quarters
-        parseInt(formData.year)
+        formData.startDate || null,
+        formData.endDate || null
       ))
         .then((response) => {
           setReportData(response.data);
@@ -108,16 +108,16 @@ function OrganizationPerformanceReviewsSection() {
     );
   };
 
-  const selectedSkillName = reportData?.skills?.[0]?.skillName || 
+  const selectedSkillName = reportData?.skills?.[0]?.skillName ||
     skills.find(s => s.id === parseInt(formData.skillId))?.name || '';
-  
-  const selectedDepartmentName = formData.departmentId 
-    ? departments.find(d => d.id === parseInt(formData.departmentId))?.name 
+
+  const selectedDepartmentName = formData.departmentId
+    ? departments.find(d => d.id === parseInt(formData.departmentId))?.name
     : null;
 
   return (
     <Card className="mb-4">
-      <CardHeader 
+      <CardHeader
         style={{ cursor: 'pointer' }}
         onClick={() => setIsOpen(!isOpen)}
       >
@@ -186,24 +186,38 @@ function OrganizationPerformanceReviewsSection() {
             </Col>
             <Col md={3}>
               <FormGroup>
-                <Label for="year">Year *</Label>
+                <Label for="startDate">Start Date *</Label>
                 <Input
-                  type="number"
-                  name="year"
-                  id="year"
-                  value={formData.year}
+                  type="date"
+                  name="startDate"
+                  id="startDate"
+                  value={formData.startDate}
                   onChange={(e) => handleChange(e, setFormData)}
-                  min="2000"
-                  max={new Date().getFullYear() + 1}
                   required
                 />
               </FormGroup>
             </Col>
-            <Col md={3} className="d-flex align-items-end" style={{marginBottom: '17px'}}>
+
+            <Col md={3}>
+              <FormGroup>
+                <Label for="endDate">End Date *</Label>
+                <Input
+                  type="date"
+                  name="endDate"
+                  id="endDate"
+                  value={formData.endDate}
+                  onChange={(e) => handleChange(e, setFormData)}
+                  required
+                />
+              </FormGroup>
+            </Col>
+          </Row>
+          <Row>
+            <Col md={12} className="d-flex justify-content-end">
               <Button
                 type="submit"
                 color="primary"
-                disabled={loadingReport || !formData.skillId || !formData.year}
+                disabled={loadingReport || !formData.skillId || !formData.startDate || !formData.endDate}
               >
                 {loadingReport ? (
                   <>
@@ -223,13 +237,13 @@ function OrganizationPerformanceReviewsSection() {
             <h5 className="mb-3">
               {selectedSkillName}
               {selectedDepartmentName && ` - ${selectedDepartmentName}`}
-              {` - ${formData.year}`}
+              {` - ${formData.startDate} to ${formData.endDate}`}
             </h5>
             <ResponsiveContainer width="100%" height={400}>
               <BarChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="quarter" />
-                <YAxis 
+                <YAxis
                   label={{ value: 'Rating', angle: -90, position: 'insideLeft' }}
                   domain={[0, 5]}
                   ticks={[0, 1, 2, 3, 4, 5]}
@@ -238,11 +252,11 @@ function OrganizationPerformanceReviewsSection() {
                 <Legend />
                 <Bar dataKey="avgRating" fill="#8884d8" name="Average Rating" />
                 <Bar dataKey="maxRating" fill="#ff7300" name="Max Rating" />
-                
+
                 <Bar dataKey="minRating" fill="#ffc658" name="Min Rating" />
               </BarChart>
             </ResponsiveContainer>
-            
+
             {/* Employee Count */}
             <div className="mt-4">
               <h6>Employee Count by Quarter</h6>
@@ -259,7 +273,7 @@ function OrganizationPerformanceReviewsSection() {
 
         {reportData && chartData.length === 0 && (
           <div className="mt-4 text-muted">
-            <p>No data available for the selected skill and year.</p>
+            <p>No data available for the selected skill and date range.</p>
           </div>
         )}
         </CardBody>

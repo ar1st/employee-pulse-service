@@ -23,14 +23,21 @@ public class ReportingController {
     @GetMapping("/org/{orgId}")
     public ResponseEntity<OrgDeptReportingResponseDto> getReportByOrganizationAndDepartment(
             @PathVariable Integer orgId,
-            @RequestParam PeriodType periodType,
+            @RequestParam(required = false) PeriodType periodType,
             @RequestParam(required = false) Integer deptId,
             @RequestParam(required = false) Integer skillId,
-            @RequestParam(required = false) Integer periodValue,
-            @RequestParam(required = false) Integer year
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate
     ) {
         return ResponseEntity.ok(
-                reportingRepository.getReportByOrganizationAndDepartment(periodType, orgId, deptId, skillId, periodValue, year)
+                reportingRepository.getReportByOrganizationAndDepartment(
+                        periodType,
+                        orgId,
+                        deptId,
+                        skillId,
+                        startDate,
+                        endDate
+                )
         );
     }
 
