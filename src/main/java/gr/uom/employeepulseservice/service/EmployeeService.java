@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.*;
 
 @Service
@@ -59,9 +58,12 @@ public class EmployeeService {
 
     @Transactional
     public void updateEmployee(Integer id, SaveEmployeeDto dto) {
-        checkIfDuplicateEmailExists(dto.email());
 
         Employee employee = findById(id);
+
+        if (!dto.email().equals(employee.getEmail())) {
+            checkIfDuplicateEmailExists(dto.email());
+        }
 
         employeeMapper.updateFromDto(employee, dto);
         setEmployeeRelations(dto, employee);
