@@ -1,4 +1,6 @@
 import '../../styles/Common.css';
+import { OrganizationFilterProvider } from '../charts/OrganizationFilterContext.jsx';
+import OrganizationFilterComponent from '../charts/OrganizationFilterComponent.jsx';
 import OrganizationPerformanceReviewChart from '../charts/OrganizationPerformanceReviewChart.jsx';
 import OrganizationSkillTimelineChart from '../charts/OrganizationSkillTimelineChart.jsx';
 
@@ -8,9 +10,11 @@ function OrganizationChartsPage() {
       <h2>Organization Charts</h2>
       <p className="mb-4">Visualize charts for skills and performance metrics by organization and department.</p>
 
-      <OrganizationPerformanceReviewChart />
-
-      <OrganizationSkillTimelineChart />
+      <OrganizationFilterProvider>
+        <OrganizationFilterComponent />
+        <OrganizationPerformanceReviewChart />
+        <OrganizationSkillTimelineChart />
+      </OrganizationFilterProvider>
     </div>
   );
 }

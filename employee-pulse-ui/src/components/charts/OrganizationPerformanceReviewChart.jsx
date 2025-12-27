@@ -1,53 +1,50 @@
 import { useState, useEffect } from 'react';
-import { Card, CardBody, CardHeader, Form, FormGroup, Label, Input, Button, Row, Col, Spinner, Collapse, Table } from 'reactstrap';
+import { Card, CardBody, CardHeader, Collapse } from 'reactstrap';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { DEFAULT_ORGANIZATION_ID, GET_SKILLS_BY_ORGANIZATION_URL, GET_DEPARTMENTS_BY_ORGANIZATION_URL, GET_ORG_DEPT_REPORT_URL } from '../../lib/api/apiUrls.js';
+import { DEFAULT_ORGANIZATION_ID, GET_ORG_DEPT_REPORT_URL } from '../../lib/api/apiUrls.js';
 import { axiosGet } from '../../lib/api/client.js';
 import useCatch from '../../lib/api/useCatch.js';
-import { handleChange } from '../../lib/formUtils.js';
-import {getDefaultDates} from '../../lib/dateUtils.js';
+import { useOrganizationFilter } from './OrganizationFilterContext.jsx';
 
 function OrganizationPerformanceReviewChart() {
   const { cWrapper } = useCatch();
   const [isOpen, setIsOpen] = useState(true);
-  const [skills, setSkills] = useState([]);
-  const [departments, setDepartments] = useState([]);
-  const [loadingSkills, setLoadingSkills] = useState(false);
-  const [loadingDepartments, setLoadingDepartments] = useState(false);
-  const [loadingChart, setLoadingChart] = useState(false);
+  const { filterValues, triggerFetch } = useOrganizationFilter();
   const [chartResponseData, setChartResponseData] = useState(null);
   const [chartData, setChartData] = useState([]);
+  const [hasAttemptedChart, setHasAttemptedChart] = useState(false);
+  const [loadingChart, setLoadingChart] = useState(false);
 
-  const [formData, setFormData] = useState({
-    skillId: '',
-    departmentId: '',
-    ...getDefaultDates()
-  });
-
-  // Load skills and departments on mount
+  // Fetch data when triggerFetch changes (Generate Chart button clicked)
   useEffect(() => {
-    setLoadingSkills(true);
-    setLoadingDepartments(true);
+    if (triggerFetch === 0) return; // Don't fetch on initial mount
+    
+    if (!filterValues.skillId || !filterValues.startDate || !filterValues.endDate) {
+      return;
+    }
 
+    setLoadingChart(true);
+    setHasAttemptedChart(true);
     cWrapper(() =>
-      Promise.all([
-        axiosGet(GET_SKILLS_BY_ORGANIZATION_URL(DEFAULT_ORGANIZATION_ID)),
-        axiosGet(GET_DEPARTMENTS_BY_ORGANIZATION_URL(DEFAULT_ORGANIZATION_ID))
-      ])
-        .then(([skillsResponse, departmentsResponse]) => {
-          setSkills(skillsResponse.data || []);
-          const depts = departmentsResponse.data.content || departmentsResponse.data || [];
-          setDepartments(Array.isArray(depts) ? depts : []);
+      axiosGet(GET_ORG_DEPT_REPORT_URL(
+        DEFAULT_ORGANIZATION_ID,
+        filterValues.departmentId ? parseInt(filterValues.departmentId) : null,
+        parseInt(filterValues.skillId),
+        filterValues.startDate || null,
+        filterValues.endDate || null
+      ))
+        .then((response) => {
+          setChartResponseData(response.data || null);
         })
-        .finally(() => {
-          setLoadingSkills(false);
-          setLoadingDepartments(false);
+        .catch(() => {
+          setChartResponseData(null);
         })
+        .finally(() => setLoadingChart(false))
     );
-  }, [cWrapper]);
+  }, [triggerFetch, filterValues.skillId, filterValues.departmentId, filterValues.startDate, filterValues.endDate, cWrapper]);
 
   useEffect(() => {
-    if (!chartResponseData || !formData.skillId) {
+    if (!chartResponseData || !filterValues.skillId) {
       setChartData([]);
       return;
     }
@@ -83,36 +80,10 @@ function OrganizationPerformanceReviewChart() {
     });
 
     setChartData(chartDataPoints);
-  }, [chartResponseData, formData.skillId]);
+  }, [chartResponseData, filterValues.skillId]);
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (!formData.skillId || !formData.startDate || !formData.endDate) {
-      return;
-    }
-
-    setLoadingChart(true);
-    cWrapper(() =>
-      axiosGet(GET_ORG_DEPT_REPORT_URL(
-        DEFAULT_ORGANIZATION_ID,
-        formData.departmentId ? parseInt(formData.departmentId) : null, // deptId
-        parseInt(formData.skillId), // skillId
-        formData.startDate || null,
-        formData.endDate || null
-      ))
-        .then((response) => {
-          setChartResponseData(response.data);
-        })
-        .finally(() => setLoadingChart(false))
-    );
-  };
-
-  const selectedSkillName = chartResponseData?.skills?.[0]?.skillName ||
-    skills.find(s => s.id === parseInt(formData.skillId))?.name || '';
-
-  const selectedDepartmentName = formData.departmentId
-    ? departments.find(d => d.id === parseInt(formData.departmentId))?.name
-    : null;
+  const selectedSkillName = chartResponseData?.skills?.[0]?.skillName || '';
+  const selectedDepartmentName = chartResponseData?.departmentName || null;
 
   return (
     <Card className="mb-4">
@@ -127,116 +98,18 @@ function OrganizationPerformanceReviewChart() {
       </CardHeader>
       <Collapse isOpen={isOpen}>
         <CardBody>
-        <Form onSubmit={handleSubmit}>
-          <Row>
-            <Col md={3}>
-              <FormGroup>
-                <Label for="departmentId">Department</Label>
-                <Input
-                  type="select"
-                  name="departmentId"
-                  id="departmentId"
-                  value={formData.departmentId}
-                  onChange={(e) => handleChange(e, setFormData)}
-                  disabled={loadingDepartments}
-                >
-                  <option value="">All Departments</option>
-                  {departments.map((department) => (
-                    <option key={department.id} value={department.id}>
-                      {department.name}
-                    </option>
-                  ))}
-                </Input>
-                {loadingDepartments && (
-                  <small className="text-muted">
-                    <Spinner size="sm" className="me-1" />
-                    Loading departments...
-                  </small>
-                )}
-              </FormGroup>
-            </Col>
-
-            <Col md={3}>
-              <FormGroup>
-                <Label for="skillId">Skill *</Label>
-                <Input
-                  type="select"
-                  name="skillId"
-                  id="skillId"
-                  value={formData.skillId}
-                  onChange={(e) => handleChange(e, setFormData)}
-                  required
-                  disabled={loadingSkills}
-                >
-                  <option value="">Select a skill</option>
-                  {skills.map((skill) => (
-                    <option key={skill.id} value={skill.id}>
-                      {skill.name}
-                    </option>
-                  ))}
-                </Input>
-                {loadingSkills && (
-                  <small className="text-muted">
-                    <Spinner size="sm" className="me-1" />
-                    Loading skills...
-                  </small>
-                )}
-              </FormGroup>
-            </Col>
-            <Col md={3}>
-              <FormGroup>
-                <Label for="startDate">Start Date *</Label>
-                <Input
-                  type="date"
-                  name="startDate"
-                  id="startDate"
-                  value={formData.startDate}
-                  onChange={(e) => handleChange(e, setFormData)}
-                  required
-                />
-              </FormGroup>
-            </Col>
-
-            <Col md={3}>
-              <FormGroup>
-                <Label for="endDate">End Date *</Label>
-                <Input
-                  type="date"
-                  name="endDate"
-                  id="endDate"
-                  value={formData.endDate}
-                  onChange={(e) => handleChange(e, setFormData)}
-                  required
-                />
-              </FormGroup>
-            </Col>
-          </Row>
-          <Row>
-            <Col md={12} className="d-flex justify-content-end">
-              <Button
-                type="submit"
-                color="primary"
-                disabled={loadingChart || !formData.skillId || !formData.startDate || !formData.endDate}
-              >
-                {loadingChart ? (
-                  <>
-                    <Spinner size="sm" className="me-2" />
-                    Loading...
-                  </>
-                ) : (
-                  'Generate Chart'
-                )}
-              </Button>
-            </Col>
-          </Row>
-        </Form>
+        {loadingChart && (
+          <div className="mt-4 text-center">
+            <p>Loading chart data...</p>
+          </div>
+        )}
 
         {chartData.length > 0 && (
           <div className="mt-4">
             <h5 className="mb-3">
               {selectedSkillName}
               {selectedDepartmentName && ` - ${selectedDepartmentName}`}
-              {` - ${formData.startDate} to ${formData.endDate}`}
+              {` - ${filterValues.startDate} to ${filterValues.endDate}`}
             </h5>
             <ResponsiveContainer width="100%" height={400}>
               <BarChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
@@ -270,10 +143,19 @@ function OrganizationPerformanceReviewChart() {
           </div>
         )}
 
-        {chartResponseData && chartData.length === 0 && (
-          <div className="mt-4 text-muted">
-            <p>No data available for the selected skill and date range.</p>
-          </div>
+        {hasAttemptedChart && !loadingChart && (
+          <>
+            {chartResponseData && chartData.length === 0 && (
+              <div className="mt-4 text-muted">
+                <p>No data available for the selected skill and date range.</p>
+              </div>
+            )}
+            {!chartResponseData && (
+              <div className="mt-4 text-muted">
+                <p>No data found for the selected filters. Please try a different skill, department, or date range.</p>
+              </div>
+            )}
+          </>
         )}
         </CardBody>
       </Collapse>
