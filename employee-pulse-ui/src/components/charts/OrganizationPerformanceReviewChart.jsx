@@ -41,7 +41,8 @@ function OrganizationPerformanceReviewChart() {
         })
         .finally(() => setLoadingChart(false))
     );
-  }, [triggerFetch, filterValues.skillId, filterValues.departmentId, filterValues.startDate, filterValues.endDate, cWrapper]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [triggerFetch, cWrapper]);
 
   useEffect(() => {
     if (!chartResponseData || !filterValues.skillId) {

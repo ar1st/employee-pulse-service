@@ -39,7 +39,8 @@ function EmployeeSkillTimelineChart() {
         })
         .finally(() => setLoadingChart(false))
     );
-  }, [triggerFetch, filterValues.employeeId, filterValues.skillId, filterValues.startDate, filterValues.endDate, cWrapper]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [triggerFetch, cWrapper]);
 
   // Transform timeline data for chart
   const getChartDataForSkill = (skill) => {

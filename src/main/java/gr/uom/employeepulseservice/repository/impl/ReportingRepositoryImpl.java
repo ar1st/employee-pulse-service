@@ -215,6 +215,7 @@ public class ReportingRepositoryImpl implements ReportingRepository {
     public EmployeeReportingResponseDto getReportByEmployee(
             PeriodType periodType,
             Integer employeeId,
+            Integer skillId,
             LocalDate startDate,
             LocalDate endDate
     ) {
@@ -223,6 +224,13 @@ public class ReportingRepositoryImpl implements ReportingRepository {
 
         String periodStart = periodStartExpression(periodType);
         String dateRangeWhere = dateRangePredicate(startDate, endDate);
+
+        // Build WHERE clause with optional skill filter
+        StringBuilder whereClause = new StringBuilder("employee_id = :employeeId");
+        if (skillId != null) {
+            whereClause.append(" AND skill_id = :skillId");
+        }
+        whereClause.append(" AND ").append(dateRangeWhere);
 
         // SQL expression for period grouping (month, quarter, etc.)
         String sql = String.format("""
@@ -236,16 +244,18 @@ public class ReportingRepositoryImpl implements ReportingRepository {
                     min(rating) AS min_rating,
                     max(rating) AS max_rating
                 FROM v_employee_skill_period
-                WHERE employee_id = :employeeId
-                  AND %s
+                WHERE %s
                 GROUP BY employee_id, first_name, last_name, skill_name, period_start
                 ORDER BY skill_name, period_start DESC;
-                """, periodStart, dateRangeWhere);
+                """, periodStart, whereClause.toString());
 
         // Mandatory employee parameter
         MapSqlParameterSource params = new MapSqlParameterSource()
                 .addValue("employeeId", employeeId);
 
+        // Optional skill filter parameter
+        if (skillId != null) params.addValue("skillId", skillId);
+        
         // Optional date range parameters
         if (startDate != null) params.addValue("startDate", startDate);
         if (endDate != null) params.addValue("endDate", endDate);

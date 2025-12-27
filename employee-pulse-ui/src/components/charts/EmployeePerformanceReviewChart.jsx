@@ -28,6 +28,7 @@ function EmployeePerformanceReviewChart() {
     cWrapper(() =>
       axiosGet(GET_EMPLOYEE_REPORT_URL(
         parseInt(filterValues.employeeId),
+        filterValues.skillId ? parseInt(filterValues.skillId) : null,
         filterValues.startDate || null,
         filterValues.endDate || null
       ))
@@ -39,7 +40,8 @@ function EmployeePerformanceReviewChart() {
         })
         .finally(() => setLoadingCharts(false))
     );
-  }, [triggerFetch, filterValues.employeeId, filterValues.skillId, filterValues.startDate, filterValues.endDate, cWrapper]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [triggerFetch, cWrapper]);
 
   useEffect(() => {
     if (!chartResponseData || !filterValues.skillId) {

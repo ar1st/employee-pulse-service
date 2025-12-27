@@ -45,11 +45,12 @@ public class ReportingController {
     public ResponseEntity<EmployeeReportingResponseDto> getReportByEmployee(
             @PathVariable Integer employeeId,
             @RequestParam(required = false) PeriodType periodType,
+            @RequestParam(required = false) Integer skillId,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate
     ) {
         return ResponseEntity.ok(
-                reportingRepository.getReportByEmployee(periodType, employeeId, startDate, endDate)
+                reportingRepository.getReportByEmployee(periodType, employeeId, skillId, startDate, endDate)
         );
     }
 
