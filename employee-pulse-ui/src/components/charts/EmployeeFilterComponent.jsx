@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Card, CardBody, Form, FormGroup, Label, Input, Button, Row, Col } from 'reactstrap';
 import Select from 'react-select';
-import { DEFAULT_ORGANIZATION_ID, GET_SKILLS_BY_ORGANIZATION_URL, GET_EMPLOYEES_BY_ORGANIZATION_URL, GET_DEPARTMENTS_BY_ORGANIZATION_URL } from '../../lib/api/apiUrls.js';
+import { DEFAULT_ORGANIZATION_ID, GET_SKILLS_BY_ORGANIZATION_URL, GET_EMPLOYEES_BY_ORGANIZATION_URL, GET_DEPARTMENTS_BY_ORGANIZATION_URL, GET_EMPLOYEE_LATEST_SKILL_ENTRIES_URL } from '../../lib/api/apiUrls.js';
 import { axiosGet } from '../../lib/api/client.js';
 import useCatch from '../../lib/api/useCatch.js';
 import { useEmployeeFilter } from './EmployeeFilterContext.jsx';
@@ -9,12 +9,14 @@ import { useEmployeeFilter } from './EmployeeFilterContext.jsx';
 function EmployeeFilterComponent() {
   const { cWrapper } = useCatch();
   const { filterValues, setFilterValues, triggerChartGeneration } = useEmployeeFilter();
-  const [skills, setSkills] = useState([]);
+  const [allSkills, setAllSkills] = useState([]);
   const [employees, setEmployees] = useState([]);
   const [departments, setDepartments] = useState([]);
+  const [employeeSkillIds, setEmployeeSkillIds] = useState(new Set());
   const [loadingSkills, setLoadingSkills] = useState(false);
   const [loadingEmployees, setLoadingEmployees] = useState(false);
   const [loadingDepartments, setLoadingDepartments] = useState(false);
+  const [loadingEmployeeSkills, setLoadingEmployeeSkills] = useState(false);
 
   // Load skills, employees, and departments on mount
   useEffect(() => {
@@ -29,7 +31,7 @@ function EmployeeFilterComponent() {
         axiosGet(GET_DEPARTMENTS_BY_ORGANIZATION_URL(DEFAULT_ORGANIZATION_ID))
       ])
         .then(([skillsResponse, employeesResponse, departmentsResponse]) => {
-          setSkills(skillsResponse.data || []);
+          setAllSkills(skillsResponse.data || []);
           const emps = employeesResponse.data.content || employeesResponse.data || [];
           setEmployees(Array.isArray(emps) ? emps : []);
           const depts = departmentsResponse.data.content || departmentsResponse.data || [];
@@ -42,6 +44,31 @@ function EmployeeFilterComponent() {
         })
     );
   }, [cWrapper]);
+
+  // Load employee skills when employee is selected
+  useEffect(() => {
+    if (!filterValues.employeeId) {
+      setEmployeeSkillIds(new Set());
+      return;
+    }
+
+    setLoadingEmployeeSkills(true);
+    cWrapper(() =>
+      axiosGet(GET_EMPLOYEE_LATEST_SKILL_ENTRIES_URL(parseInt(filterValues.employeeId)))
+        .then((response) => {
+          const skillEntries = response.data || [];
+          const skillIds = new Set(skillEntries.map(entry => entry.skillId).filter(id => id != null));
+          setEmployeeSkillIds(skillIds);
+
+          // Clear skill selection if current skill is not in employee's skills
+          if (filterValues.skillId && !skillIds.has(parseInt(filterValues.skillId))) {
+            setFilterValues({ skillId: '' });
+          }
+        })
+        .finally(() => setLoadingEmployeeSkills(false))
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filterValues.employeeId, cWrapper]);
 
   // Filter employees by department
   const filteredEmployees = useMemo(() => {
@@ -79,14 +106,22 @@ function EmployeeFilterComponent() {
     [filteredEmployees]
   );
 
-  // Convert skills to react-select options
+  // Filter skills based on selected employee
+  const filteredSkills = useMemo(() => {
+    if (!filterValues.employeeId || employeeSkillIds.size === 0) {
+      return [];
+    }
+    return allSkills.filter(skill => employeeSkillIds.has(skill.id));
+  }, [allSkills, employeeSkillIds, filterValues.employeeId]);
+
+  // Convert filtered skills to react-select options
   const skillOptions = useMemo(
     () =>
-      skills.map((skill) => ({
+      filteredSkills.map((skill) => ({
         value: skill.id,
         label: skill.name
       })),
-    [skills]
+    [filteredSkills]
   );
 
   const selectedEmployeeOption = useMemo(
@@ -126,7 +161,8 @@ function EmployeeFilterComponent() {
 
   const handleEmployeeChange = (selected) => {
     setFilterValues({ 
-      employeeId: selected ? selected.value.toString() : '' 
+      employeeId: selected ? selected.value.toString() : '',
+      skillId: '' // Clear skill when employee changes
     });
   };
 
@@ -198,15 +234,20 @@ function EmployeeFilterComponent() {
                   options={skillOptions}
                   value={selectedSkillOption}
                   onChange={handleSkillChange}
-                  isLoading={loadingSkills}
-                  isDisabled={loadingSkills}
+                  isLoading={loadingSkills || loadingEmployeeSkills}
+                  isDisabled={loadingSkills || loadingEmployeeSkills || !filterValues.employeeId}
                   isClearable
-                  placeholder="Select a skill..."
+                  placeholder={filterValues.employeeId ? "Select a skill..." : "Select an employee first"}
                   menuPortalTarget={typeof document !== 'undefined' ? document.body : null}
                   styles={{
                     menuPortal: (base) => ({ ...base, zIndex: 9999 })
                   }}
                 />
+                {loadingEmployeeSkills && (
+                  <small className="text-muted">
+                    Loading employee skills...
+                  </small>
+                )}
               </FormGroup>
             </Col>
 

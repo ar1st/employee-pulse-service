@@ -121,7 +121,7 @@ public class EmployeeService {
         }
 
         return latestPerSkill.values().stream()
-                .map(it -> new SkillToRatingDto(it.getId(), it.getSkill().getName(), it.getRating()))
+                .map(it -> new SkillToRatingDto(it.getSkill().getId(), it.getSkill().getName(), it.getRating()))
                 .toList();
     }
 
