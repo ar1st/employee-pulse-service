@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react';
-import { Card, CardBody, Form, FormGroup, Label, Input, Button, Row, Col, Spinner } from 'reactstrap';
+import { useState, useEffect, useMemo } from 'react';
+import { Card, CardBody, Form, FormGroup, Label, Input, Button, Row, Col } from 'reactstrap';
+import Select from 'react-select';
 import { DEFAULT_ORGANIZATION_ID, GET_SKILLS_BY_ORGANIZATION_URL, GET_EMPLOYEES_BY_ORGANIZATION_URL } from '../../lib/api/apiUrls.js';
 import { axiosGet } from '../../lib/api/client.js';
 import useCatch from '../../lib/api/useCatch.js';
@@ -35,9 +36,57 @@ function EmployeeFilterComponent() {
     );
   }, [cWrapper]);
 
+  const employeeOptions = useMemo(
+    () =>
+      employees.map((employee) => ({
+        value: employee.id,
+        label: `${employee.firstName} ${employee.lastName}`
+      })),
+    [employees]
+  );
+
+  // Convert skills to react-select options
+  const skillOptions = useMemo(
+    () =>
+      skills.map((skill) => ({
+        value: skill.id,
+        label: skill.name
+      })),
+    [skills]
+  );
+
+  const selectedEmployeeOption = useMemo(
+    () =>
+      employeeOptions.find(
+        (opt) => opt.value?.toString() === filterValues.employeeId
+      ) || null,
+    [employeeOptions, filterValues.employeeId]
+  );
+
+  // Find selected skill option
+  const selectedSkillOption = useMemo(
+    () =>
+      skillOptions.find(
+        (opt) => opt.value?.toString() === filterValues.skillId
+      ) || null,
+    [skillOptions, filterValues.skillId]
+  );
+
   const handleFormChange = (e) => {
     const { name, value } = e.target;
     setFilterValues({ [name]: value });
+  };
+
+  const handleEmployeeChange = (selected) => {
+    setFilterValues({ 
+      employeeId: selected ? selected.value.toString() : '' 
+    });
+  };
+
+  const handleSkillChange = (selected) => {
+    setFilterValues({ 
+      skillId: selected ? selected.value.toString() : '' 
+    });
   };
 
   const handleSubmit = (e) => {
@@ -57,56 +106,40 @@ function EmployeeFilterComponent() {
             <Col md={3}>
               <FormGroup>
                 <Label for="employeeId">Employee *</Label>
-                <Input
-                  type="select"
-                  name="employeeId"
-                  id="employeeId"
-                  value={filterValues.employeeId}
-                  onChange={handleFormChange}
-                  disabled={loadingEmployees}
-                  required
-                >
-                  <option value="">Select an employee</option>
-                  {employees.map((employee) => (
-                    <option key={employee.id} value={employee.id}>
-                      {employee.firstName} {employee.lastName}
-                    </option>
-                  ))}
-                </Input>
-                {loadingEmployees && (
-                  <small className="text-muted">
-                    <Spinner size="sm" className="me-1" />
-                    Loading employees...
-                  </small>
-                )}
+                <Select
+                  inputId="employeeId"
+                  options={employeeOptions}
+                  value={selectedEmployeeOption}
+                  onChange={handleEmployeeChange}
+                  isLoading={loadingEmployees}
+                  isDisabled={loadingEmployees}
+                  isClearable
+                  placeholder="Select an employee..."
+                  menuPortalTarget={typeof document !== 'undefined' ? document.body : null}
+                  styles={{
+                    menuPortal: (base) => ({ ...base, zIndex: 9999 })
+                  }}
+                />
               </FormGroup>
             </Col>
 
             <Col md={3}>
               <FormGroup>
                 <Label for="skillId">Skill *</Label>
-                <Input
-                  type="select"
-                  name="skillId"
-                  id="skillId"
-                  value={filterValues.skillId}
-                  onChange={handleFormChange}
-                  disabled={loadingSkills}
-                  required
-                >
-                  <option value="">Select a skill</option>
-                  {skills.map((skill) => (
-                    <option key={skill.id} value={skill.id}>
-                      {skill.name}
-                    </option>
-                  ))}
-                </Input>
-                {loadingSkills && (
-                  <small className="text-muted">
-                    <Spinner size="sm" className="me-1" />
-                    Loading skills...
-                  </small>
-                )}
+                <Select
+                  inputId="skillId"
+                  options={skillOptions}
+                  value={selectedSkillOption}
+                  onChange={handleSkillChange}
+                  isLoading={loadingSkills}
+                  isDisabled={loadingSkills}
+                  isClearable
+                  placeholder="Select a skill..."
+                  menuPortalTarget={typeof document !== 'undefined' ? document.body : null}
+                  styles={{
+                    menuPortal: (base) => ({ ...base, zIndex: 9999 })
+                  }}
+                />
               </FormGroup>
             </Col>
 
