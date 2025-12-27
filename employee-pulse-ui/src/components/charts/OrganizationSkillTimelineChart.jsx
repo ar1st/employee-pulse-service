@@ -200,7 +200,7 @@ function OrganizationSkillTimelineChart() {
                       Loading...
                     </>
                   ) : (
-                    'Generate Timeline'
+                    'Generate Chart'
                   )}
                 </Button>
               </Col>

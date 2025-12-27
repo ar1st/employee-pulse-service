@@ -1,107 +1,46 @@
 import { useState, useEffect } from 'react';
-import { Card, CardBody, CardHeader, Collapse, Form, FormGroup, Label, Input, Button, Row, Col, Spinner } from 'reactstrap';
+import { Card, CardBody, CardHeader, Collapse } from 'reactstrap';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { DEFAULT_ORGANIZATION_ID, GET_EMPLOYEES_BY_ORGANIZATION_URL, GET_EMPLOYEE_SKILL_TIMELINE_URL, GET_EMPLOYEE_LATEST_SKILL_ENTRIES_URL } from '../../lib/api/apiUrls.js';
+import { DEFAULT_ORGANIZATION_ID, GET_ORG_DEPT_SKILL_TIMELINE_URL } from '../../lib/api/apiUrls.js';
 import { axiosGet } from '../../lib/api/client.js';
 import useCatch from '../../lib/api/useCatch.js';
-import { handleChange } from '../../lib/formUtils.js';
-import {formatDateForInput} from "../../lib/dateUtils.js";
+import { useEmployeeFilter } from './EmployeeFilterContext.jsx';
 
 function EmployeeSkillTimelineChart() {
   const { cWrapper } = useCatch();
   const [isOpen, setIsOpen] = useState(true);
-  const [skills, setSkills] = useState([]);
-  const [employees, setEmployees] = useState([]);
-  const [loadingSkills, setLoadingSkills] = useState(false);
-  const [loadingEmployees, setLoadingEmployees] = useState(false);
-  const [loadingChart, setLoadingChart] = useState(false);
+  const { filterValues, triggerFetch } = useEmployeeFilter();
   const [chartData, setChartData] = useState(null);
   const [hasAttemptedChart, setHasAttemptedChart] = useState(false);
+  const [loadingChart, setLoadingChart] = useState(false);
 
-  const getDefaultDates = () => {
-    const endDate = new Date(2025, 11, 31);
-    const startDate = new Date(2025, 0, 1);
-    return {
-      startDate: formatDateForInput(startDate),
-      endDate: formatDateForInput(endDate)
-    };
-  };
-
-  const [formData, setFormData] = useState({
-    employeeId: '',
-    skillId: '',
-    ...getDefaultDates()
-  });
-
+  // Fetch data when triggerFetch changes (Generate Chart button clicked)
   useEffect(() => {
-    setLoadingEmployees(true);
+    if (triggerFetch === 0) return; // Don't fetch on initial mount
     
-    cWrapper(() =>
-      axiosGet(GET_EMPLOYEES_BY_ORGANIZATION_URL(DEFAULT_ORGANIZATION_ID))
-        .then((employeesResponse) => {
-          const emps = employeesResponse.data.content || employeesResponse.data || [];
-          setEmployees(Array.isArray(emps) ? emps : []);
-        })
-        .finally(() => {
-          setLoadingEmployees(false);
-        })
-    );
-  }, [cWrapper]);
-
-  // Load skills when employee is selected
-  useEffect(() => {
-    if (!formData.employeeId) {
-      setSkills([]);
-      setFormData(prev => ({ ...prev, skillId: '' }));
-      return;
-    }
-
-    setLoadingSkills(true);
-    cWrapper(() =>
-      axiosGet(GET_EMPLOYEE_LATEST_SKILL_ENTRIES_URL(parseInt(formData.employeeId)))
-        .then((response) => {
-          // Convert SkillToRatingDto to skill format with id and name
-          const employeeSkills = (response.data || []).map(skillEntry => ({
-            id: skillEntry.skillId,
-            name: skillEntry.skillName
-          }));
-          setSkills(employeeSkills);
-          // Clear skill selection when employee changes
-          setFormData(prev => ({ ...prev, skillId: '' }));
-        })
-        .catch(() => {
-          setSkills([]);
-        })
-        .finally(() => {
-          setLoadingSkills(false);
-        })
-    );
-  }, [formData.employeeId, cWrapper]);
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (!formData.employeeId) {
+    if (!filterValues.startDate || !filterValues.endDate) {
       return;
     }
 
     setLoadingChart(true);
     setHasAttemptedChart(true);
     cWrapper(() =>
-      axiosGet(GET_EMPLOYEE_SKILL_TIMELINE_URL(
-        parseInt(formData.employeeId),
-        formData.skillId ? parseInt(formData.skillId) : null,
-        formData.startDate || null,
-        formData.endDate || null
+      axiosGet(GET_ORG_DEPT_SKILL_TIMELINE_URL(
+        DEFAULT_ORGANIZATION_ID,
+        filterValues.departmentId ? parseInt(filterValues.departmentId) : null,
+        filterValues.skillId ? parseInt(filterValues.skillId) : null,
+        filterValues.startDate || null,
+        filterValues.endDate || null
       ))
         .then((response) => {
-          setChartData(response.data);
+          setChartData(response.data || null);
         })
         .catch(() => {
           setChartData(null);
         })
         .finally(() => setLoadingChart(false))
     );
-  };
+  }, [triggerFetch, filterValues.departmentId, filterValues.skillId, filterValues.startDate, filterValues.endDate, cWrapper]);
 
   // Transform timeline data for chart
   const getChartDataForSkill = (skill) => {
@@ -119,14 +58,15 @@ function EmployeeSkillTimelineChart() {
           day: 'numeric' 
         }),
         dateValue: date.getTime(),
-        rating: point.rating || 0
+        avgRating: point.avgRating || 0,
+        minRating: point.minRating || 0,
+        maxRating: point.maxRating || 0
       };
     }).sort((a, b) => a.dateValue - b.dateValue);
   };
 
-  const selectedEmployee = employees.find(e => e.id === parseInt(formData.employeeId));
-  const selectedSkillName = formData.skillId
-    ? skills.find(s => s.id === parseInt(formData.skillId))?.name
+  const selectedSkillName = filterValues.skillId
+    ? chartData?.skills?.find(s => s.skillId === parseInt(filterValues.skillId))?.skillName || null
     : null;
 
   return (
@@ -144,137 +84,43 @@ function EmployeeSkillTimelineChart() {
       </CardHeader>
       <Collapse isOpen={isOpen}>
         <CardBody>
-          <Form onSubmit={handleSubmit}>
-            <Row>
-              <Col md={3}>
-                <FormGroup>
-                  <Label for="employeeId">Employee *</Label>
-                  <Input
-                    type="select"
-                    name="employeeId"
-                    id="employeeId"
-                    value={formData.employeeId}
-                    onChange={(e) => handleChange(e, setFormData)}
-                    required
-                    disabled={loadingEmployees}
-                  >
-                    <option value="">Select an employee</option>
-                    {employees.map((employee) => (
-                      <option key={employee.id} value={employee.id}>
-                        {employee.firstName} {employee.lastName}
-                      </option>
-                    ))}
-                  </Input>
-                  {loadingEmployees && (
-                    <small className="text-muted">
-                      <Spinner size="sm" className="me-1" />
-                      Loading employees...
-                    </small>
-                  )}
-                </FormGroup>
-              </Col>
-
-              <Col md={3}>
-                <FormGroup>
-                  <Label for="skillId">Skill</Label>
-                  <Input
-                    type="select"
-                    name="skillId"
-                    id="skillId"
-                    value={formData.skillId}
-                    onChange={(e) => handleChange(e, setFormData)}
-                    disabled={loadingSkills || !formData.employeeId || skills.length === 0}
-                  >
-                    <option value="">All Skills</option>
-                    {skills.map((skill) => (
-                      <option key={skill.id} value={skill.id}>
-                        {skill.name}
-                      </option>
-                    ))}
-                  </Input>
-                  {loadingSkills && (
-                    <small className="text-muted">
-                      <Spinner size="sm" className="me-1" />
-                      Loading skills...
-                    </small>
-                  )}
-                  {!loadingSkills && formData.employeeId && skills.length === 0 && (
-                    <small className="text-muted">
-                      No skills found for this employee.
-                    </small>
-                  )}
-                </FormGroup>
-              </Col>
-
-              <Col md={3}>
-                <FormGroup>
-                  <Label for="startDate">Start Date</Label>
-                  <Input
-                    type="date"
-                    name="startDate"
-                    id="startDate"
-                    value={formData.startDate}
-                    onChange={(e) => handleChange(e, setFormData)}
-                  />
-                </FormGroup>
-              </Col>
-
-              <Col md={3}>
-                <FormGroup>
-                  <Label for="endDate">End Date</Label>
-                  <Input
-                    type="date"
-                    name="endDate"
-                    id="endDate"
-                    value={formData.endDate}
-                    onChange={(e) => handleChange(e, setFormData)}
-                  />
-                </FormGroup>
-              </Col>
-            </Row>
-            <Row>
-              <Col md={12} className="d-flex justify-content-end">
-                <Button
-                  type="submit"
-                  color="primary"
-                  disabled={loadingChart || !formData.employeeId}
-                >
-                  {loadingChart ? (
-                    <>
-                      <Spinner size="sm" className="me-2" />
-                      Loading...
-                    </>
-                  ) : (
-                    'Generate Timeline'
-                  )}
-                </Button>
-              </Col>
-            </Row>
-          </Form>
+          {loadingChart && (
+            <div className="mt-4 text-center">
+              <p>Loading chart data...</p>
+            </div>
+          )}
 
           {chartData && chartData.skills && chartData.skills.length > 0 && (
             <div className="mt-4">
               <h5 className="mb-3">
-                {chartData.firstName} {chartData.lastName}
+                {chartData.departmentName && `${chartData.departmentName}`}
                 {selectedSkillName && ` - ${selectedSkillName}`}
               </h5>
 
               {chartData.skills.map((skill) => {
-                const chartData = getChartDataForSkill(skill);
-                if (chartData.length === 0) return null;
+                const skillChartData = getChartDataForSkill(skill);
+                if (skillChartData.length === 0) return null;
+
+                // Calculate min/max/avg from the timeline points for the selected range
+                const ratings = skill.timeline.map(point => point.avgRating).filter(r => r != null);
+                const minRating = ratings.length > 0 ? Math.min(...ratings) : null;
+                const maxRating = ratings.length > 0 ? Math.max(...ratings) : null;
+                const avgRating = ratings.length > 0 
+                  ? ratings.reduce((sum, r) => sum + r, 0) / ratings.length 
+                  : null;
 
                 return (
                   <div key={skill.skillId} className="mb-5">
                     <h6 className="mb-3">
                       {skill.skillName}
-                      {skill.avgRating !== null && skill.avgRating !== undefined && (
+                      {avgRating !== null && (
                         <span className="ms-3 text-muted" style={{ fontSize: '0.9rem' }}>
-                          (Avg: {skill.avgRating.toFixed(2)}, Min: {skill.minRating?.toFixed(2) || 'N/A'}, Max: {skill.maxRating?.toFixed(2) || 'N/A'})
+                          (Avg: {avgRating.toFixed(2)}, Min: {minRating?.toFixed(2) || 'N/A'}, Max: {maxRating?.toFixed(2) || 'N/A'})
                         </span>
                       )}
                     </h6>
                     <ResponsiveContainer width="100%" height={400}>
-                      <LineChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                      <LineChart data={skillChartData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
                         <CartesianGrid strokeDasharray="3 3" />
                         <XAxis 
                           dataKey="date" 
@@ -291,9 +137,9 @@ function EmployeeSkillTimelineChart() {
                         <Legend />
                         <Line 
                           type="monotone" 
-                          dataKey="rating" 
+                          dataKey="avgRating" 
                           stroke="#8884d8" 
-                          name="Rating"
+                          name="Average Rating"
                           strokeWidth={2}
                           dot={{ r: 4 }}
                         />
@@ -309,13 +155,13 @@ function EmployeeSkillTimelineChart() {
             <>
               {chartData && (!chartData.skills || chartData.skills.length === 0) && (
                 <div className="mt-4 text-muted">
-                  <p>No timeline data available for {selectedEmployee ? `${selectedEmployee.firstName} ${selectedEmployee.lastName}` : 'the selected employee'}{selectedSkillName ? ` - ${selectedSkillName}` : ''}.</p>
+                  <p>No timeline data available{selectedSkillName ? ` for ${selectedSkillName}` : ''}.</p>
                 </div>
               )}
 
               {!chartData && (
                 <div className="mt-4 text-muted">
-                  <p>No timeline data found for {selectedEmployee ? `${selectedEmployee.firstName} ${selectedEmployee.lastName}` : 'the selected employee'}{selectedSkillName ? ` - ${selectedSkillName}` : ''}. Please try a different employee or skill.</p>
+                  <p>No timeline data found{selectedSkillName ? ` for ${selectedSkillName}` : ''}. Please try a different skill or date range.</p>
                 </div>
               )}
             </>
