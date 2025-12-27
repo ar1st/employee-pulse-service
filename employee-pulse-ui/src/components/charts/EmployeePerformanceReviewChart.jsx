@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Card, CardBody, CardHeader, Collapse } from 'reactstrap';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { DEFAULT_ORGANIZATION_ID, GET_ORG_DEPT_REPORT_URL } from '../../lib/api/apiUrls.js';
+import { GET_EMPLOYEE_REPORT_URL } from '../../lib/api/apiUrls.js';
 import { axiosGet } from '../../lib/api/client.js';
 import useCatch from '../../lib/api/useCatch.js';
 import { useEmployeeFilter } from './EmployeeFilterContext.jsx';
@@ -19,17 +19,15 @@ function EmployeePerformanceReviewChart() {
   useEffect(() => {
     if (triggerFetch === 0) return; // Don't fetch on initial mount
     
-    if (!filterValues.skillId || !filterValues.startDate || !filterValues.endDate) {
+    if (!filterValues.employeeId || !filterValues.skillId || !filterValues.startDate || !filterValues.endDate) {
       return;
     }
 
     setLoadingCharts(true);
     setHasAttemptedChart(true);
     cWrapper(() =>
-      axiosGet(GET_ORG_DEPT_REPORT_URL(
-        DEFAULT_ORGANIZATION_ID,
-        filterValues.departmentId ? parseInt(filterValues.departmentId) : null,
-        parseInt(filterValues.skillId),
+      axiosGet(GET_EMPLOYEE_REPORT_URL(
+        parseInt(filterValues.employeeId),
         filterValues.startDate || null,
         filterValues.endDate || null
       ))
@@ -41,7 +39,7 @@ function EmployeePerformanceReviewChart() {
         })
         .finally(() => setLoadingCharts(false))
     );
-  }, [triggerFetch, filterValues.skillId, filterValues.departmentId, filterValues.startDate, filterValues.endDate, cWrapper]);
+  }, [triggerFetch, filterValues.employeeId, filterValues.skillId, filterValues.startDate, filterValues.endDate, cWrapper]);
 
   useEffect(() => {
     if (!chartResponseData || !filterValues.skillId) {
@@ -105,7 +103,8 @@ function EmployeePerformanceReviewChart() {
         {chartData.length > 0 && (
           <div className="mt-4">
             <h5 className="mb-3">
-              {selectedSkillName && `${selectedSkillName}`}
+              {chartResponseData?.firstName && chartResponseData?.lastName && `${chartResponseData.firstName} ${chartResponseData.lastName}`}
+              {selectedSkillName && ` - ${selectedSkillName}`}
               {` - ${filterValues.startDate} to ${filterValues.endDate}`}
             </h5>
             <ResponsiveContainer width="100%" height={400}>

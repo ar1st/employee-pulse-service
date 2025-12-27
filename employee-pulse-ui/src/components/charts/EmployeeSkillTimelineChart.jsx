@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Card, CardBody, CardHeader, Collapse } from 'reactstrap';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { DEFAULT_ORGANIZATION_ID, GET_ORG_DEPT_SKILL_TIMELINE_URL } from '../../lib/api/apiUrls.js';
+import { GET_EMPLOYEE_SKILL_TIMELINE_URL } from '../../lib/api/apiUrls.js';
 import { axiosGet } from '../../lib/api/client.js';
 import useCatch from '../../lib/api/useCatch.js';
 import { useEmployeeFilter } from './EmployeeFilterContext.jsx';
@@ -18,16 +18,15 @@ function EmployeeSkillTimelineChart() {
   useEffect(() => {
     if (triggerFetch === 0) return; // Don't fetch on initial mount
     
-    if (!filterValues.startDate || !filterValues.endDate) {
+    if (!filterValues.employeeId || !filterValues.startDate || !filterValues.endDate) {
       return;
     }
 
     setLoadingChart(true);
     setHasAttemptedChart(true);
     cWrapper(() =>
-      axiosGet(GET_ORG_DEPT_SKILL_TIMELINE_URL(
-        DEFAULT_ORGANIZATION_ID,
-        filterValues.departmentId ? parseInt(filterValues.departmentId) : null,
+      axiosGet(GET_EMPLOYEE_SKILL_TIMELINE_URL(
+        parseInt(filterValues.employeeId),
         filterValues.skillId ? parseInt(filterValues.skillId) : null,
         filterValues.startDate || null,
         filterValues.endDate || null
@@ -40,7 +39,7 @@ function EmployeeSkillTimelineChart() {
         })
         .finally(() => setLoadingChart(false))
     );
-  }, [triggerFetch, filterValues.departmentId, filterValues.skillId, filterValues.startDate, filterValues.endDate, cWrapper]);
+  }, [triggerFetch, filterValues.employeeId, filterValues.skillId, filterValues.startDate, filterValues.endDate, cWrapper]);
 
   // Transform timeline data for chart
   const getChartDataForSkill = (skill) => {
@@ -58,9 +57,7 @@ function EmployeeSkillTimelineChart() {
           day: 'numeric' 
         }),
         dateValue: date.getTime(),
-        avgRating: point.avgRating || 0,
-        minRating: point.minRating || 0,
-        maxRating: point.maxRating || 0
+        rating: point.rating || 0
       };
     }).sort((a, b) => a.dateValue - b.dateValue);
   };
@@ -93,7 +90,7 @@ function EmployeeSkillTimelineChart() {
           {chartData && chartData.skills && chartData.skills.length > 0 && (
             <div className="mt-4">
               <h5 className="mb-3">
-                {chartData.departmentName && `${chartData.departmentName}`}
+                {chartData.firstName && chartData.lastName && `${chartData.firstName} ${chartData.lastName}`}
                 {selectedSkillName && ` - ${selectedSkillName}`}
               </h5>
 
@@ -101,21 +98,13 @@ function EmployeeSkillTimelineChart() {
                 const skillChartData = getChartDataForSkill(skill);
                 if (skillChartData.length === 0) return null;
 
-                // Calculate min/max/avg from the timeline points for the selected range
-                const ratings = skill.timeline.map(point => point.avgRating).filter(r => r != null);
-                const minRating = ratings.length > 0 ? Math.min(...ratings) : null;
-                const maxRating = ratings.length > 0 ? Math.max(...ratings) : null;
-                const avgRating = ratings.length > 0 
-                  ? ratings.reduce((sum, r) => sum + r, 0) / ratings.length 
-                  : null;
-
                 return (
                   <div key={skill.skillId} className="mb-5">
                     <h6 className="mb-3">
                       {skill.skillName}
-                      {avgRating !== null && (
+                      {skill.avgRating !== null && skill.avgRating !== undefined && (
                         <span className="ms-3 text-muted" style={{ fontSize: '0.9rem' }}>
-                          (Avg: {avgRating.toFixed(2)}, Min: {minRating?.toFixed(2) || 'N/A'}, Max: {maxRating?.toFixed(2) || 'N/A'})
+                          (Avg: {skill.avgRating.toFixed(2)}, Min: {skill.minRating?.toFixed(2) || 'N/A'}, Max: {skill.maxRating?.toFixed(2) || 'N/A'})
                         </span>
                       )}
                     </h6>
@@ -137,9 +126,9 @@ function EmployeeSkillTimelineChart() {
                         <Legend />
                         <Line 
                           type="monotone" 
-                          dataKey="avgRating" 
+                          dataKey="rating" 
                           stroke="#8884d8" 
-                          name="Average Rating"
+                          name="Rating"
                           strokeWidth={2}
                           dot={{ r: 4 }}
                         />

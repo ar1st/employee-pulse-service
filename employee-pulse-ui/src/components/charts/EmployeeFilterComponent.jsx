@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Card, CardBody, Form, FormGroup, Label, Input, Button, Row, Col, Spinner } from 'reactstrap';
-import { DEFAULT_ORGANIZATION_ID, GET_SKILLS_BY_ORGANIZATION_URL, GET_DEPARTMENTS_BY_ORGANIZATION_URL } from '../../lib/api/apiUrls.js';
+import { DEFAULT_ORGANIZATION_ID, GET_SKILLS_BY_ORGANIZATION_URL, GET_EMPLOYEES_BY_ORGANIZATION_URL } from '../../lib/api/apiUrls.js';
 import { axiosGet } from '../../lib/api/client.js';
 import useCatch from '../../lib/api/useCatch.js';
 import { useEmployeeFilter } from './EmployeeFilterContext.jsx';
@@ -9,28 +9,28 @@ function EmployeeFilterComponent() {
   const { cWrapper } = useCatch();
   const { filterValues, setFilterValues, triggerChartGeneration } = useEmployeeFilter();
   const [skills, setSkills] = useState([]);
-  const [departments, setDepartments] = useState([]);
+  const [employees, setEmployees] = useState([]);
   const [loadingSkills, setLoadingSkills] = useState(false);
-  const [loadingDepartments, setLoadingDepartments] = useState(false);
+  const [loadingEmployees, setLoadingEmployees] = useState(false);
 
-  // Load skills and departments on mount
+  // Load skills and employees on mount
   useEffect(() => {
     setLoadingSkills(true);
-    setLoadingDepartments(true);
+    setLoadingEmployees(true);
 
     cWrapper(() =>
       Promise.all([
         axiosGet(GET_SKILLS_BY_ORGANIZATION_URL(DEFAULT_ORGANIZATION_ID)),
-        axiosGet(GET_DEPARTMENTS_BY_ORGANIZATION_URL(DEFAULT_ORGANIZATION_ID))
+        axiosGet(GET_EMPLOYEES_BY_ORGANIZATION_URL(DEFAULT_ORGANIZATION_ID))
       ])
-        .then(([skillsResponse, departmentsResponse]) => {
+        .then(([skillsResponse, employeesResponse]) => {
           setSkills(skillsResponse.data || []);
-          const depts = departmentsResponse.data.content || departmentsResponse.data || [];
-          setDepartments(Array.isArray(depts) ? depts : []);
+          const emps = employeesResponse.data.content || employeesResponse.data || [];
+          setEmployees(Array.isArray(emps) ? emps : []);
         })
         .finally(() => {
           setLoadingSkills(false);
-          setLoadingDepartments(false);
+          setLoadingEmployees(false);
         })
     );
   }, [cWrapper]);
@@ -42,12 +42,12 @@ function EmployeeFilterComponent() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (filterValues.startDate && filterValues.endDate && filterValues.skillId) {
+    if (filterValues.startDate && filterValues.endDate && filterValues.employeeId && filterValues.skillId) {
       triggerChartGeneration();
     }
   };
 
-  const isGenerateDisabled = !filterValues.startDate || !filterValues.endDate || !filterValues.skillId;
+  const isGenerateDisabled = !filterValues.startDate || !filterValues.endDate || !filterValues.employeeId || !filterValues.skillId;
 
   return (
     <Card className="mb-4">
@@ -56,26 +56,27 @@ function EmployeeFilterComponent() {
           <Row>
             <Col md={3}>
               <FormGroup>
-                <Label for="departmentId">Department</Label>
+                <Label for="employeeId">Employee *</Label>
                 <Input
                   type="select"
-                  name="departmentId"
-                  id="departmentId"
-                  value={filterValues.departmentId}
+                  name="employeeId"
+                  id="employeeId"
+                  value={filterValues.employeeId}
                   onChange={handleFormChange}
-                  disabled={loadingDepartments}
+                  disabled={loadingEmployees}
+                  required
                 >
-                  <option value="">All Departments</option>
-                  {departments.map((department) => (
-                    <option key={department.id} value={department.id}>
-                      {department.name}
+                  <option value="">Select an employee</option>
+                  {employees.map((employee) => (
+                    <option key={employee.id} value={employee.id}>
+                      {employee.firstName} {employee.lastName}
                     </option>
                   ))}
                 </Input>
-                {loadingDepartments && (
+                {loadingEmployees && (
                   <small className="text-muted">
                     <Spinner size="sm" className="me-1" />
-                    Loading departments...
+                    Loading employees...
                   </small>
                 )}
               </FormGroup>
@@ -83,7 +84,7 @@ function EmployeeFilterComponent() {
 
             <Col md={3}>
               <FormGroup>
-                <Label for="skillId">Skill</Label>
+                <Label for="skillId">Skill *</Label>
                 <Input
                   type="select"
                   name="skillId"
@@ -91,8 +92,9 @@ function EmployeeFilterComponent() {
                   value={filterValues.skillId}
                   onChange={handleFormChange}
                   disabled={loadingSkills}
+                  required
                 >
-                  <option value="">All Skills</option>
+                  <option value="">Select a skill</option>
                   {skills.map((skill) => (
                     <option key={skill.id} value={skill.id}>
                       {skill.name}
