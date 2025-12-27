@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react';
-import { Card, CardBody, Form, FormGroup, Label, Input, Button, Row, Col, Spinner } from 'reactstrap';
-import { DEFAULT_ORGANIZATION_ID, GET_SKILLS_BY_ORGANIZATION_URL, GET_DEPARTMENTS_BY_ORGANIZATION_URL } from '../../lib/api/apiUrls.js';
+import { useState, useEffect, useMemo } from 'react';
+import { Card, CardBody, Form, FormGroup, Label, Input, Button, Row, Col } from 'reactstrap';
+import Select from 'react-select';
+import { DEFAULT_ORGANIZATION_ID, GET_SKILLS_BY_ORGANIZATION_URL, GET_SKILLS_BY_DEPARTMENT_URL, GET_DEPARTMENTS_BY_ORGANIZATION_URL } from '../../lib/api/apiUrls.js';
 import { axiosGet } from '../../lib/api/client.js';
 import useCatch from '../../lib/api/useCatch.js';
 import { useOrganizationFilter } from './OrganizationFilterContext.jsx';
@@ -8,32 +9,107 @@ import { useOrganizationFilter } from './OrganizationFilterContext.jsx';
 function OrganizationFilterComponent() {
   const { cWrapper } = useCatch();
   const { filterValues, setFilterValues, triggerChartGeneration } = useOrganizationFilter();
-  const [skills, setSkills] = useState([]);
+  const [allSkills, setAllSkills] = useState([]);
   const [departments, setDepartments] = useState([]);
   const [loadingSkills, setLoadingSkills] = useState(false);
   const [loadingDepartments, setLoadingDepartments] = useState(false);
 
-  // Load skills and departments on mount
+  // Load departments on mount
   useEffect(() => {
-    setLoadingSkills(true);
     setLoadingDepartments(true);
 
     cWrapper(() =>
-      Promise.all([
-        axiosGet(GET_SKILLS_BY_ORGANIZATION_URL(DEFAULT_ORGANIZATION_ID)),
-        axiosGet(GET_DEPARTMENTS_BY_ORGANIZATION_URL(DEFAULT_ORGANIZATION_ID))
-      ])
-        .then(([skillsResponse, departmentsResponse]) => {
-          setSkills(skillsResponse.data || []);
+      axiosGet(GET_DEPARTMENTS_BY_ORGANIZATION_URL(DEFAULT_ORGANIZATION_ID))
+        .then((departmentsResponse) => {
           const depts = departmentsResponse.data.content || departmentsResponse.data || [];
           setDepartments(Array.isArray(depts) ? depts : []);
         })
         .finally(() => {
-          setLoadingSkills(false);
           setLoadingDepartments(false);
         })
     );
   }, [cWrapper]);
+
+  // Load skills based on department selection
+  useEffect(() => {
+    setLoadingSkills(true);
+
+    const loadSkills = filterValues.departmentId
+      ? axiosGet(GET_SKILLS_BY_DEPARTMENT_URL(parseInt(filterValues.departmentId)))
+      : axiosGet(GET_SKILLS_BY_ORGANIZATION_URL(DEFAULT_ORGANIZATION_ID));
+
+    cWrapper(() =>
+      loadSkills
+        .then((skillsResponse) => {
+          setAllSkills(skillsResponse.data || []);
+          
+          // Clear skill selection if current skill is not in the filtered skills
+          if (filterValues.skillId) {
+            const skillIds = (skillsResponse.data || []).map(s => s.id.toString());
+            if (!skillIds.includes(filterValues.skillId)) {
+              setFilterValues({ skillId: '' });
+            }
+          }
+        })
+        .finally(() => {
+          setLoadingSkills(false);
+        })
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filterValues.departmentId, cWrapper]);
+
+  // Convert departments to react-select options
+  const departmentOptions = useMemo(
+    () =>
+      departments.map((department) => ({
+        value: department.id,
+        label: department.name
+      })),
+    [departments]
+  );
+
+  // Find selected department option (null for "All Departments")
+  const selectedDepartmentOption = useMemo(
+    () =>
+      filterValues.departmentId
+        ? departmentOptions.find(
+            (opt) => opt.value?.toString() === filterValues.departmentId
+          ) || null
+        : { value: '', label: 'All Departments' },
+    [departmentOptions, filterValues.departmentId]
+  );
+
+  // Convert skills to react-select options
+  const skillOptions = useMemo(
+    () =>
+      allSkills.map((skill) => ({
+        value: skill.id,
+        label: skill.name
+      })),
+    [allSkills]
+  );
+
+  // Find selected skill option
+  const selectedSkillOption = useMemo(
+    () =>
+      skillOptions.find(
+        (opt) => opt.value?.toString() === filterValues.skillId
+      ) || null,
+    [skillOptions, filterValues.skillId]
+  );
+
+  const handleDepartmentChange = (selected) => {
+    setFilterValues({
+      departmentId: selected && selected.value !== '' ? selected.value.toString() : '',
+      skillId: '' // Clear skill when department changes
+    });
+  };
+
+  const handleSkillChange = (selected) => {
+    setFilterValues({
+      skillId: selected ? selected.value.toString() : ''
+    });
+  };
 
   const handleFormChange = (e) => {
     const { name, value } = e.target;
@@ -57,55 +133,39 @@ function OrganizationFilterComponent() {
             <Col md={3}>
               <FormGroup>
                 <Label for="departmentId">Department</Label>
-                <Input
-                  type="select"
-                  name="departmentId"
-                  id="departmentId"
-                  value={filterValues.departmentId}
-                  onChange={handleFormChange}
-                  disabled={loadingDepartments}
-                >
-                  <option value="">All Departments</option>
-                  {departments.map((department) => (
-                    <option key={department.id} value={department.id}>
-                      {department.name}
-                    </option>
-                  ))}
-                </Input>
-                {loadingDepartments && (
-                  <small className="text-muted">
-                    <Spinner size="sm" className="me-1" />
-                    Loading departments...
-                  </small>
-                )}
+                <Select
+                  inputId="departmentId"
+                  options={[{ value: '', label: 'All Departments' }, ...departmentOptions]}
+                  value={selectedDepartmentOption}
+                  onChange={handleDepartmentChange}
+                  isLoading={loadingDepartments}
+                  isDisabled={loadingDepartments}
+                  isClearable={false}
+                  menuPortalTarget={typeof document !== 'undefined' ? document.body : null}
+                  styles={{
+                    menuPortal: (base) => ({ ...base, zIndex: 9999 })
+                  }}
+                />
               </FormGroup>
             </Col>
 
             <Col md={3}>
               <FormGroup>
                 <Label for="skillId">Skill *</Label>
-                <Input
-                  type="select"
-                  name="skillId"
-                  id="skillId"
-                  value={filterValues.skillId}
-                  onChange={handleFormChange}
-                  disabled={loadingSkills}
-                  required
-                >
-                  <option value="">Select a skill</option>
-                  {skills.map((skill) => (
-                    <option key={skill.id} value={skill.id}>
-                      {skill.name}
-                    </option>
-                  ))}
-                </Input>
-                {loadingSkills && (
-                  <small className="text-muted">
-                    <Spinner size="sm" className="me-1" />
-                    Loading skills...
-                  </small>
-                )}
+                <Select
+                  inputId="skillId"
+                  options={skillOptions}
+                  value={selectedSkillOption}
+                  onChange={handleSkillChange}
+                  isLoading={loadingSkills}
+                  isDisabled={loadingSkills}
+                  isClearable
+                  placeholder="Select a skill..."
+                  menuPortalTarget={typeof document !== 'undefined' ? document.body : null}
+                  styles={{
+                    menuPortal: (base) => ({ ...base, zIndex: 9999 })
+                  }}
+                />
               </FormGroup>
             </Col>
 
