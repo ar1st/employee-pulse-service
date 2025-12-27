@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Card, CardBody, CardHeader, Collapse } from 'reactstrap';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { DEFAULT_ORGANIZATION_ID, GET_ORG_DEPT_REPORT_URL } from '../../lib/api/apiUrls.js';
 import { axiosGet } from '../../lib/api/client.js';
 import useCatch from '../../lib/api/useCatch.js';
@@ -129,16 +129,40 @@ function OrganizationPerformanceReviewChart() {
               </BarChart>
             </ResponsiveContainer>
 
-            {/* Employee Count */}
+            {/* Employee Count Line Chart */}
+            {/*<div className="mt-4">*/}
+            {/*  <h6>Employee Count by Quarter</h6>*/}
+            {/*  <div className="d-flex flex-wrap gap-3 align-items-center">*/}
+            {/*    {chartData.map((data, index) => (*/}
+            {/*      <span key={index} className="p-2 border rounded">*/}
+            {/*        <span className="fw-bold">{data.quarter}:</span> {data.employeeCount || 0}*/}
+            {/*      </span>*/}
+            {/*    ))}*/}
+            {/*  </div>*/}
+            {/*</div>*/}
+
             <div className="mt-4">
               <h6>Employee Count by Quarter</h6>
-              <div className="d-flex flex-wrap gap-3 align-items-center">
-                {chartData.map((data, index) => (
-                  <span key={index} className="p-2 border rounded">
-                    <span className="fw-bold">{data.quarter}:</span> {data.employeeCount || 0}
-                  </span>
-                ))}
-              </div>
+              <ResponsiveContainer width="100%" height={300}>
+                <LineChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="quarter" />
+                  <YAxis 
+                    label={{ value: 'Employee Count', angle: -90, position: 'insideLeft' }}
+                    allowDecimals={false}
+                  />
+                  <Tooltip />
+                  <Legend />
+                  <Line 
+                    type="monotone" 
+                    dataKey="employeeCount" 
+                    stroke="#82ca9d" 
+                    name="Employee Count"
+                    strokeWidth={2}
+                    dot={{ r: 4 }}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
             </div>
           </div>
         )}
