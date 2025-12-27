@@ -13,6 +13,7 @@ export const useEmployeeFilter = () => {
 
 export const EmployeeFilterProvider = ({ children }) => {
   const [filterValues, setFilterValues] = useState({
+    departmentId: '',
     employeeId: '',
     skillId: '',
     ...getDefaultDates()
@@ -28,6 +29,7 @@ export const EmployeeFilterProvider = ({ children }) => {
 
   const resetFilters = useCallback(() => {
     setFilterValues({
+      departmentId: '',
       employeeId: '',
       skillId: '',
       ...getDefaultDates()
