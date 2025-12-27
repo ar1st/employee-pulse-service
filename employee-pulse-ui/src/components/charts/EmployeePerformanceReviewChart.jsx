@@ -1,77 +1,101 @@
 import { useState, useEffect } from 'react';
-import { Card, CardBody, CardHeader, Form, FormGroup, Label, Input, Button, Row, Col, Spinner, Collapse, Table } from 'reactstrap';
+import { Card, CardBody, CardHeader, Form, FormGroup, Label, Input, Button, Row, Col, Spinner, Collapse } from 'reactstrap';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { DEFAULT_ORGANIZATION_ID, GET_SKILLS_BY_ORGANIZATION_URL, GET_DEPARTMENTS_BY_ORGANIZATION_URL, GET_ORG_DEPT_REPORT_URL } from '../../lib/api/apiUrls.js';
+import { DEFAULT_ORGANIZATION_ID, GET_EMPLOYEES_BY_ORGANIZATION_URL, GET_EMPLOYEE_REPORT_URL, GET_EMPLOYEE_LATEST_SKILL_ENTRIES_URL } from '../../lib/api/apiUrls.js';
 import { axiosGet } from '../../lib/api/client.js';
 import useCatch from '../../lib/api/useCatch.js';
 import { handleChange } from '../../lib/formUtils.js';
-import {getDefaultDates} from '../../lib/dateUtils.js';
+import { getDefaultDates } from '../../lib/dateUtils.js';
 
-function OrganizationPerformanceReviewsSection() {
+function EmployeePerformanceReviewChart() {
   const { cWrapper } = useCatch();
   const [isOpen, setIsOpen] = useState(true);
   const [skills, setSkills] = useState([]);
-  const [departments, setDepartments] = useState([]);
+  const [employees, setEmployees] = useState([]);
   const [loadingSkills, setLoadingSkills] = useState(false);
-  const [loadingDepartments, setLoadingDepartments] = useState(false);
-  const [loadingReport, setLoadingReport] = useState(false);
-  const [reportData, setReportData] = useState(null);
+  const [loadingEmployees, setLoadingEmployees] = useState(false);
+  const [loadingCharts, setLoadingCharts] = useState(false);
+  const [chartResponseData, setChartResponseData] = useState(null);
   const [chartData, setChartData] = useState([]);
+  const [hasAttemptedChart, setHasAttemptedChart] = useState(false);
 
   const [formData, setFormData] = useState({
+    employeeId: '',
     skillId: '',
-    departmentId: '',
     ...getDefaultDates()
   });
 
-  // Load skills and departments on mount
+  // Load employees on mount
   useEffect(() => {
-    setLoadingSkills(true);
-    setLoadingDepartments(true);
-
+    setLoadingEmployees(true);
+    
     cWrapper(() =>
-      Promise.all([
-        axiosGet(GET_SKILLS_BY_ORGANIZATION_URL(DEFAULT_ORGANIZATION_ID)),
-        axiosGet(GET_DEPARTMENTS_BY_ORGANIZATION_URL(DEFAULT_ORGANIZATION_ID))
-      ])
-        .then(([skillsResponse, departmentsResponse]) => {
-          setSkills(skillsResponse.data || []);
-          const depts = departmentsResponse.data.content || departmentsResponse.data || [];
-          setDepartments(Array.isArray(depts) ? depts : []);
+      axiosGet(GET_EMPLOYEES_BY_ORGANIZATION_URL(DEFAULT_ORGANIZATION_ID))
+        .then((employeesResponse) => {
+          const emps = employeesResponse.data.content || employeesResponse.data || [];
+          setEmployees(Array.isArray(emps) ? emps : []);
         })
         .finally(() => {
-          setLoadingSkills(false);
-          setLoadingDepartments(false);
+          setLoadingEmployees(false);
         })
     );
   }, [cWrapper]);
 
-  // Process report data into chart format
+  // Load skills when employee is selected
   useEffect(() => {
-    if (!reportData || !formData.skillId) {
+    if (!formData.employeeId) {
+      setSkills([]);
+      setFormData(prev => ({ ...prev, skillId: '' }));
+      return;
+    }
+
+    setLoadingSkills(true);
+    cWrapper(() =>
+      axiosGet(GET_EMPLOYEE_LATEST_SKILL_ENTRIES_URL(parseInt(formData.employeeId)))
+        .then((response) => {
+          // Convert SkillToRatingDto to skill format with id and name
+          const employeeSkills = (response.data || []).map(skillEntry => ({
+            id: skillEntry.skillId,
+            name: skillEntry.skillName
+          }));
+          setSkills(employeeSkills);
+          // Clear skill selection when employee changes
+          setFormData(prev => ({ ...prev, skillId: '' }));
+        })
+        .catch(() => {
+          setSkills([]);
+        })
+        .finally(() => {
+          setLoadingSkills(false);
+        })
+    );
+  }, [formData.employeeId, cWrapper]);
+
+  useEffect(() => {
+    if (!chartResponseData || !formData.skillId) {
       setChartData([]);
       return;
     }
 
-    // Since we're filtering by skillId on the backend, there should be at most one skill in the response
-    const selectedSkill = reportData.skills?.[0];
+    const selectedSkill = skills.find(s => s.id === parseInt(formData.skillId));
+    const selectedSkillName = selectedSkill?.name;
+    const skillData = chartResponseData.skills?.find(s => s.skillName === selectedSkillName);
 
-    if (!selectedSkill || !selectedSkill.periods || selectedSkill.periods.length === 0) {
+    if (!skillData || !skillData.periods || skillData.periods.length === 0) {
       setChartData([]);
       return;
     }
 
     // Transform periods into chart data
-    const chartDataPoints = selectedSkill.periods.map(period => {
+    const chartDataPoints = skillData.periods.map(period => {
       const date = new Date(period.periodStart);
       const quarter = `Q${Math.floor(date.getMonth() / 3) + 1} ${date.getFullYear()}`;
-
+      
       return {
         quarter,
         avgRating: period.avgRating || 0,
         minRating: period.minRating || 0,
-        maxRating: period.maxRating || 0,
-        employeeCount: period.employeeCount || 0
+        maxRating: period.maxRating || 0
       };
     });
 
@@ -84,45 +108,44 @@ function OrganizationPerformanceReviewsSection() {
     });
 
     setChartData(chartDataPoints);
-  }, [reportData, formData.skillId]);
+  }, [chartResponseData, formData.skillId, skills]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!formData.skillId || !formData.startDate || !formData.endDate) {
+    if (!formData.employeeId || !formData.skillId || !formData.startDate || !formData.endDate) {
       return;
     }
 
-    setLoadingReport(true);
+    setLoadingCharts(true);
+    setHasAttemptedChart(true);
     cWrapper(() =>
-      axiosGet(GET_ORG_DEPT_REPORT_URL(
-        DEFAULT_ORGANIZATION_ID,
-        formData.departmentId ? parseInt(formData.departmentId) : null, // deptId
-        parseInt(formData.skillId), // skillId
+      axiosGet(GET_EMPLOYEE_REPORT_URL(
+        parseInt(formData.employeeId),
         formData.startDate || null,
         formData.endDate || null
       ))
         .then((response) => {
-          setReportData(response.data);
+          setChartResponseData(response.data || null);
         })
-        .finally(() => setLoadingReport(false))
+        .catch(() => {
+          setChartResponseData(null);
+        })
+        .finally(() => setLoadingCharts(false))
     );
   };
 
-  const selectedSkillName = reportData?.skills?.[0]?.skillName ||
-    skills.find(s => s.id === parseInt(formData.skillId))?.name || '';
+  const selectedSkillName = skills.find(s => s.id === parseInt(formData.skillId))?.name || '';
 
-  const selectedDepartmentName = formData.departmentId
-    ? departments.find(d => d.id === parseInt(formData.departmentId))?.name
-    : null;
+  const selectedEmployee = employees.find(e => e.id === parseInt(formData.employeeId));
 
   return (
     <Card className="mb-4">
-      <CardHeader
+      <CardHeader 
         style={{ cursor: 'pointer' }}
         onClick={() => setIsOpen(!isOpen)}
       >
         <div className="d-flex justify-content-between align-items-center">
-          <h4 className="mb-0">Organization Performance Reviews Report</h4>
+          <h4 className="mb-0">Employee Performance Review Chart</h4>
           <i className={`bi bi-chevron-${isOpen ? 'up' : 'down'}`}></i>
         </div>
       </CardHeader>
@@ -132,26 +155,27 @@ function OrganizationPerformanceReviewsSection() {
           <Row>
             <Col md={3}>
               <FormGroup>
-                <Label for="departmentId">Department</Label>
+                <Label for="employeeId">Employee *</Label>
                 <Input
                   type="select"
-                  name="departmentId"
-                  id="departmentId"
-                  value={formData.departmentId}
+                  name="employeeId"
+                  id="employeeId"
+                  value={formData.employeeId}
                   onChange={(e) => handleChange(e, setFormData)}
-                  disabled={loadingDepartments}
+                  required
+                  disabled={loadingEmployees}
                 >
-                  <option value="">All Departments</option>
-                  {departments.map((department) => (
-                    <option key={department.id} value={department.id}>
-                      {department.name}
+                  <option value="">Select an employee</option>
+                  {employees.map((employee) => (
+                    <option key={employee.id} value={employee.id}>
+                      {employee.firstName} {employee.lastName}
                     </option>
                   ))}
                 </Input>
-                {loadingDepartments && (
+                {loadingEmployees && (
                   <small className="text-muted">
                     <Spinner size="sm" className="me-1" />
-                    Loading departments...
+                    Loading employees...
                   </small>
                 )}
               </FormGroup>
@@ -197,7 +221,6 @@ function OrganizationPerformanceReviewsSection() {
                 />
               </FormGroup>
             </Col>
-
             <Col md={3}>
               <FormGroup>
                 <Label for="endDate">End Date *</Label>
@@ -217,15 +240,15 @@ function OrganizationPerformanceReviewsSection() {
               <Button
                 type="submit"
                 color="primary"
-                disabled={loadingReport || !formData.skillId || !formData.startDate || !formData.endDate}
+                disabled={loadingCharts || !formData.employeeId || !formData.skillId || !formData.startDate || !formData.endDate}
               >
-                {loadingReport ? (
+                {loadingCharts ? (
                   <>
                     <Spinner size="sm" className="me-2" />
                     Loading...
                   </>
                 ) : (
-                  'Generate Report'
+                  'Generate Chart'
                 )}
               </Button>
             </Col>
@@ -235,15 +258,15 @@ function OrganizationPerformanceReviewsSection() {
         {chartData.length > 0 && (
           <div className="mt-4">
             <h5 className="mb-3">
-              {selectedSkillName}
-              {selectedDepartmentName && ` - ${selectedDepartmentName}`}
+              {selectedEmployee && `${selectedEmployee.firstName} ${selectedEmployee.lastName}`}
+              {selectedSkillName && ` - ${selectedSkillName}`}
               {` - ${formData.startDate} to ${formData.endDate}`}
             </h5>
             <ResponsiveContainer width="100%" height={400}>
               <BarChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="quarter" />
-                <YAxis
+                <YAxis 
                   label={{ value: 'Rating', angle: -90, position: 'insideLeft' }}
                   domain={[0, 5]}
                   ticks={[0, 1, 2, 3, 4, 5]}
@@ -252,29 +275,25 @@ function OrganizationPerformanceReviewsSection() {
                 <Legend />
                 <Bar dataKey="avgRating" fill="#8884d8" name="Average Rating" />
                 <Bar dataKey="maxRating" fill="#ff7300" name="Max Rating" />
-
                 <Bar dataKey="minRating" fill="#ffc658" name="Min Rating" />
               </BarChart>
             </ResponsiveContainer>
-
-            {/* Employee Count */}
-            <div className="mt-4">
-              <h6>Employee Count by Quarter</h6>
-              <div className="d-flex flex-wrap gap-3 align-items-center">
-                {chartData.map((data, index) => (
-                  <span key={index} className="p-2 border rounded">
-                    <span className="fw-bold">{data.quarter}:</span> {data.employeeCount || 0}
-                  </span>
-                ))}
-              </div>
-            </div>
           </div>
         )}
 
-        {reportData && chartData.length === 0 && (
-          <div className="mt-4 text-muted">
-            <p>No data available for the selected skill and date range.</p>
-          </div>
+        {hasAttemptedChart && !loadingCharts && (
+          <>
+            {chartResponseData && chartData.length === 0 && (
+              <div className="mt-4 text-muted">
+                <p>No review data available for {selectedEmployee ? `${selectedEmployee.firstName} ${selectedEmployee.lastName}` : 'the selected employee'}{selectedSkillName ? ` - ${selectedSkillName}` : ''} for the selected date range.</p>
+              </div>
+            )}
+            {!chartResponseData && (
+              <div className="mt-4 text-muted">
+                <p>No review data found for {selectedEmployee ? `${selectedEmployee.firstName} ${selectedEmployee.lastName}` : 'the selected employee'}{selectedSkillName ? ` - ${selectedSkillName}` : ''} for the selected date range. Please try a different employee, skill, or date range.</p>
+              </div>
+            )}
+          </>
         )}
         </CardBody>
       </Collapse>
@@ -282,4 +301,5 @@ function OrganizationPerformanceReviewsSection() {
   );
 }
 
-export default OrganizationPerformanceReviewsSection;
+export default EmployeePerformanceReviewChart;
+

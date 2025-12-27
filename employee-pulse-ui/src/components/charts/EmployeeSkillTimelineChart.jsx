@@ -7,16 +7,16 @@ import useCatch from '../../lib/api/useCatch.js';
 import { handleChange } from '../../lib/formUtils.js';
 import {formatDateForInput} from "../../lib/dateUtils.js";
 
-function EmployeeSkillTimelineSection() {
+function EmployeeSkillTimelineChart() {
   const { cWrapper } = useCatch();
   const [isOpen, setIsOpen] = useState(true);
   const [skills, setSkills] = useState([]);
   const [employees, setEmployees] = useState([]);
   const [loadingSkills, setLoadingSkills] = useState(false);
   const [loadingEmployees, setLoadingEmployees] = useState(false);
-  const [loadingReport, setLoadingReport] = useState(false);
-  const [reportData, setReportData] = useState(null);
-  const [hasAttemptedReport, setHasAttemptedReport] = useState(false);
+  const [loadingChart, setLoadingChart] = useState(false);
+  const [chartData, setChartData] = useState(null);
+  const [hasAttemptedChart, setHasAttemptedChart] = useState(false);
 
   const getDefaultDates = () => {
     const endDate = new Date(2025, 11, 31);
@@ -84,8 +84,8 @@ function EmployeeSkillTimelineSection() {
       return;
     }
 
-    setLoadingReport(true);
-    setHasAttemptedReport(true);
+    setLoadingChart(true);
+    setHasAttemptedChart(true);
     cWrapper(() =>
       axiosGet(GET_EMPLOYEE_SKILL_TIMELINE_URL(
         parseInt(formData.employeeId),
@@ -94,12 +94,12 @@ function EmployeeSkillTimelineSection() {
         formData.endDate || null
       ))
         .then((response) => {
-          setReportData(response.data);
+          setChartData(response.data);
         })
         .catch(() => {
-          setReportData(null);
+          setChartData(null);
         })
-        .finally(() => setLoadingReport(false))
+        .finally(() => setLoadingChart(false))
     );
   };
 
@@ -237,9 +237,9 @@ function EmployeeSkillTimelineSection() {
                 <Button
                   type="submit"
                   color="primary"
-                  disabled={loadingReport || !formData.employeeId}
+                  disabled={loadingChart || !formData.employeeId}
                 >
-                  {loadingReport ? (
+                  {loadingChart ? (
                     <>
                       <Spinner size="sm" className="me-2" />
                       Loading...
@@ -252,14 +252,14 @@ function EmployeeSkillTimelineSection() {
             </Row>
           </Form>
 
-          {reportData && reportData.skills && reportData.skills.length > 0 && (
+          {chartData && chartData.skills && chartData.skills.length > 0 && (
             <div className="mt-4">
               <h5 className="mb-3">
-                {reportData.firstName} {reportData.lastName}
+                {chartData.firstName} {chartData.lastName}
                 {selectedSkillName && ` - ${selectedSkillName}`}
               </h5>
 
-              {reportData.skills.map((skill) => {
+              {chartData.skills.map((skill) => {
                 const chartData = getChartDataForSkill(skill);
                 if (chartData.length === 0) return null;
 
@@ -305,15 +305,15 @@ function EmployeeSkillTimelineSection() {
             </div>
           )}
 
-          {hasAttemptedReport && !loadingReport && (
+          {hasAttemptedChart && !loadingChart && (
             <>
-              {reportData && (!reportData.skills || reportData.skills.length === 0) && (
+              {chartData && (!chartData.skills || chartData.skills.length === 0) && (
                 <div className="mt-4 text-muted">
                   <p>No timeline data available for {selectedEmployee ? `${selectedEmployee.firstName} ${selectedEmployee.lastName}` : 'the selected employee'}{selectedSkillName ? ` - ${selectedSkillName}` : ''}.</p>
                 </div>
               )}
 
-              {!reportData && (
+              {!chartData && (
                 <div className="mt-4 text-muted">
                   <p>No timeline data found for {selectedEmployee ? `${selectedEmployee.firstName} ${selectedEmployee.lastName}` : 'the selected employee'}{selectedSkillName ? ` - ${selectedSkillName}` : ''}. Please try a different employee or skill.</p>
                 </div>
@@ -326,5 +326,5 @@ function EmployeeSkillTimelineSection() {
   );
 }
 
-export default EmployeeSkillTimelineSection;
+export default EmployeeSkillTimelineChart;
 

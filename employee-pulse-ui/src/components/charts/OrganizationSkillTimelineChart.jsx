@@ -5,27 +5,17 @@ import { DEFAULT_ORGANIZATION_ID, GET_SKILLS_BY_ORGANIZATION_URL, GET_DEPARTMENT
 import { axiosGet } from '../../lib/api/client.js';
 import useCatch from '../../lib/api/useCatch.js';
 import { handleChange } from '../../lib/formUtils.js';
-import {formatDateForInput} from "../../lib/dateUtils.js";
+import {formatDateForInput, getDefaultDates} from "../../lib/dateUtils.js";
 
-function OrganizationSkillTimelineSection() {
+function OrganizationSkillTimelineChart() {
   const { cWrapper } = useCatch();
   const [isOpen, setIsOpen] = useState(true);
   const [skills, setSkills] = useState([]);
   const [departments, setDepartments] = useState([]);
   const [loadingSkills, setLoadingSkills] = useState(false);
   const [loadingDepartments, setLoadingDepartments] = useState(false);
-  const [loadingReport, setLoadingReport] = useState(false);
-  const [reportData, setReportData] = useState(null);
-
-  // Default to January 1st, 2025 to today
-  const getDefaultDates = () => {
-    const endDate = new Date(2025, 11, 31);
-    const startDate = new Date(2025, 0, 1); // January 1st, 2025 (month is 0-indexed)
-    return {
-      startDate: formatDateForInput(startDate),
-      endDate: formatDateForInput(endDate)
-    };
-  };
+  const [loadingChart, setLoadingChart] = useState(false);
+  const [chartData, setChartData] = useState(null);
 
   const [formData, setFormData] = useState({
     departmentId: '',
@@ -57,7 +47,7 @@ function OrganizationSkillTimelineSection() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    setLoadingReport(true);
+    setLoadingChart(true);
     cWrapper(() =>
       axiosGet(GET_ORG_DEPT_SKILL_TIMELINE_URL(
         DEFAULT_ORGANIZATION_ID,
@@ -67,9 +57,9 @@ function OrganizationSkillTimelineSection() {
         formData.endDate || null
       ))
         .then((response) => {
-          setReportData(response.data);
+          setChartData(response.data);
         })
-        .finally(() => setLoadingReport(false))
+        .finally(() => setLoadingChart(false))
     );
   };
 
@@ -202,9 +192,9 @@ function OrganizationSkillTimelineSection() {
                 <Button
                   type="submit"
                   color="primary"
-                  disabled={loadingReport}
+                  disabled={loadingChart}
                 >
-                  {loadingReport ? (
+                  {loadingChart ? (
                     <>
                       <Spinner size="sm" className="me-2" />
                       Loading...
@@ -217,15 +207,15 @@ function OrganizationSkillTimelineSection() {
             </Row>
           </Form>
 
-          {reportData && reportData.skills && reportData.skills.length > 0 && (
+          {chartData && chartData.skills && chartData.skills.length > 0 && (
             <div className="mt-4">
               <h5 className="mb-3">
-                {reportData.organizationName}
-                {reportData.departmentName && ` - ${reportData.departmentName}`}
+                {chartData.organizationName}
+                {chartData.departmentName && ` - ${chartData.departmentName}`}
                 {selectedSkillName && ` - ${selectedSkillName}`}
               </h5>
 
-              {reportData.skills.map((skill) => {
+              {chartData.skills.map((skill) => {
                 const chartData = getChartDataForSkill(skill);
                 if (chartData.length === 0) return null;
 
@@ -280,7 +270,7 @@ function OrganizationSkillTimelineSection() {
             </div>
           )}
 
-          {reportData && (!reportData.skills || reportData.skills.length === 0) && (
+          {chartData && (!chartData.skills || chartData.skills.length === 0) && (
             <div className="mt-4 text-muted">
               <p>No timeline data available for the selected filters.</p>
             </div>
@@ -291,5 +281,5 @@ function OrganizationSkillTimelineSection() {
   );
 }
 
-export default OrganizationSkillTimelineSection;
+export default OrganizationSkillTimelineChart;
 
