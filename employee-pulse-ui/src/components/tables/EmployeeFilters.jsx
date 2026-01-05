@@ -66,15 +66,26 @@ export default function EmployeeFilters() {
               />
             </FormGroup>
           </Col>
-          <Col md={1}>
+          <Col md={2}>
             <FormGroup className="mb-0">
-              <Label for="filter-hireDate" className="small mb-1">Hire Date</Label>
+              <Label for="filter-hireDateStart" className="small mb-1">Hire Date Start</Label>
               <Input
-                id="filter-hireDate"
-                type="text"
-                placeholder="Filter Date"
-                value={filterValues.hireDate}
-                onChange={(e) => handleFilterChange('hireDate', e.target.value)}
+                id="filter-hireDateStart"
+                type="date"
+                value={filterValues.hireDateStart}
+                onChange={(e) => handleFilterChange('hireDateStart', e.target.value)}
+                bsSize="sm"
+              />
+            </FormGroup>
+          </Col>
+          <Col md={2}>
+            <FormGroup className="mb-0">
+              <Label for="filter-hireDateEnd" className="small mb-1">Hire Date End</Label>
+              <Input
+                id="filter-hireDateEnd"
+                type="date"
+                value={filterValues.hireDateEnd}
+                onChange={(e) => handleFilterChange('hireDateEnd', e.target.value)}
                 bsSize="sm"
               />
             </FormGroup>

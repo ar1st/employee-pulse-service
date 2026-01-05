@@ -16,7 +16,8 @@ export const EmployeeFilterProvider = ({ children }) => {
     firstName: '',
     lastName: '',
     email: '',
-    hireDate: '',
+    hireDateStart: '',
+    hireDateEnd: '',
     department: '',
     occupation: ''
   });
@@ -34,7 +35,8 @@ export const EmployeeFilterProvider = ({ children }) => {
       firstName: '',
       lastName: '',
       email: '',
-      hireDate: '',
+      hireDateStart: '',
+      hireDateEnd: '',
       department: '',
       occupation: ''
     });

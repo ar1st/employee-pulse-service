@@ -69,7 +69,37 @@ export default function EmployeesTable() {
       const firstNameMatch = !filterValues.firstName || (employee.firstName || '').toLowerCase().includes(filterValues.firstName.toLowerCase())
       const lastNameMatch = !filterValues.lastName || (employee.lastName || '').toLowerCase().includes(filterValues.lastName.toLowerCase())
       const emailMatch = !filterValues.email || (employee.email || '').toLowerCase().includes(filterValues.email.toLowerCase())
-      const hireDateMatch = !filterValues.hireDate || formatDate(employee.hireDate).toLowerCase().includes(filterValues.hireDate.toLowerCase())
+      
+      // Date range filtering
+      let hireDateMatch = true
+      if (filterValues.hireDateStart || filterValues.hireDateEnd) {
+        if (employee.hireDate) {
+          const employeeDate = new Date(employee.hireDate)
+          employeeDate.setHours(0, 0, 0, 0)
+          
+          if (filterValues.hireDateStart && filterValues.hireDateEnd) {
+            // Both dates provided - check if employee date is within range
+            const startDate = new Date(filterValues.hireDateStart)
+            startDate.setHours(0, 0, 0, 0)
+            const endDate = new Date(filterValues.hireDateEnd)
+            endDate.setHours(23, 59, 59, 999) // Include entire end date
+            hireDateMatch = employeeDate >= startDate && employeeDate <= endDate
+          } else if (filterValues.hireDateStart) {
+            // Only start date - check if employee date is >= start date
+            const startDate = new Date(filterValues.hireDateStart)
+            startDate.setHours(0, 0, 0, 0)
+            hireDateMatch = employeeDate >= startDate
+          } else if (filterValues.hireDateEnd) {
+            // Only end date - check if employee date is <= end date
+            const endDate = new Date(filterValues.hireDateEnd)
+            endDate.setHours(23, 59, 59, 999)
+            hireDateMatch = employeeDate <= endDate
+          }
+        } else {
+          hireDateMatch = false
+        }
+      }
+      
       const departmentMatch = !filterValues.department || (employee.departmentName || '').toLowerCase().includes(filterValues.department.toLowerCase())
       const occupationMatch = !filterValues.occupation || (employee.occupationTitle || '').toLowerCase().includes(filterValues.occupation.toLowerCase())
       
