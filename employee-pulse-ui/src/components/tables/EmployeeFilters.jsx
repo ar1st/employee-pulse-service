@@ -1,11 +1,11 @@
-import { Card, CardBody, FormGroup, Label, Input, Row, Col, Button } from "reactstrap";
-import { useEmployeeFilter } from "./EmployeeFilterContext.jsx";
+import {Card, CardBody, FormGroup, Label, Input, Row, Col, Button} from "reactstrap";
+import {useEmployeeFilter} from "./EmployeeFilterContext.jsx";
 
 export default function EmployeeFilters() {
-  const { filterValues, setFilterValues, resetFilters } = useEmployeeFilter();
+  const {filterValues, setFilterValues, resetFilters} = useEmployeeFilter();
 
   const handleFilterChange = (field, value) => {
-    setFilterValues({ [field]: value });
+    setFilterValues({[field]: value});
   };
 
   const hasActiveFilters = Object.values(filterValues).some(f => f);
@@ -14,39 +14,37 @@ export default function EmployeeFilters() {
     <Card className="mt-3" style={{backgroundColor: '#f8f9fa'}}>
       <CardBody>
         <Row className="align-items-end g-3">
-          <Col md={1}>
+          <Col md={1} style={{maxWidth: '80px'}}>
             <FormGroup className="mb-0">
-              <Label for="filter-id" className="small mb-1">ID</Label>
               <Input
                 id="filter-id"
                 type="text"
-                placeholder="Filter ID"
+                placeholder="ID"
                 value={filterValues.id}
                 onChange={(e) => handleFilterChange('id', e.target.value)}
                 bsSize="sm"
+                style={{maxWidth: '100%'}}
               />
             </FormGroup>
           </Col>
-          <Col md={1}>
+          <Col md={2}>
             <FormGroup className="mb-0">
-              <Label for="filter-firstName" className="small mb-1">First Name</Label>
               <Input
                 id="filter-firstName"
                 type="text"
-                placeholder="Filter First Name"
+                placeholder="First Name"
                 value={filterValues.firstName}
                 onChange={(e) => handleFilterChange('firstName', e.target.value)}
                 bsSize="sm"
               />
             </FormGroup>
           </Col>
-          <Col md={1}>
+          <Col md={2}>
             <FormGroup className="mb-0">
-              <Label for="filter-lastName" className="small mb-1">Last Name</Label>
               <Input
                 id="filter-lastName"
                 type="text"
-                placeholder="Filter Last Name"
+                placeholder="Last Name"
                 value={filterValues.lastName}
                 onChange={(e) => handleFilterChange('lastName', e.target.value)}
                 bsSize="sm"
@@ -55,17 +53,58 @@ export default function EmployeeFilters() {
           </Col>
           <Col md={2}>
             <FormGroup className="mb-0">
-              <Label for="filter-email" className="small mb-1">Email</Label>
               <Input
                 id="filter-email"
                 type="text"
-                placeholder="Filter Email"
+                placeholder="Email"
                 value={filterValues.email}
                 onChange={(e) => handleFilterChange('email', e.target.value)}
                 bsSize="sm"
               />
             </FormGroup>
           </Col>
+          <Col md={2}>
+            <FormGroup className="mb-0">
+              <Input
+                id="filter-department"
+                type="text"
+                placeholder="Department"
+                value={filterValues.department}
+                onChange={(e) => handleFilterChange('department', e.target.value)}
+                bsSize="sm"
+              />
+            </FormGroup>
+          </Col>
+          <Col md={2}>
+            <FormGroup className="mb-0">
+              <Input
+                id="filter-occupation"
+                type="text"
+                placeholder="Occupation"
+                value={filterValues.occupation}
+                onChange={(e) => handleFilterChange('occupation', e.target.value)}
+                bsSize="sm"
+              />
+            </FormGroup>
+          </Col>
+          <Col md={2} className="d-flex align-items-end">
+            {hasActiveFilters && (
+              <Button
+                color="secondary"
+                size="sm"
+                onClick={resetFilters}
+                className="w-100"
+              >
+                <i className="bi bi-x-circle me-1"></i>
+                Clear Filters
+              </Button>
+            )}
+          </Col>
+
+
+        </Row>
+
+        <Row className="align-items-end g-3">
           <Col md={2}>
             <FormGroup className="mb-0">
               <Label for="filter-hireDateStart" className="small mb-1">Hire Date Start</Label>
@@ -89,45 +128,6 @@ export default function EmployeeFilters() {
                 bsSize="sm"
               />
             </FormGroup>
-          </Col>
-          <Col md={2}>
-            <FormGroup className="mb-0">
-              <Label for="filter-department" className="small mb-1">Department</Label>
-              <Input
-                id="filter-department"
-                type="text"
-                placeholder="Filter Department"
-                value={filterValues.department}
-                onChange={(e) => handleFilterChange('department', e.target.value)}
-                bsSize="sm"
-              />
-            </FormGroup>
-          </Col>
-          <Col md={2}>
-            <FormGroup className="mb-0">
-              <Label for="filter-occupation" className="small mb-1">Occupation</Label>
-              <Input
-                id="filter-occupation"
-                type="text"
-                placeholder="Filter Occupation"
-                value={filterValues.occupation}
-                onChange={(e) => handleFilterChange('occupation', e.target.value)}
-                bsSize="sm"
-              />
-            </FormGroup>
-          </Col>
-          <Col md={2} className="d-flex align-items-end">
-            {hasActiveFilters && (
-              <Button
-                color="secondary"
-                size="sm"
-                onClick={resetFilters}
-                className="w-100"
-              >
-                <i className="bi bi-x-circle me-1"></i>
-                Clear Filters
-              </Button>
-            )}
           </Col>
         </Row>
       </CardBody>
