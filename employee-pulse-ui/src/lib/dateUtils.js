@@ -31,10 +31,9 @@ export const formatDateForInput = (date) => {
 };
 
 export const getDefaultDates = () => {
-  const now = new Date();
-  const currentYear = now.getFullYear();
-  const startDate = new Date(currentYear, 0, 1);
-  const endDate = new Date(currentYear, 11, 31);
+  const defaultYear = 2025;
+  const startDate = new Date(defaultYear, 0, 1);
+  const endDate = new Date(defaultYear, 11, 31);
 
   return {
     startDate: formatDateForInput(startDate),
