@@ -1,5 +1,7 @@
 import '../../styles/Common.css';
 import EmployeesTable from "../tables/EmployeesTable.jsx";
+import EmployeeFilters from "../tables/EmployeeFilters.jsx";
+import {EmployeeFilterProvider} from "../tables/EmployeeFilterContext.jsx";
 import {Button} from "reactstrap";
 import {useNavigate} from "react-router-dom";
 
@@ -19,7 +21,10 @@ function EmployeesPage() {
           Create Employee
         </Button>
       </div>
-      <EmployeesTable/>
+      <EmployeeFilterProvider>
+        <EmployeeFilters/>
+        <EmployeesTable/>
+      </EmployeeFilterProvider>
     </div>
   )
 }
