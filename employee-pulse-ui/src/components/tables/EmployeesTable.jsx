@@ -6,7 +6,7 @@ import useCatch from "../../lib/api/useCatch.js";
 import {formatDate} from "../../lib/dateUtils.js";
 import ConfirmModal from "../ConfirmModal.jsx";
 import {useNavigate} from "react-router-dom";
-import {useEmployeeFilter} from "./EmployeeFilterContext.jsx";
+import {useEmployeeFilter} from "./filters/EmployeeFilterContext.jsx";
 
 export default function EmployeesTable() {
   const navigate = useNavigate()

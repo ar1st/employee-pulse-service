@@ -1,7 +1,7 @@
 import '../../styles/Common.css';
 import EmployeesTable from "../tables/EmployeesTable.jsx";
-import EmployeeFilters from "../tables/EmployeeFilters.jsx";
-import {EmployeeFilterProvider} from "../tables/EmployeeFilterContext.jsx";
+import EmployeeFilters from "../tables/filters/EmployeeFilters.jsx";
+import {EmployeeFilterProvider} from "../tables/filters/EmployeeFilterContext.jsx";
 import {Button} from "reactstrap";
 import {useNavigate} from "react-router-dom";
 
