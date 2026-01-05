@@ -1,4 +1,4 @@
-import {useEffect, useState} from "react";
+import {useEffect, useState, useMemo} from "react";
 import {DEFAULT_ORGANIZATION_ID, GET_PERFORMANCE_REVIEWS_URL, DELETE_PERFORMANCE_REVIEW_URL} from "../../lib/api/apiUrls.js";
 import {Alert, Spinner, Table} from "reactstrap";
 import {axiosGet, axiosDelete} from "../../lib/api/client.js";
@@ -6,6 +6,7 @@ import useCatch from "../../lib/api/useCatch.js";
 import {formatDateTime} from "../../lib/dateUtils.js";
 import ConfirmModal from "../ConfirmModal.jsx";
 import {useNavigate} from "react-router-dom";
+import {usePerformanceReviewFilter} from "./filters/PerformanceReviewFilterContext.jsx";
 
 export default function PerformanceReviewsTable() {
   const navigate = useNavigate()
@@ -15,6 +16,7 @@ export default function PerformanceReviewsTable() {
   const [reviewToDelete, setReviewToDelete] = useState(null)
   const [deleting, setDeleting] = useState(false)
   const {cWrapper} = useCatch()
+  const {filterValues} = usePerformanceReviewFilter()
 
   const formatRating = (rating) => {
     return rating != null ? rating.toFixed(1) : 'N/A'
@@ -66,6 +68,62 @@ export default function PerformanceReviewsTable() {
     setReviewToDelete(null)
   }
 
+  const filteredPerformanceReviews = useMemo(() => {
+    return performanceReviews.filter(review => {
+      const idMatch = !filterValues.id || String(review.id).toLowerCase().includes(filterValues.id.toLowerCase())
+      const departmentMatch = !filterValues.department || (review.departmentName || '').toLowerCase().includes(filterValues.department.toLowerCase())
+      const employeeMatch = !filterValues.employee || (review.employeeName || '').toLowerCase().includes(filterValues.employee.toLowerCase())
+      const reporterMatch = !filterValues.reporter || (review.reporterName || '').toLowerCase().includes(filterValues.reporter.toLowerCase())
+      
+      // Rating range filtering
+      let ratingMatch = true
+      if (filterValues.overallRatingMin || filterValues.overallRatingMax) {
+        const rating = review.overallRating != null ? review.overallRating : -1
+        if (filterValues.overallRatingMin && filterValues.overallRatingMax) {
+          const min = parseFloat(filterValues.overallRatingMin)
+          const max = parseFloat(filterValues.overallRatingMax)
+          ratingMatch = rating >= min && rating <= max
+        } else if (filterValues.overallRatingMin) {
+          const min = parseFloat(filterValues.overallRatingMin)
+          ratingMatch = rating >= min
+        } else if (filterValues.overallRatingMax) {
+          const max = parseFloat(filterValues.overallRatingMax)
+          ratingMatch = rating <= max
+        }
+      }
+      
+      // Date range filtering
+      let reviewDateMatch = true
+      if (filterValues.reviewDateStart || filterValues.reviewDateEnd) {
+        if (review.reviewDateTime && Array.isArray(review.reviewDateTime)) {
+          const [year, month, day] = review.reviewDateTime.map(Number)
+          const reviewDate = new Date(year, month - 1, day)
+          reviewDate.setHours(0, 0, 0, 0)
+          
+          if (filterValues.reviewDateStart && filterValues.reviewDateEnd) {
+            const startDate = new Date(filterValues.reviewDateStart)
+            startDate.setHours(0, 0, 0, 0)
+            const endDate = new Date(filterValues.reviewDateEnd)
+            endDate.setHours(23, 59, 59, 999)
+            reviewDateMatch = reviewDate >= startDate && reviewDate <= endDate
+          } else if (filterValues.reviewDateStart) {
+            const startDate = new Date(filterValues.reviewDateStart)
+            startDate.setHours(0, 0, 0, 0)
+            reviewDateMatch = reviewDate >= startDate
+          } else if (filterValues.reviewDateEnd) {
+            const endDate = new Date(filterValues.reviewDateEnd)
+            endDate.setHours(23, 59, 59, 999)
+            reviewDateMatch = reviewDate <= endDate
+          }
+        } else {
+          reviewDateMatch = false
+        }
+      }
+      
+      return idMatch && departmentMatch && employeeMatch && reporterMatch && ratingMatch && reviewDateMatch
+    })
+  }, [performanceReviews, filterValues])
+
   return <>
     {loading && (
       <div className="text-center mt-3">
@@ -96,7 +154,14 @@ export default function PerformanceReviewsTable() {
           </tr>
           </thead>
           <tbody>
-          {performanceReviews.map((review) => (
+          {filteredPerformanceReviews.length === 0 ? (
+            <tr>
+              <td colSpan={8} className="text-center">
+                No performance reviews match the current filters.
+              </td>
+            </tr>
+          ) : (
+            filteredPerformanceReviews.map((review) => (
             <tr key={review.id}>
               <td>{review.id}</td>
               <td>{review.departmentName || 'N/A'}</td>
@@ -139,7 +204,8 @@ export default function PerformanceReviewsTable() {
                 </div>
               </td>
             </tr>
-          ))}
+            ))
+          )}
           </tbody>
         </Table>
       </div>

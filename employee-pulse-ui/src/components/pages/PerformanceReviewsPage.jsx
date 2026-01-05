@@ -1,5 +1,7 @@
 import '../../styles/Common.css';
 import PerformanceReviewsTable from "../tables/PerformanceReviewsTable.jsx";
+import PerformanceReviewFilters from "../tables/filters/PerformanceReviewFilters.jsx";
+import {PerformanceReviewFilterProvider} from "../tables/filters/PerformanceReviewFilterContext.jsx";
 import {Button} from "reactstrap";
 import {useNavigate} from "react-router-dom";
 
@@ -12,7 +14,6 @@ function PerformanceReviewsPage() {
       <p>Track and manage employee performance reviews by organization.</p>
 
       <div>
-
         <Button
           color="primary"
           onClick={() => navigate('/performance-reviews/save')}
@@ -20,8 +21,10 @@ function PerformanceReviewsPage() {
           Create Performance Review
         </Button>
       </div>
-      <PerformanceReviewsTable/>
-
+      <PerformanceReviewFilterProvider>
+        <PerformanceReviewFilters/>
+        <PerformanceReviewsTable/>
+      </PerformanceReviewFilterProvider>
     </div>
   )
 }
