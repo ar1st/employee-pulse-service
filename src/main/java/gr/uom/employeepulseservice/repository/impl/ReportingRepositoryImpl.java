@@ -5,7 +5,6 @@ import gr.uom.employeepulseservice.controller.dto.reportingDto.orgdept.*;
 import gr.uom.employeepulseservice.model.PeriodType;
 import gr.uom.employeepulseservice.repository.ReportingRepository;
 import lombok.RequiredArgsConstructor;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
@@ -33,24 +32,6 @@ public class ReportingRepositoryImpl implements ReportingRepository {
             case QUARTER -> "date_trunc('quarter', entry_date)::date";
             case YEAR -> "date_trunc('year', entry_date)::date";
         };
-    }
-
-    // Returns SQL predicate for filtering by a specific period value (e.g. month = 5)
-    private String periodValuePredicate(PeriodType periodType, Integer periodValue) {
-        if (periodValue == null) return "TRUE"; // no filter when period value is not provided
-
-        return switch (periodType) {
-            case DAY -> "EXTRACT(day FROM entry_date)::int = :periodValue";
-            case WEEK -> "EXTRACT(week FROM entry_date)::int = :periodValue";
-            case MONTH -> "EXTRACT(month FROM entry_date)::int = :periodValue";
-            case QUARTER -> "EXTRACT(quarter FROM entry_date)::int = :periodValue";
-            case YEAR -> "EXTRACT(year FROM entry_date)::int = :periodValue";
-        };
-    }
-
-    // Returns SQL predicate for filtering by year
-    private String yearPredicate(Integer year) {
-        return (year == null) ? "TRUE" : "EXTRACT(year FROM entry_date)::int = :year ";
     }
 
     // Returns SQL predicate for filtering by an optional date range
@@ -198,18 +179,6 @@ public class ReportingRepositoryImpl implements ReportingRepository {
         );
     }
 
-    @NotNull
-    private String constructSqlStatement(PeriodType periodType, Integer periodValue, Integer year, String x) {
-        String periodStart = periodStartExpression(periodType);
-        // SQL predicate for filtering by period number
-        String periodValueWhere = periodValuePredicate(periodType, periodValue);
-        // SQL predicate for filtering by year
-        String yearWhere = yearPredicate(year);
-
-        // Query that returns a flat list: org/dept + skill + period stats
-        return x.formatted(periodStart, periodValueWhere, yearWhere);
-    }
-
     @Override
     @Transactional(readOnly = true)
     public EmployeeReportingResponseDto getReportByEmployee(
@@ -247,7 +216,7 @@ public class ReportingRepositoryImpl implements ReportingRepository {
                 WHERE %s
                 GROUP BY employee_id, first_name, last_name, skill_name, period_start
                 ORDER BY skill_name, period_start DESC;
-                """, periodStart, whereClause.toString());
+                """, periodStart, whereClause);
 
         // Mandatory employee parameter
         MapSqlParameterSource params = new MapSqlParameterSource()
