@@ -2,6 +2,7 @@ package gr.uom.employeepulseservice.repository;
 
 import gr.uom.employeepulseservice.model.Department;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -23,10 +24,11 @@ public interface DepartmentRepository extends JpaRepository<Department, Integer>
     boolean isManagerOfEmployee(@Param("reporterId") Integer reporterId,
                                 @Param("employeeId") Integer employeeId);
 
+    @Modifying
     @Query(value = """
             UPDATE departments
             SET manager_id = NULL
-            WHERE manager_id = :employeeid
+            WHERE manager_id = :employeeId
             
             """, nativeQuery = true)
     void deleteManagerOfDepartmentsByEmployeeId(@Param("employeeId") Integer employeeId);
