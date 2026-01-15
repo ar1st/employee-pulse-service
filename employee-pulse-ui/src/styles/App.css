@@ -44,6 +44,18 @@
   position: relative;
 }
 
+.navbar-brand-right {
+  margin-left: auto;
+}
+
+.app-name {
+  display: block;
+  padding: 1rem 1.5rem;
+  color: #495057;
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
 .nav-link-custom {
   display: block;
   padding: 1rem 1.5rem;

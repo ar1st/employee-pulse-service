@@ -1,12 +1,30 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Nav, NavItem, Dropdown, DropdownToggle, DropdownMenu, DropdownItem } from 'reactstrap'
 import { NavLink, useLocation } from 'react-router-dom'
+import { DEFAULT_ORGANIZATION_ID, GET_ORGANIZATION_URL } from '../lib/api/apiUrls.js'
+import { axiosGet } from '../lib/api/client.js'
+import useCatch from '../lib/api/useCatch.js'
 
 function Navbar() {
   const [analyticsDropdownOpen, setAnalyticsDropdownOpen] = useState(false);
+  const [organizationName, setOrganizationName] = useState('');
   const location = useLocation();
+  const { cWrapper } = useCatch();
   
   const isAnalytics = location.pathname.startsWith('/analytics');
+
+  useEffect(() => {
+    cWrapper(() =>
+      axiosGet(GET_ORGANIZATION_URL(DEFAULT_ORGANIZATION_ID))
+        .then((response) => {
+          setOrganizationName(response.data?.name || '');
+        })
+        .catch(() => {
+          setOrganizationName('');
+        })
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <div className="navbar-top">
@@ -80,6 +98,9 @@ function Navbar() {
               </DropdownItem>
             </DropdownMenu>
           </Dropdown>
+        </NavItem>
+        <NavItem className="navbar-brand-right">
+          <span className="app-name">{organizationName || ''}</span>
         </NavItem>
       </Nav>
     </div>
