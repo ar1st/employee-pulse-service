@@ -73,6 +73,7 @@ public class EmployeeService {
     @Transactional
     public void deleteEmployee(Integer id) {
         employeeRepository.deleteById(id);
+        departmentRepository.deleteManagerOfDepartmentsByEmployeeId(id);
     }
 
     @Transactional

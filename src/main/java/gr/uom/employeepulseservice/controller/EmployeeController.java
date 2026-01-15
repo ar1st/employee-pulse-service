@@ -83,39 +83,4 @@ public class EmployeeController {
         return ResponseEntity.ok().build();
     }
 
-
-
-
-
-
-    // get employee skill distribution within department
-    // per skill -> avg, mean, min, max, percentage
-
-    // get monthly/historical skill report trends by Department, Organization, Employee
-    // how does employee percentage change by date
-    // how avg, mean, min, max, percentage change by date
-
-    /*
-    Java
-
-
-
-
-    FOR EACH ORGANIZATION ->
-        FOR EACH DEPARTMENT ->
-            FOR EACH SKILL ->
-                QUARTERLY REPORT
-                avg, mean, min, max, percentage
-    We will create a view that will hold all skill entries
-
-    fields [id, skill_entry_id, employee_id, entry_date, department_id, organization_id]
-
-
-    FOR EMPLOYEE ->
-        FOR EACH SKILL ->
-            MONTHLY REPORT
-            avg, mean, min, max, percentage
-
-
-     */
 }

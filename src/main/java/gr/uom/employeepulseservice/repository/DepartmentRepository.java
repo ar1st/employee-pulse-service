@@ -22,4 +22,12 @@ public interface DepartmentRepository extends JpaRepository<Department, Integer>
         """, nativeQuery = true)
     boolean isManagerOfEmployee(@Param("reporterId") Integer reporterId,
                                 @Param("employeeId") Integer employeeId);
+
+    @Query(value = """
+            UPDATE departments
+            SET manager_id = NULL
+            WHERE manager_id = :employeeid
+            
+            """, nativeQuery = true)
+    void deleteManagerOfDepartmentsByEmployeeId(@Param("employeeId") Integer employeeId);
 }
