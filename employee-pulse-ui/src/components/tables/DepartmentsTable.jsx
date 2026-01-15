@@ -93,7 +93,7 @@ export default function DepartmentsTable() {
             <tr key={department.id}>
               <td>{department.id}</td>
               <td>{department.name || 'N/A'}</td>
-              <td>{department.managerId || 'N/A'}</td>
+              <td>{department.managerId || 'No manager assigned'}</td>
               <td>
                 <div className="d-flex gap-2">
                   <button

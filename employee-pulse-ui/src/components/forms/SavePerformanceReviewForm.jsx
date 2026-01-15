@@ -6,6 +6,7 @@ import {
   GET_PERFORMANCE_REVIEW_URL,
   UPDATE_PERFORMANCE_REVIEW_URL,
   ADD_SKILL_ENTRY_TO_REVIEW_URL,
+  ADD_SKILL_ENTRIES_BULK_TO_REVIEW_URL,
   DELETE_SKILL_ENTRY_FROM_REVIEW_URL
 } from "../../lib/api/apiUrls.js";
 import {axiosGet, axiosPost, axiosPut, axiosDelete} from "../../lib/api/client.js";
@@ -199,15 +200,15 @@ export default function SavePerformanceReviewForm({ reviewId = null }) {
         );
         await Promise.all(deletePromises);
 
-        // Add all new skill entries
-        const addPromises = skillEntries.map(entry =>
-          axiosPost(ADD_SKILL_ENTRY_TO_REVIEW_URL(reviewId), {
+        // Add all new skill entries in bulk
+        if (skillEntries.length > 0) {
+          const skillEntriesPayload = skillEntries.map(entry => ({
             skillId: entry.skillId,
             rating: entry.rating,
             entryDate: formData.reviewDate || null
-          })
-        );
-        await Promise.all(addPromises);
+          }));
+          await axiosPost(ADD_SKILL_ENTRIES_BULK_TO_REVIEW_URL(reviewId), skillEntriesPayload);
+        }
 
         navigate('/performance-reviews');
       })
@@ -227,14 +228,15 @@ export default function SavePerformanceReviewForm({ reviewId = null }) {
         const createPerformanceReviewResponse = await axiosPost(CREATE_PERFORMANCE_REVIEW_URL(), payload);
         const performanceReviewId = createPerformanceReviewResponse.data.performanceReviewId;
 
-        const addPromises = skillEntries.map(entry =>
-          axiosPost(ADD_SKILL_ENTRY_TO_REVIEW_URL(performanceReviewId), {
+        // Add all skill entries in bulk
+        if (skillEntries.length > 0) {
+          const skillEntriesPayload = skillEntries.map(entry => ({
             skillId: entry.skillId,
             rating: entry.rating,
             entryDate: formData.reviewDate || null
-          })
-        );
-        await Promise.all(addPromises);
+          }));
+          await axiosPost(ADD_SKILL_ENTRIES_BULK_TO_REVIEW_URL(performanceReviewId), skillEntriesPayload);
+        }
 
         navigate('/performance-reviews');
       })

@@ -82,6 +82,16 @@ public class PerformanceReviewController {
         );
     }
 
+    @PostMapping("/{reviewId}/skill-entries/bulk")
+    public ResponseEntity<PerformanceReviewDto> addSkillEntriesBulk(
+            @PathVariable Integer reviewId,
+            @RequestBody List<SaveSkillEntryDto> dtos
+    ) {
+        return ResponseEntity.ok(
+                performanceReviewService.addSkillEntriesToReview(reviewId, dtos)
+        );
+    }
+
     @PutMapping("/{reviewId}/skill-entries/{entryId}")
     public ResponseEntity<PerformanceReviewDto> updateSkillEntry(
             @PathVariable Integer reviewId,

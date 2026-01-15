@@ -184,6 +184,34 @@ public class PerformanceReviewService {
     }
 
     @Transactional
+    public PerformanceReviewDto addSkillEntriesToReview(Integer reviewId, List<SaveSkillEntryDto> dtos) {
+        PerformanceReview review = performanceReviewRepository.findById(reviewId)
+                .orElseThrow(() -> new RuntimeException("Performance review not found"));
+
+        LocalDate defaultEntryDate = review.getReviewDate() != null ? review.getReviewDate() : LocalDate.now();
+
+        for (SaveSkillEntryDto dto : dtos) {
+            Skill skill = skillRepository.findById(dto.skillId())
+                    .orElseThrow(() -> new RuntimeException("Skill not found with id: " + dto.skillId()));
+
+            SkillEntry entry = new SkillEntry();
+            entry.setSkill(skill);
+            entry.setRating(dto.rating());
+            
+            LocalDate entryDate = dto.entryDate() != null ? dto.entryDate() : defaultEntryDate;
+            entry.setEntryDate(entryDate);
+            entry.setEntryDateTime(entryDate.atStartOfDay());
+            entry.setEmployee(review.getRefersTo());
+
+            review.getSkillEntries().add(entry);
+        }
+
+        return performanceReviewMapper.toDto(
+                performanceReviewRepository.save(review)
+        );
+    }
+
+    @Transactional
     public PerformanceReviewDto updateSkillEntryInReview(Integer reviewId, Integer entryId, SaveSkillEntryDto dto) {
         PerformanceReview review = performanceReviewRepository.findById(reviewId)
                 .orElseThrow(() -> new RuntimeException("Performance review not found"));

@@ -29,6 +29,7 @@ export const GET_SKILLS_BY_ORGANIZATION_URL = (organizationId) => `${API_BASE_UR
 export const GET_SKILLS_BY_DEPARTMENT_URL = (departmentId) => `${API_BASE_URL}/skills/department/${departmentId}`
 export const SEARCH_SKILLS_URL = (searchTerm) => `${API_BASE_URL}/skills/search?q=${encodeURIComponent(searchTerm)}`
 export const ADD_SKILL_ENTRY_TO_REVIEW_URL = (reviewId) => `${API_BASE_URL}/performance-reviews/${reviewId}/skill-entries`
+export const ADD_SKILL_ENTRIES_BULK_TO_REVIEW_URL = (reviewId) => `${API_BASE_URL}/performance-reviews/${reviewId}/skill-entries/bulk`
 export const DELETE_SKILL_ENTRY_FROM_REVIEW_URL = (reviewId, entryId) => `${API_BASE_URL}/performance-reviews/${reviewId}/skill-entries/${entryId}`
 export const GENERATE_SKILL_ENTRIES_URL = () => `${API_BASE_URL}/performance-reviews/generate-skill-entries`
 
