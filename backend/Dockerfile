@@ -22,7 +22,7 @@ USER spring:spring
 COPY --from=build /app/target/employee-pulse-service-*.jar app.jar
 
 # Expose the application port
-EXPOSE 8001
+EXPOSE 8002
 
 # Run the application
 ENTRYPOINT ["java", "-jar", "app.jar"]

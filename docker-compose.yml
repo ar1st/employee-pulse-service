@@ -32,9 +32,9 @@ services:
       SPRING_JPA_HIBERNATE_DDL_AUTO: validate
       SPRING_LIQUIBASE_ENABLED: "true"
       SPRING_LIQUIBASE_CHANGE_LOG: classpath:db/changelog/changelog-master.yaml
-      SERVER_PORT: 8001
+      SERVER_PORT: 8002
     ports:
-      - "8001:8001"
+      - "8002:8002"
     depends_on:
       postgres:
         condition: service_healthy
@@ -46,7 +46,7 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
       args:
-        VITE_API_BASE_URL: http://localhost:8001
+        VITE_API_BASE_URL: http://localhost:8002
     container_name: employee-pulse-frontend
     ports:
       - "3000:80"
