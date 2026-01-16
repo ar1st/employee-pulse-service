@@ -5,7 +5,9 @@ public record DepartmentDto(
         Integer id,
         String name,
         Integer organizationId,
-        Integer managerId
+        Integer managerId,
+        String managerFirstName,
+        String managerLastName
 ) {
 
 }

@@ -18,6 +18,8 @@ public interface DepartmentMapper {
 
     @Mapping(target = "organizationId", source = "organization.id")
     @Mapping(target = "managerId", source = "manager.id")
+    @Mapping(target = "managerFirstName", source = "manager.firstName")
+    @Mapping(target = "managerLastName", source = "manager.lastName")
     DepartmentDto toDto(Department organization);
 
     List<DepartmentDto> toDtos(List<Department> organizations);
