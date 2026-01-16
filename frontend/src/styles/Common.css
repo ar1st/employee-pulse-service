@@ -1,0 +1,131 @@
+.page-wrapper {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  overflow-x: hidden;
+}
+
+.table-container {
+  margin-top: 1rem;
+  overflow-x: auto;
+  overflow-y: auto;
+  flex: 1;
+  min-height: 500px;
+  min-width: 0;
+  width: 100%;
+  border: 1px solid #dee2e6;
+  border-radius: 0.25rem;
+}
+
+.data-table thead {
+  position: sticky;
+  top: 0;
+  background-color: #fff;
+  z-index: 10;
+}
+
+.data-table {
+  margin-bottom: 0;
+}
+
+.edit-button {
+  background: none;
+  border: none;
+  padding: 0.5rem;
+  cursor: pointer;
+  color: #007bff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.25rem;
+  transition: all 0.2s ease;
+}
+
+.edit-button:hover {
+  background-color: #e7f3ff;
+  color: #0056b3;
+}
+
+.edit-button:active {
+  background-color: #cfe2ff;
+}
+
+.edit-button svg {
+  display: block;
+}
+
+/* Form width constraints */
+.page-wrapper form {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  overflow-x: hidden;
+}
+
+.page-wrapper .row {
+  width: 100%;
+  max-width: 100%;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
+
+.page-wrapper .row > * {
+  padding-left: 0.75rem;
+  padding-right: 0.75rem;
+  box-sizing: border-box;
+}
+
+.page-wrapper .col,
+.page-wrapper [class*="col-"] {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.page-wrapper .form-group,
+.page-wrapper .form-group > * {
+  max-width: 100%;
+  min-width: 0;
+}
+
+.page-wrapper input,
+.page-wrapper textarea,
+.page-wrapper select {
+  max-width: 100% !important;
+  box-sizing: border-box;
+  width: 100%;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+}
+
+.page-wrapper input[readonly],
+.page-wrapper input[disabled] {
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  max-width: 100% !important;
+}
+
+/* Table sections */
+.page-wrapper table {
+  margin-top: 0.2rem;
+  width: 100%;
+  max-width: 100%;
+}
+
+.page-wrapper table th {
+  background-color: #f8f9fa;
+  font-weight: 600;
+  border-bottom: 2px solid #dee2e6;
+}
+
+.page-wrapper table td {
+  vertical-align: middle;
+}
+
+.page-wrapper .btn-sm {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.875rem;
+}
