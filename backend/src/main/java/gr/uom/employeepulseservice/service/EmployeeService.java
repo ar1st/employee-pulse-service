@@ -29,7 +29,8 @@ public class EmployeeService {
     private final EmployeeMapper employeeMapper;
     private final SkillEntryMapper skillEntryMapper;
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    // Ensure Java Time (LocalDate, etc.) is supported for bulkCreate JSON parsing
+    private final ObjectMapper objectMapper = new ObjectMapper().findAndRegisterModules();
 
     @Transactional(readOnly = true)
     public List<EmployeeDto> findAll() {
