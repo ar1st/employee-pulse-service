@@ -72,7 +72,7 @@ public class ChatGptClient {
                 .asOutputText()
                 .text();
 
-
+        log.info("ChatGPT response: {}", json);
         return objectMapper.readValue(json, new TypeReference<>() {});
     }
 
