@@ -47,12 +47,20 @@ public class OrganizationController {
     }
 
     @GetMapping("/{id}/employees")
-    public ResponseEntity<List<EmployeeDto>> findEmployeesById(@PathVariable Integer id) {
+    public ResponseEntity<List<EmployeeDto>> findEmployeesById(
+            @PathVariable Integer id,
+            @RequestHeader(value = "X-Organization-Id", required = false) Integer headerOrgId
+            ) {
+        HttpUtils.validateOrganizationHeader(id, headerOrgId);
         return ResponseEntity.ok(organizationService.findEmployeesById(id));
     }
 
     @GetMapping("/{id}/departments")
-    public ResponseEntity<List<DepartmentDto>> findDepartmentsById(@PathVariable Integer id) {
+    public ResponseEntity<List<DepartmentDto>> findDepartmentsById(
+            @PathVariable Integer id,
+            @RequestHeader(value = "X-Organization-Id", required = false) Integer headerOrgId
+    ) {
+        HttpUtils.validateOrganizationHeader(id, headerOrgId);
         return ResponseEntity.ok(organizationService.findDepartmentsById(id));
     }
 

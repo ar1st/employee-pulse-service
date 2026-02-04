@@ -1,16 +1,17 @@
 import {Button, Col, FormGroup, Input, Label, Row, Spinner, Table} from "reactstrap";
 import {
-  DEFAULT_ORGANIZATION_ID,
-  GET_SKILLS_BY_ORGANIZATION_URL,
+    GET_SKILLS_BY_ORGANIZATION_URL,
   SEARCH_SKILLS_URL,
   GENERATE_SKILL_ENTRIES_URL
 } from "../../lib/api/apiUrls.js";
 import {axiosGet, axiosPost} from "../../lib/api/client.js";
 import {useEffect, useState, useMemo, useRef} from "react";
 import useCatch from "../../lib/api/useCatch.js";
+import { useOrganization } from "../../context/OrganizationContext.jsx";
 
 export default function SkillEntrySection({ rawText, onRawTextChange, skillEntries, onSkillEntriesChange }) {
   const {cWrapper} = useCatch();
+  const { selectedOrganizationId } = useOrganization();
 
   const [organizationSkills, setOrganizationSkills] = useState([]);
   const [searchedSkills, setSearchedSkills] = useState([]);
@@ -23,12 +24,12 @@ export default function SkillEntrySection({ rawText, onRawTextChange, skillEntri
 
   useEffect(() => {
     cWrapper(() =>
-      axiosGet(GET_SKILLS_BY_ORGANIZATION_URL(DEFAULT_ORGANIZATION_ID))
+      axiosGet(GET_SKILLS_BY_ORGANIZATION_URL(selectedOrganizationId))
         .then((skillsResponse) => {
           setOrganizationSkills(skillsResponse.data);
         })
     );
-  }, [cWrapper]);
+  }, [cWrapper, selectedOrganizationId]);
 
   // Search skills when user types (with debouncing)
   useEffect(() => {
