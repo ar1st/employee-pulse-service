@@ -61,7 +61,11 @@ public class OccupationController {
     }
 
     @GetMapping("/organization/{organizationId}")
-    public ResponseEntity<List<OccupationDto>> findByOrganizationId(@PathVariable Integer organizationId) {
+    public ResponseEntity<List<OccupationDto>> findByOrganizationId(
+            @PathVariable Integer organizationId,
+            @RequestHeader(value = "X-Organization-Id", required = false) Integer headerOrgId
+    ) {
+        HttpUtils.validateOrganizationHeader(organizationId, headerOrgId);
         return ResponseEntity.ok(occupationService.findByOrganizationId(organizationId));
     }
 

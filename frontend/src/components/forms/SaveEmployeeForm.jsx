@@ -2,7 +2,6 @@ import {Button, Col, Form, FormGroup, Input, Label, Row, Spinner} from "reactstr
 import Select from 'react-select';
 import {
   CREATE_EMPLOYEE_URL,
-  DEFAULT_ORGANIZATION_ID,
   GET_DEPARTMENTS_BY_ORGANIZATION_URL,
   GET_EMPLOYEE_URL,
   GET_OCCUPATIONS_BY_ORGANIZATION_URL,
@@ -14,11 +13,13 @@ import {useEffect, useMemo, useRef, useState} from "react";
 import useCatch from "../../lib/api/useCatch.js";
 import {useNavigate} from "react-router-dom";
 import {handleChange} from "../../lib/formUtils.js";
+import { useOrganization } from "../../context/OrganizationContext.jsx";
 
 export default function SaveEmployeeForm({ employeeId = null }) {
   const navigate = useNavigate();
   const {cWrapper} = useCatch();
   const isEditMode = !!employeeId;
+  const { selectedOrganizationId } = useOrganization();
 
   const [loadingData, setLoadingData] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -44,8 +45,8 @@ export default function SaveEmployeeForm({ employeeId = null }) {
     setLoadingData(true);
     const loadData = () => {
       return Promise.all([
-        axiosGet(GET_DEPARTMENTS_BY_ORGANIZATION_URL(DEFAULT_ORGANIZATION_ID)),
-        axiosGet(GET_OCCUPATIONS_BY_ORGANIZATION_URL(DEFAULT_ORGANIZATION_ID))
+        axiosGet(GET_DEPARTMENTS_BY_ORGANIZATION_URL(selectedOrganizationId)),
+        axiosGet(GET_OCCUPATIONS_BY_ORGANIZATION_URL(selectedOrganizationId))
       ])
         .then(([departmentsResponse, occupationsResponse]) => {
           const depts = departmentsResponse.data.content || departmentsResponse.data || [];
@@ -85,7 +86,7 @@ export default function SaveEmployeeForm({ employeeId = null }) {
         .finally(() => setLoadingData(false))
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isEditMode, employeeId, cWrapper]);
+  }, [isEditMode, employeeId, cWrapper, selectedOrganizationId]);
 
   // Search occupations when user types (with debouncing)
   useEffect(() => {
@@ -173,7 +174,7 @@ export default function SaveEmployeeForm({ employeeId = null }) {
       lastName: formData.lastName,
       email: formData.email,
       hireDate: formData.hireDate || null,
-      organizationId: DEFAULT_ORGANIZATION_ID,
+      organizationId: selectedOrganizationId,
       departmentId: formData.departmentId ? parseInt(formData.departmentId) : null,
       occupationId: formData.occupationId ? parseInt(formData.occupationId) : null
     };

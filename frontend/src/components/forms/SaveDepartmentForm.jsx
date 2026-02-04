@@ -1,6 +1,5 @@
 import {Button, Form, FormGroup, Input, Label, Spinner} from "reactstrap";
 import {
-  DEFAULT_ORGANIZATION_ID,
   GET_DEPARTMENT_URL,
   GET_DEPARTMENT_EMPLOYEES_URL,
   CREATE_DEPARTMENT_URL,
@@ -12,11 +11,13 @@ import {useEffect, useState} from "react";
 import useCatch from "../../lib/api/useCatch.js";
 import {useNavigate} from "react-router-dom";
 import {handleChange} from "../../lib/formUtils.js";
+import { useOrganization } from "../../context/OrganizationContext.jsx";
 
 export default function SaveDepartmentForm({ departmentId = null }) {
   const navigate = useNavigate();
   const {cWrapper} = useCatch();
   const isEditMode = !!departmentId;
+  const { selectedOrganizationId } = useOrganization();
 
   const [loading, setLoading] = useState(false);
   const [loadingEmployees, setLoadingEmployees] = useState(false);
@@ -78,7 +79,7 @@ export default function SaveDepartmentForm({ departmentId = null }) {
       // Create new department
       const payload = {
         name: formData.name,
-        organizationId: DEFAULT_ORGANIZATION_ID
+        organizationId: selectedOrganizationId
       };
 
       cWrapper(() =>
