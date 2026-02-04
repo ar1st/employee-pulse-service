@@ -27,8 +27,11 @@ public class ReportingController {
             @RequestParam(required = false) Integer deptId,
             @RequestParam(required = false) Integer skillId,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
+            @RequestHeader(value = "X-Organization-Id", required = false) Integer headerOrgId
     ) {
+        HttpUtils.validateOrganizationHeader(orgId, headerOrgId);
+
         return ResponseEntity.ok(
                 reportingRepository.getReportByOrganizationAndDepartment(
                         periodType,
@@ -70,8 +73,11 @@ public class ReportingController {
             @RequestParam(required = false) Integer departmentId,
             @RequestParam(required = false) Integer skillId,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
+            @RequestHeader(value = "X-Organization-Id", required = false) Integer headerOrgId
     ) {
+        HttpUtils.validateOrganizationHeader(organizationId, headerOrgId);
+
         return reportingRepository.getSkillTimelineByOrganizationAndDepartment(
                 organizationId,
                 departmentId,

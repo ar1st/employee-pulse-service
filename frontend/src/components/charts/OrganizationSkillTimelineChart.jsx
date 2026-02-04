@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
 import { Card, CardBody, CardHeader, Collapse } from 'reactstrap';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { DEFAULT_ORGANIZATION_ID, GET_ORG_DEPT_SKILL_TIMELINE_URL } from '../../lib/api/apiUrls.js';
+import { GET_ORG_DEPT_SKILL_TIMELINE_URL } from '../../lib/api/apiUrls.js';
 import { axiosGet } from '../../lib/api/client.js';
 import useCatch from '../../lib/api/useCatch.js';
 import { useOrganizationFilter } from './OrganizationFilterContext.jsx';
+import { useOrganization } from "../../context/OrganizationContext.jsx";
 
 function OrganizationSkillTimelineChart() {
   const { cWrapper } = useCatch();
@@ -13,6 +14,7 @@ function OrganizationSkillTimelineChart() {
   const [chartData, setChartData] = useState(null);
   const [hasAttemptedChart, setHasAttemptedChart] = useState(false);
   const [loadingChart, setLoadingChart] = useState(false);
+  const { selectedOrganizationId } = useOrganization();
 
   // Fetch data when triggerFetch changes (Generate Chart button clicked)
   useEffect(() => {
@@ -26,7 +28,7 @@ function OrganizationSkillTimelineChart() {
     setHasAttemptedChart(true);
     cWrapper(() =>
       axiosGet(GET_ORG_DEPT_SKILL_TIMELINE_URL(
-        DEFAULT_ORGANIZATION_ID,
+        selectedOrganizationId,
         filterValues.departmentId ? parseInt(filterValues.departmentId) : null,
         filterValues.skillId ? parseInt(filterValues.skillId) : null,
         filterValues.startDate || null,
@@ -41,7 +43,7 @@ function OrganizationSkillTimelineChart() {
         .finally(() => setLoadingChart(false))
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [triggerFetch, cWrapper]);
+  }, [triggerFetch, cWrapper, selectedOrganizationId]);
 
   // Transform timeline data for chart
   const getChartDataForSkill = (skill) => {

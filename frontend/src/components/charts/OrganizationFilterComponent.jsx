@@ -1,10 +1,11 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Card, CardBody, Form, FormGroup, Label, Input, Button, Row, Col } from 'reactstrap';
 import Select from 'react-select';
-import { DEFAULT_ORGANIZATION_ID, GET_SKILLS_BY_ORGANIZATION_URL, GET_SKILLS_BY_DEPARTMENT_URL, GET_DEPARTMENTS_BY_ORGANIZATION_URL } from '../../lib/api/apiUrls.js';
+import { GET_SKILLS_BY_ORGANIZATION_URL, GET_SKILLS_BY_DEPARTMENT_URL, GET_DEPARTMENTS_BY_ORGANIZATION_URL } from '../../lib/api/apiUrls.js';
 import { axiosGet } from '../../lib/api/client.js';
 import useCatch from '../../lib/api/useCatch.js';
 import { useOrganizationFilter } from './OrganizationFilterContext.jsx';
+import { useOrganization } from "../../context/OrganizationContext.jsx";
 
 function OrganizationFilterComponent() {
   const { cWrapper } = useCatch();
@@ -13,13 +14,14 @@ function OrganizationFilterComponent() {
   const [departments, setDepartments] = useState([]);
   const [loadingSkills, setLoadingSkills] = useState(false);
   const [loadingDepartments, setLoadingDepartments] = useState(false);
+  const { selectedOrganizationId } = useOrganization();
 
   // Load departments on mount
   useEffect(() => {
     setLoadingDepartments(true);
 
     cWrapper(() =>
-      axiosGet(GET_DEPARTMENTS_BY_ORGANIZATION_URL(DEFAULT_ORGANIZATION_ID))
+      axiosGet(GET_DEPARTMENTS_BY_ORGANIZATION_URL(selectedOrganizationId))
         .then((departmentsResponse) => {
           const depts = departmentsResponse.data.content || departmentsResponse.data || [];
           setDepartments(Array.isArray(depts) ? depts : []);
@@ -28,7 +30,7 @@ function OrganizationFilterComponent() {
           setLoadingDepartments(false);
         })
     );
-  }, [cWrapper]);
+  }, [cWrapper, selectedOrganizationId]);
 
   // Load skills based on department selection
   useEffect(() => {
@@ -36,7 +38,7 @@ function OrganizationFilterComponent() {
 
     const loadSkills = filterValues.departmentId
       ? axiosGet(GET_SKILLS_BY_DEPARTMENT_URL(parseInt(filterValues.departmentId)))
-      : axiosGet(GET_SKILLS_BY_ORGANIZATION_URL(DEFAULT_ORGANIZATION_ID));
+      : axiosGet(GET_SKILLS_BY_ORGANIZATION_URL(selectedOrganizationId));
 
     cWrapper(() =>
       loadSkills
@@ -56,7 +58,7 @@ function OrganizationFilterComponent() {
         })
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filterValues.departmentId, cWrapper]);
+  }, [filterValues.departmentId, cWrapper, selectedOrganizationId]);
 
   // Convert departments to react-select options
   const departmentOptions = useMemo(
