@@ -1,5 +1,5 @@
 import {useEffect, useState, useMemo} from "react";
-import {DEFAULT_ORGANIZATION_ID, GET_EMPLOYEES_BY_ORGANIZATION_URL, DELETE_EMPLOYEE_URL} from "../../lib/api/apiUrls.js";
+import {GET_EMPLOYEES_BY_ORGANIZATION_URL, DELETE_EMPLOYEE_URL} from "../../lib/api/apiUrls.js";
 import {Alert, Spinner, Table} from "reactstrap";
 import {axiosGet, axiosDelete} from "../../lib/api/client.js";
 import useCatch from "../../lib/api/useCatch.js";
@@ -7,6 +7,7 @@ import {formatDate} from "../../lib/dateUtils.js";
 import ConfirmModal from "../ConfirmModal.jsx";
 import {useNavigate} from "react-router-dom";
 import {useEmployeeFilter} from "./filters/EmployeeFilterContext.jsx";
+import { useOrganization } from "../../context/OrganizationContext.jsx";
 
 export default function EmployeesTable() {
   const navigate = useNavigate()
@@ -17,11 +18,12 @@ export default function EmployeesTable() {
   const [deleting, setDeleting] = useState(false)
   const {cWrapper} = useCatch()
   const {filterValues} = useEmployeeFilter()
+  const { selectedOrganizationId } = useOrganization();
 
   const loadEmployees = () => {
     setLoading(true)
     cWrapper(() =>
-      axiosGet(GET_EMPLOYEES_BY_ORGANIZATION_URL(DEFAULT_ORGANIZATION_ID))
+      axiosGet(GET_EMPLOYEES_BY_ORGANIZATION_URL(selectedOrganizationId))
         .then((response) => {
           setEmployees(response.data)
         })
@@ -32,7 +34,7 @@ export default function EmployeesTable() {
   useEffect(() => {
     loadEmployees()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [cWrapper])
+  }, [cWrapper, selectedOrganizationId])
 
   const handleEdit = (employeeId) => {
     navigate(`/employees/save?id=${employeeId}`)
