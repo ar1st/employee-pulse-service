@@ -58,7 +58,12 @@ public class PerformanceReviewController {
     }
 
     @GetMapping("/organization/{organizationId}")
-    public ResponseEntity<List<PerformanceReviewDto>> getByOrganization(@PathVariable Integer organizationId) {
+    public ResponseEntity<List<PerformanceReviewDto>> getByOrganization(
+            @PathVariable Integer organizationId,
+            @RequestHeader(value = "X-Organization-Id", required = false) Integer headerOrgId
+    ) {
+        HttpUtils.validateOrganizationHeader(organizationId, headerOrgId);
+
         return ResponseEntity.ok(performanceReviewService.findByOrganization(organizationId));
     }
 

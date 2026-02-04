@@ -1,6 +1,6 @@
 import {Button, Col, Form, FormGroup, Input, Label, Row, Spinner} from "reactstrap";
 import {
-  CREATE_PERFORMANCE_REVIEW_URL, DEFAULT_ORGANIZATION_ID,
+  CREATE_PERFORMANCE_REVIEW_URL,
   GET_DEPARTMENT_URL, GET_DEPARTMENTS_BY_ORGANIZATION_URL,
   GET_EMPLOYEES_BY_ORGANIZATION_URL,
   GET_PERFORMANCE_REVIEW_URL,
@@ -15,11 +15,13 @@ import useCatch from "../../lib/api/useCatch.js";
 import {useNavigate} from "react-router-dom";
 import {handleChange} from "../../lib/formUtils.js";
 import SkillEntrySection from "./SkillEntrySection.jsx";
+import { useOrganization } from "../../context/OrganizationContext.jsx";
 
 export default function SavePerformanceReviewForm({ reviewId = null }) {
   const isEditMode = !!reviewId;
   const navigate = useNavigate();
   const {cWrapper} = useCatch();
+  const { selectedOrganizationId } = useOrganization();
 
   const [departments, setDepartments] = useState([]);
   const [allEmployees, setAllEmployees] = useState([]);
@@ -49,8 +51,8 @@ export default function SavePerformanceReviewForm({ reviewId = null }) {
 
     cWrapper(() =>
       Promise.all([
-        axiosGet(GET_DEPARTMENTS_BY_ORGANIZATION_URL(DEFAULT_ORGANIZATION_ID)),
-        axiosGet(GET_EMPLOYEES_BY_ORGANIZATION_URL(DEFAULT_ORGANIZATION_ID))
+        axiosGet(GET_DEPARTMENTS_BY_ORGANIZATION_URL(selectedOrganizationId)),
+        axiosGet(GET_EMPLOYEES_BY_ORGANIZATION_URL(selectedOrganizationId))
       ])
         .then(([departmentsResponse, employeesResponse]) => {
           setDepartments(departmentsResponse.data);

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Nav, NavItem, Dropdown, DropdownToggle, DropdownMenu, DropdownItem } from 'reactstrap'
 import { NavLink, useLocation } from 'react-router-dom'
 import Select from 'react-select'
-import { DEFAULT_ORGANIZATION_ID, GET_ORGANIZATIONS_URL } from '../lib/api/apiUrls.js'
+import { GET_ORGANIZATIONS_URL } from '../lib/api/apiUrls.js'
 import { axiosGet } from '../lib/api/client.js'
 import useCatch from '../lib/api/useCatch.js'
 import { useOrganization } from '../context/OrganizationContext.jsx'
@@ -10,7 +10,7 @@ import { useOrganization } from '../context/OrganizationContext.jsx'
 function Navbar() {
   const [analyticsDropdownOpen, setAnalyticsDropdownOpen] = useState(false);
   const [organizations, setOrganizations] = useState([]);
-  const { selectedOrganization, setOrganization } = useOrganization();
+  const { selectedOrganizationId, selectedOrganization, setOrganization } = useOrganization();
   const location = useLocation();
   const { cWrapper } = useCatch();
   
@@ -27,7 +27,7 @@ function Navbar() {
           setOrganizations(options);
 
           const defaultOption =
-            options.find((opt) => opt.value === DEFAULT_ORGANIZATION_ID) ||
+            options.find((opt) => opt.value === selectedOrganizationId) ||
             options[0] ||
             null;
 

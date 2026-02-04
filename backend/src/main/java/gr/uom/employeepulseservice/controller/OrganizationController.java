@@ -50,7 +50,7 @@ public class OrganizationController {
     public ResponseEntity<List<EmployeeDto>> findEmployeesById(
             @PathVariable Integer id,
             @RequestHeader(value = "X-Organization-Id", required = false) Integer headerOrgId
-            ) {
+    ) {
         HttpUtils.validateOrganizationHeader(id, headerOrgId);
         return ResponseEntity.ok(organizationService.findEmployeesById(id));
     }
@@ -65,7 +65,11 @@ public class OrganizationController {
     }
 
     @GetMapping("/{id}/skills")
-    public ResponseEntity<List<SkillDto>> findSkillsById(@PathVariable Integer id) {
+    public ResponseEntity<List<SkillDto>> findSkillsById(
+            @PathVariable Integer id,
+            @RequestHeader(value = "X-Organization-Id", required = false) Integer headerOrgId
+    ) {
+        HttpUtils.validateOrganizationHeader(id, headerOrgId);
         return ResponseEntity.ok(organizationService.findSkillsById(id));
     }
 }

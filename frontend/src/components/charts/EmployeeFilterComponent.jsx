@@ -1,13 +1,15 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Card, CardBody, Form, FormGroup, Label, Input, Button, Row, Col } from 'reactstrap';
 import Select from 'react-select';
-import { DEFAULT_ORGANIZATION_ID, GET_SKILLS_BY_ORGANIZATION_URL, GET_EMPLOYEES_BY_ORGANIZATION_URL, GET_DEPARTMENTS_BY_ORGANIZATION_URL, GET_EMPLOYEE_LATEST_SKILL_ENTRIES_URL } from '../../lib/api/apiUrls.js';
+import { GET_SKILLS_BY_ORGANIZATION_URL, GET_EMPLOYEES_BY_ORGANIZATION_URL, GET_DEPARTMENTS_BY_ORGANIZATION_URL, GET_EMPLOYEE_LATEST_SKILL_ENTRIES_URL } from '../../lib/api/apiUrls.js';
 import { axiosGet } from '../../lib/api/client.js';
 import useCatch from '../../lib/api/useCatch.js';
 import { useEmployeeFilter } from './EmployeeFilterContext.jsx';
+import { useOrganization } from "../../context/OrganizationContext.jsx";
 
 function EmployeeFilterComponent() {
   const { cWrapper } = useCatch();
+  const { selectedOrganizationId } = useOrganization();
   const { filterValues, setFilterValues, triggerChartGeneration } = useEmployeeFilter();
   const [allSkills, setAllSkills] = useState([]);
   const [employees, setEmployees] = useState([]);
@@ -26,9 +28,9 @@ function EmployeeFilterComponent() {
 
     cWrapper(() =>
       Promise.all([
-        axiosGet(GET_SKILLS_BY_ORGANIZATION_URL(DEFAULT_ORGANIZATION_ID)),
-        axiosGet(GET_EMPLOYEES_BY_ORGANIZATION_URL(DEFAULT_ORGANIZATION_ID)),
-        axiosGet(GET_DEPARTMENTS_BY_ORGANIZATION_URL(DEFAULT_ORGANIZATION_ID))
+        axiosGet(GET_SKILLS_BY_ORGANIZATION_URL(selectedOrganizationId)),
+        axiosGet(GET_EMPLOYEES_BY_ORGANIZATION_URL(selectedOrganizationId)),
+        axiosGet(GET_DEPARTMENTS_BY_ORGANIZATION_URL(selectedOrganizationId))
       ])
         .then(([skillsResponse, employeesResponse, departmentsResponse]) => {
           setAllSkills(skillsResponse.data || []);
@@ -43,7 +45,7 @@ function EmployeeFilterComponent() {
           setLoadingDepartments(false);
         })
     );
-  }, [cWrapper]);
+  }, [cWrapper, selectedOrganizationId]);
 
   // Load employee skills when employee is selected
   useEffect(() => {
