@@ -14,7 +14,7 @@ function OrganizationSkillTimelineChart() {
   const [chartData, setChartData] = useState(null);
   const [hasAttemptedChart, setHasAttemptedChart] = useState(false);
   const [loadingChart, setLoadingChart] = useState(false);
-  const { selectedOrganizationId } = useOrganization();
+  const { selectedOrganization } = useOrganization();
 
   // Fetch data when triggerFetch changes (Generate Chart button clicked)
   useEffect(() => {
@@ -26,9 +26,11 @@ function OrganizationSkillTimelineChart() {
 
     setLoadingChart(true);
     setHasAttemptedChart(true);
+    const orgId = selectedOrganization?.value;
+
     cWrapper(() =>
       axiosGet(GET_ORG_DEPT_SKILL_TIMELINE_URL(
-        selectedOrganizationId,
+        orgId,
         filterValues.departmentId ? parseInt(filterValues.departmentId) : null,
         filterValues.skillId ? parseInt(filterValues.skillId) : null,
         filterValues.startDate || null,
@@ -43,7 +45,7 @@ function OrganizationSkillTimelineChart() {
         .finally(() => setLoadingChart(false))
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [triggerFetch, cWrapper, selectedOrganizationId]);
+  }, [triggerFetch, cWrapper, selectedOrganization]);
 
   // Transform timeline data for chart
   const getChartDataForSkill = (skill) => {

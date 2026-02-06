@@ -1,32 +1,32 @@
 import { createContext, useContext, useEffect, useState } from 'react';
-import { DEFAULT_ORGANIZATION_ID } from '../lib/api/apiUrls.js';
 import { setOrganizationHeader } from '../lib/api/client.js';
 
 const OrganizationContext = createContext(null);
 
+const DEFAULT_ORGANIZATION = {
+  value: 1,
+  label: 'University of Macedonia',
+};
+
 export function OrganizationProvider({ children }) {
-  const [selectedOrganizationId, setSelectedOrganizationId] = useState(DEFAULT_ORGANIZATION_ID);
-  const [selectedOrganization, setSelectedOrganization] = useState(null);
+  const [selectedOrganization, setSelectedOrganization] = useState(DEFAULT_ORGANIZATION);
 
   useEffect(() => {
-    if (selectedOrganizationId != null) {
-      setOrganizationHeader(selectedOrganizationId);
-    }
-  }, [selectedOrganizationId]);
+    const id = selectedOrganization?.label ?? 'University of Macedonia';
+    setOrganizationHeader(id);
+  }, [selectedOrganization]);
 
   const setOrganization = (org) => {
-    if (org && typeof org === 'object') {       
+    if (org && typeof org === 'object') {
       setSelectedOrganization(org);
-      setSelectedOrganizationId(org.value ?? null);
     } else {
-      setSelectedOrganization(null);
-      setSelectedOrganizationId(null);
+      setSelectedOrganization(DEFAULT_ORGANIZATION);
     }
   };
 
   const value = {
-    selectedOrganizationId: selectedOrganizationId ?? DEFAULT_ORGANIZATION_ID,
     selectedOrganization,
+    selectedOrganizationName: selectedOrganization?.label ?? '',
     setOrganization,
   };
 
@@ -39,11 +39,9 @@ export function OrganizationProvider({ children }) {
 
 export function useOrganization() {
   const ctx = useContext(OrganizationContext);
-  console.log('ctx ', ctx)
   if (!ctx) {
     throw new Error('useOrganization must be used within an OrganizationProvider');
   }
   return ctx;
 }
-
 

@@ -19,7 +19,7 @@ export default function SaveEmployeeForm({ employeeId = null }) {
   const navigate = useNavigate();
   const {cWrapper} = useCatch();
   const isEditMode = !!employeeId;
-  const { selectedOrganizationId } = useOrganization();
+  const { selectedOrganization } = useOrganization();
 
   const [loadingData, setLoadingData] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -44,9 +44,11 @@ export default function SaveEmployeeForm({ employeeId = null }) {
   useEffect(() => {
     setLoadingData(true);
     const loadData = () => {
+      const orgId = selectedOrganization?.value;
+
       return Promise.all([
-        axiosGet(GET_DEPARTMENTS_BY_ORGANIZATION_URL(selectedOrganizationId)),
-        axiosGet(GET_OCCUPATIONS_BY_ORGANIZATION_URL(selectedOrganizationId))
+        axiosGet(GET_DEPARTMENTS_BY_ORGANIZATION_URL(orgId)),
+        axiosGet(GET_OCCUPATIONS_BY_ORGANIZATION_URL(orgId))
       ])
         .then(([departmentsResponse, occupationsResponse]) => {
           const depts = departmentsResponse.data.content || departmentsResponse.data || [];
@@ -86,7 +88,7 @@ export default function SaveEmployeeForm({ employeeId = null }) {
         .finally(() => setLoadingData(false))
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isEditMode, employeeId, cWrapper, selectedOrganizationId]);
+  }, [isEditMode, employeeId, cWrapper, selectedOrganization]);
 
   // Search occupations when user types (with debouncing)
   useEffect(() => {
@@ -174,7 +176,7 @@ export default function SaveEmployeeForm({ employeeId = null }) {
       lastName: formData.lastName,
       email: formData.email,
       hireDate: formData.hireDate || null,
-      organizationId: selectedOrganizationId,
+      organizationId: selectedOrganization?.value,
       departmentId: formData.departmentId ? parseInt(formData.departmentId) : null,
       occupationId: formData.occupationId ? parseInt(formData.occupationId) : null
     };

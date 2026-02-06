@@ -17,7 +17,7 @@ export default function SaveDepartmentForm({ departmentId = null }) {
   const navigate = useNavigate();
   const {cWrapper} = useCatch();
   const isEditMode = !!departmentId;
-  const { selectedOrganizationId } = useOrganization();
+  const { selectedOrganization } = useOrganization();
 
   const [loading, setLoading] = useState(false);
   const [loadingEmployees, setLoadingEmployees] = useState(false);
@@ -79,7 +79,7 @@ export default function SaveDepartmentForm({ departmentId = null }) {
       // Create new department
       const payload = {
         name: formData.name,
-        organizationId: selectedOrganizationId
+        organizationId: selectedOrganization?.value
       };
 
       cWrapper(() =>

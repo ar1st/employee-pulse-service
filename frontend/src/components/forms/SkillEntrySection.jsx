@@ -11,7 +11,7 @@ import { useOrganization } from "../../context/OrganizationContext.jsx";
 
 export default function SkillEntrySection({ rawText, onRawTextChange, skillEntries, onSkillEntriesChange }) {
   const {cWrapper} = useCatch();
-  const { selectedOrganizationId } = useOrganization();
+  const { selectedOrganization } = useOrganization();
 
   const [organizationSkills, setOrganizationSkills] = useState([]);
   const [searchedSkills, setSearchedSkills] = useState([]);
@@ -23,13 +23,15 @@ export default function SkillEntrySection({ rawText, onRawTextChange, skillEntri
   const searchTimeoutRef = useRef(null);
 
   useEffect(() => {
+    const orgId = selectedOrganization?.value;
+
     cWrapper(() =>
-      axiosGet(GET_SKILLS_BY_ORGANIZATION_URL(selectedOrganizationId))
+      axiosGet(GET_SKILLS_BY_ORGANIZATION_URL(orgId))
         .then((skillsResponse) => {
           setOrganizationSkills(skillsResponse.data);
         })
     );
-  }, [cWrapper, selectedOrganizationId]);
+  }, [cWrapper, selectedOrganization]);
 
   // Search skills when user types (with debouncing)
   useEffect(() => {

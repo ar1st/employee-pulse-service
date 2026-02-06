@@ -15,7 +15,7 @@ function OrganizationPerformanceReviewChart() {
   const [chartData, setChartData] = useState([]);
   const [hasAttemptedChart, setHasAttemptedChart] = useState(false);
   const [loadingChart, setLoadingChart] = useState(false);
-  const { selectedOrganizationId } = useOrganization();
+  const { selectedOrganization } = useOrganization();
 
   // Fetch data when triggerFetch changes (Generate Chart button clicked)
   useEffect(() => {
@@ -27,9 +27,11 @@ function OrganizationPerformanceReviewChart() {
 
     setLoadingChart(true);
     setHasAttemptedChart(true);
+    const orgId = selectedOrganization?.value;
+
     cWrapper(() =>
       axiosGet(GET_ORG_DEPT_REPORT_URL(
-        selectedOrganizationId,
+        orgId,
         filterValues.departmentId ? parseInt(filterValues.departmentId) : null,
         parseInt(filterValues.skillId),
         filterValues.startDate || null,
@@ -44,7 +46,7 @@ function OrganizationPerformanceReviewChart() {
         .finally(() => setLoadingChart(false))
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [triggerFetch, cWrapper, selectedOrganizationId]);
+  }, [triggerFetch, cWrapper, selectedOrganization]);
 
   useEffect(() => {
     if (!chartResponseData || !filterValues.skillId) {

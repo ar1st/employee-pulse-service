@@ -18,11 +18,11 @@ export default function DepartmentsTable() {
   const [departmentToDelete, setDepartmentToDelete] = useState(null)
   const [deleting, setDeleting] = useState(false)
   const {cWrapper} = useCatch()
-  const { selectedOrganizationId } = useOrganization();
+  const { selectedOrganization } = useOrganization();
 
   const loadDepartments = () => {
     setLoading(true)
-    const orgId = selectedOrganizationId;
+    const orgId = selectedOrganization?.value;
 
     cWrapper(() =>
       axiosGet(GET_DEPARTMENTS_BY_ORGANIZATION_URL(orgId))
@@ -36,7 +36,7 @@ export default function DepartmentsTable() {
   useEffect(() => {
     loadDepartments()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [cWrapper, selectedOrganizationId])
+  }, [cWrapper, selectedOrganization])
 
   const handleEdit = (departmentId) => {
     navigate(`/departments/save?id=${departmentId}`)

@@ -2,18 +2,18 @@ import axios from 'axios'
 
 const api = axios.create()
 
-let organizationId = null
+let organizationName = null
 
-export const setOrganizationHeader = (orgId) => {
-  organizationId = orgId
+export const setOrganizationHeader = (orgName) => {
+  organizationName = orgName
 }
 
 api.interceptors.request.use((config) => {
   const updatedConfig = { ...config }
   updatedConfig.headers = updatedConfig.headers ?? {}
 
-  if (organizationId != null) {
-    updatedConfig.headers['X-Organization-Id'] = organizationId
+  if (organizationName != null) {
+    updatedConfig.headers['X-Organization-Name'] = organizationName
   }
 
   return updatedConfig

@@ -9,7 +9,7 @@ import { useOrganization } from "../../context/OrganizationContext.jsx";
 
 function EmployeeFilterComponent() {
   const { cWrapper } = useCatch();
-  const { selectedOrganizationId } = useOrganization();
+  const { selectedOrganization } = useOrganization();
   const { filterValues, setFilterValues, triggerChartGeneration } = useEmployeeFilter();
   const [allSkills, setAllSkills] = useState([]);
   const [employees, setEmployees] = useState([]);
@@ -26,11 +26,13 @@ function EmployeeFilterComponent() {
     setLoadingEmployees(true);
     setLoadingDepartments(true);
 
+    const orgId = selectedOrganization?.value;
+
     cWrapper(() =>
       Promise.all([
-        axiosGet(GET_SKILLS_BY_ORGANIZATION_URL(selectedOrganizationId)),
-        axiosGet(GET_EMPLOYEES_BY_ORGANIZATION_URL(selectedOrganizationId)),
-        axiosGet(GET_DEPARTMENTS_BY_ORGANIZATION_URL(selectedOrganizationId))
+        axiosGet(GET_SKILLS_BY_ORGANIZATION_URL(orgId)),
+        axiosGet(GET_EMPLOYEES_BY_ORGANIZATION_URL(orgId)),
+        axiosGet(GET_DEPARTMENTS_BY_ORGANIZATION_URL(orgId))
       ])
         .then(([skillsResponse, employeesResponse, departmentsResponse]) => {
           setAllSkills(skillsResponse.data || []);
@@ -45,7 +47,7 @@ function EmployeeFilterComponent() {
           setLoadingDepartments(false);
         })
     );
-  }, [cWrapper, selectedOrganizationId]);
+  }, [cWrapper, selectedOrganization]);
 
   // Load employee skills when employee is selected
   useEffect(() => {

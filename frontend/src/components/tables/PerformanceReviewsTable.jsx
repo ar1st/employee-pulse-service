@@ -18,7 +18,7 @@ export default function PerformanceReviewsTable() {
   const [deleting, setDeleting] = useState(false)
   const {cWrapper} = useCatch()
   const {filterValues} = usePerformanceReviewFilter()
-  const { selectedOrganizationId } = useOrganization();
+  const { selectedOrganization } = useOrganization();
 
   const formatRating = (rating) => {
     return rating != null ? rating.toFixed(1) : 'N/A'
@@ -26,9 +26,11 @@ export default function PerformanceReviewsTable() {
 
   const loadPerformanceReviews = () => {
     setLoading(true)
+    const orgId = selectedOrganization?.value;
+
     cWrapper(() =>
       axiosGet(
-        GET_PERFORMANCE_REVIEWS_URL(selectedOrganizationId),
+        GET_PERFORMANCE_REVIEWS_URL(orgId),
       ).then((response) => {
         setPerformanceReviews(response.data)
       })
@@ -39,7 +41,7 @@ export default function PerformanceReviewsTable() {
   useEffect(() => {
     loadPerformanceReviews()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [cWrapper, selectedOrganizationId])
+  }, [cWrapper, selectedOrganization])
 
   const handleEdit = (reviewId) => {
     navigate(`/performance-reviews/save?id=${reviewId}`)

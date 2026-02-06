@@ -18,12 +18,14 @@ export default function EmployeesTable() {
   const [deleting, setDeleting] = useState(false)
   const {cWrapper} = useCatch()
   const {filterValues} = useEmployeeFilter()
-  const { selectedOrganizationId } = useOrganization();
+  const { selectedOrganization } = useOrganization();
 
   const loadEmployees = () => {
     setLoading(true)
+    const orgId = selectedOrganization?.value;
+
     cWrapper(() =>
-      axiosGet(GET_EMPLOYEES_BY_ORGANIZATION_URL(selectedOrganizationId))
+      axiosGet(GET_EMPLOYEES_BY_ORGANIZATION_URL(orgId))
         .then((response) => {
           setEmployees(response.data)
         })
@@ -34,7 +36,7 @@ export default function EmployeesTable() {
   useEffect(() => {
     loadEmployees()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [cWrapper, selectedOrganizationId])
+  }, [cWrapper, selectedOrganization])
 
   const handleEdit = (employeeId) => {
     navigate(`/employees/save?id=${employeeId}`)

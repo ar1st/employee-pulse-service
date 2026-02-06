@@ -1,7 +1,5 @@
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8001'
 
-export const DEFAULT_ORGANIZATION_ID = 1
-
 export const GET_PERFORMANCE_REVIEWS_URL = (organizationId) => `${API_BASE_URL}/performance-reviews/organization/${organizationId}`
 export const GET_PERFORMANCE_REVIEW_URL = (reviewId) => `${API_BASE_URL}/performance-reviews/${reviewId}`
 export const CREATE_PERFORMANCE_REVIEW_URL = () => `${API_BASE_URL}/performance-reviews`

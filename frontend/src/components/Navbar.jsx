@@ -10,7 +10,7 @@ import { useOrganization } from '../context/OrganizationContext.jsx'
 function Navbar() {
   const [analyticsDropdownOpen, setAnalyticsDropdownOpen] = useState(false);
   const [organizations, setOrganizations] = useState([]);
-  const { selectedOrganizationId, selectedOrganization, setOrganization } = useOrganization();
+  const { selectedOrganization, setOrganization } = useOrganization();
   const location = useLocation();
   const { cWrapper } = useCatch();
   
@@ -26,13 +26,16 @@ function Navbar() {
           }));
           setOrganizations(options);
 
-          const defaultOption =
-            options.find((opt) => opt.value === selectedOrganizationId) ||
-            options[0] ||
-            null;
+          if (selectedOrganization) {
+            const existing = options.find((opt) => opt.label === selectedOrganization.label);
+            if (existing) {
+              setOrganization(existing);
+              return;
+            }
+          }
 
-          if (defaultOption) {
-            setOrganization(defaultOption);
+          if (options[0]) {
+            setOrganization(options[0]);
           }
         })
         .catch(() => {

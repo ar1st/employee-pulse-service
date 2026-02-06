@@ -21,7 +21,7 @@ export default function SavePerformanceReviewForm({ reviewId = null }) {
   const isEditMode = !!reviewId;
   const navigate = useNavigate();
   const {cWrapper} = useCatch();
-  const { selectedOrganizationId } = useOrganization();
+  const { selectedOrganization } = useOrganization();
 
   const [departments, setDepartments] = useState([]);
   const [allEmployees, setAllEmployees] = useState([]);
@@ -49,10 +49,12 @@ export default function SavePerformanceReviewForm({ reviewId = null }) {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setLoading(true);
 
+    const orgId = selectedOrganization?.value;
+
     cWrapper(() =>
       Promise.all([
-        axiosGet(GET_DEPARTMENTS_BY_ORGANIZATION_URL(selectedOrganizationId)),
-        axiosGet(GET_EMPLOYEES_BY_ORGANIZATION_URL(selectedOrganizationId))
+        axiosGet(GET_DEPARTMENTS_BY_ORGANIZATION_URL(orgId)),
+        axiosGet(GET_EMPLOYEES_BY_ORGANIZATION_URL(orgId))
       ])
         .then(([departmentsResponse, employeesResponse]) => {
           setDepartments(departmentsResponse.data);
