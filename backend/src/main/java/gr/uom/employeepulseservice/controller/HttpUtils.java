@@ -8,11 +8,11 @@ public final class HttpUtils {
     private HttpUtils() {
     }
 
-    public static void validateOrganizationHeader(Integer pathOrgId, Integer headerOrgId) {
-        if (headerOrgId != null && !headerOrgId.equals(pathOrgId)) {
+    public static void validateOrganizationHeader(String pathOrgName, String headerOrgName) {
+        if (headerOrgName != null && !headerOrgName.equals(pathOrgName)) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
-                    "Path organization id does not match X-Organization-Id header"
+                    "Path organization name does not match X-Organization-Name header"
             );
         }
     }

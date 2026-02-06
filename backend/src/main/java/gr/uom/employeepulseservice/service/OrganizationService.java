@@ -45,6 +45,12 @@ public class OrganizationService {
         return organizationMapper.toDto(organization);
     }
 
+    public String findOrganizationNameById(Integer id) {
+        Organization organization = findById(id);
+
+        return organization.getName();
+    }
+
     private Organization findById(Integer id) {
         return organizationRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Organization not found"));

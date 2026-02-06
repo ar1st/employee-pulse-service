@@ -1,6 +1,7 @@
 package gr.uom.employeepulseservice.controller;
 
 import gr.uom.employeepulseservice.controller.dto.*;
+import gr.uom.employeepulseservice.service.OrganizationService;
 import gr.uom.employeepulseservice.service.PerformanceReviewService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -16,6 +17,7 @@ import java.util.List;
 public class PerformanceReviewController {
 
     private final PerformanceReviewService performanceReviewService;
+    private final OrganizationService organizationService;
 
     @PostMapping
     public ResponseEntity<CreatePerformanceReviewResponseDto> createPerformanceReview(@RequestBody CreatePerformanceReviewDto dto) {
@@ -60,9 +62,10 @@ public class PerformanceReviewController {
     @GetMapping("/organization/{organizationId}")
     public ResponseEntity<List<PerformanceReviewDto>> getByOrganization(
             @PathVariable Integer organizationId,
-            @RequestHeader(value = "X-Organization-Id", required = false) Integer headerOrgId
+            @RequestHeader(value = "X-Organization-Name", required = false) String headerOrgName
     ) {
-        HttpUtils.validateOrganizationHeader(organizationId, headerOrgId);
+        String orgName = organizationService.findOrganizationNameById(organizationId);
+        HttpUtils.validateOrganizationHeader(orgName, headerOrgName);
 
         return ResponseEntity.ok(performanceReviewService.findByOrganization(organizationId));
     }

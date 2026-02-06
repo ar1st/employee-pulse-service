@@ -49,27 +49,33 @@ public class OrganizationController {
     @GetMapping("/{id}/employees")
     public ResponseEntity<List<EmployeeDto>> findEmployeesById(
             @PathVariable Integer id,
-            @RequestHeader(value = "X-Organization-Id", required = false) Integer headerOrgId
+            @RequestHeader(value = "X-Organization-Name", required = false) String headerOrgName
     ) {
-        HttpUtils.validateOrganizationHeader(id, headerOrgId);
+        String orgName = organizationService.findOrganizationNameById(id);
+        HttpUtils.validateOrganizationHeader(orgName, headerOrgName);
+
         return ResponseEntity.ok(organizationService.findEmployeesById(id));
     }
 
     @GetMapping("/{id}/departments")
     public ResponseEntity<List<DepartmentDto>> findDepartmentsById(
             @PathVariable Integer id,
-            @RequestHeader(value = "X-Organization-Id", required = false) Integer headerOrgId
+            @RequestHeader(value = "X-Organization-Name", required = false) String headerOrgName
     ) {
-        HttpUtils.validateOrganizationHeader(id, headerOrgId);
+        String orgName = organizationService.findOrganizationNameById(id);
+        HttpUtils.validateOrganizationHeader(orgName, headerOrgName);
+
         return ResponseEntity.ok(organizationService.findDepartmentsById(id));
     }
 
     @GetMapping("/{id}/skills")
     public ResponseEntity<List<SkillDto>> findSkillsById(
             @PathVariable Integer id,
-            @RequestHeader(value = "X-Organization-Id", required = false) Integer headerOrgId
+            @RequestHeader(value = "X-Organization-Name", required = false) String headerOrgName
     ) {
-        HttpUtils.validateOrganizationHeader(id, headerOrgId);
+        String orgName = organizationService.findOrganizationNameById(id);
+        HttpUtils.validateOrganizationHeader(orgName, headerOrgName);
+
         return ResponseEntity.ok(organizationService.findSkillsById(id));
     }
 }
