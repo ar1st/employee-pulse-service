@@ -5,6 +5,7 @@ import { GET_EMPLOYEE_REPORT_URL } from '../../lib/api/apiUrls.js';
 import { axiosGet } from '../../lib/api/client.js';
 import useCatch from '../../lib/api/useCatch.js';
 import { useEmployeeFilter } from './EmployeeFilterContext.jsx';
+import { formatDateToDDMMYYYY } from '../../lib/dateUtils.js';
 
 function EmployeePerformanceReviewChart() {
   const { cWrapper } = useCatch();
@@ -107,7 +108,7 @@ function EmployeePerformanceReviewChart() {
             <h5 className="mb-3">
               {chartResponseData?.firstName && chartResponseData?.lastName && `${chartResponseData.firstName} ${chartResponseData.lastName}`}
               {selectedSkillName && ` - ${selectedSkillName}`}
-              {` - ${filterValues.startDate} to ${filterValues.endDate}`}
+              {` - ${formatDateToDDMMYYYY(filterValues.startDate)} to ${formatDateToDDMMYYYY(filterValues.endDate)}`}
             </h5>
             <ResponsiveContainer width="100%" height={400}>
               <BarChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>

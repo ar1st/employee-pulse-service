@@ -6,6 +6,7 @@ import { axiosGet } from '../../lib/api/client.js';
 import useCatch from '../../lib/api/useCatch.js';
 import { useOrganizationFilter } from './OrganizationFilterContext.jsx';
 import { useOrganization } from "../../context/OrganizationContext.jsx";
+import { formatDateToDDMMYYYY } from '../../lib/dateUtils.js';
 
 function OrganizationPerformanceReviewChart() {
   const { cWrapper } = useCatch();
@@ -114,7 +115,7 @@ function OrganizationPerformanceReviewChart() {
             <h5 className="mb-3">
               {selectedSkillName}
               {selectedDepartmentName && ` - ${selectedDepartmentName}`}
-              {` - ${filterValues.startDate} to ${filterValues.endDate}`}
+              {` - ${formatDateToDDMMYYYY(filterValues.startDate)} to ${formatDateToDDMMYYYY(filterValues.endDate)}`}
             </h5>
             <ResponsiveContainer width="100%" height={400}>
               <BarChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>

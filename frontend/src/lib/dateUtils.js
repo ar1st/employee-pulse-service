@@ -40,3 +40,19 @@ export const getDefaultDates = () => {
     endDate: formatDateForInput(endDate)
   };
 };
+
+/**
+ * Formats a date string from YYYY-MM-DD to dd-mm-yyyy
+ * @param {string} dateString - Date string in YYYY-MM-DD format
+ * @returns {string} - Date string in dd-mm-yyyy format, or empty string if invalid
+ */
+export const formatDateToDDMMYYYY = (dateString) => {
+  if (!dateString) return '';
+  
+  // Parse YYYY-MM-DD format
+  const parts = dateString.split('-');
+  if (parts.length !== 3) return dateString; // Return as-is if not in expected format
+  
+  const [year, month, day] = parts;
+  return `${day}-${month}-${year}`;
+};
