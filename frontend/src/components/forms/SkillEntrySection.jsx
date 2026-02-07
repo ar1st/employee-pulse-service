@@ -1,4 +1,5 @@
 import {Button, Col, FormGroup, Input, Label, Row, Spinner, Table} from "reactstrap";
+import Select from 'react-select';
 import {
     GET_SKILLS_BY_ORGANIZATION_URL,
   SEARCH_SKILLS_URL,
@@ -74,6 +75,23 @@ export default function SkillEntrySection({ rawText, onRawTextChange, skillEntri
     return organizationSkills;
   }, [skillSearchTerm, searchedSkills, organizationSkills]);
 
+  const skillOptions = useMemo(
+    () =>
+      skillsToShow.map((skill) => ({
+        value: skill.id,
+        label: `${skill.name} (ID: ${skill.id})`
+      })),
+    [skillsToShow]
+  );
+
+  const selectedSkillOption = useMemo(
+    () =>
+      skillOptions.find(
+        (opt) => opt.value?.toString() === selectedSkillId
+      ) || null,
+    [skillOptions, selectedSkillId]
+  );
+
   const handleAddSkillEntry = () => {
     if (!selectedSkillId || !skillRating) {
       return;
@@ -98,6 +116,10 @@ export default function SkillEntrySection({ rawText, onRawTextChange, skillEntri
     setSelectedSkillId('');
     setSkillRating('');
     setSkillSearchTerm('');
+  };
+
+  const handleSkillChange = (selected) => {
+    setSelectedSkillId(selected ? selected.value.toString() : '');
   };
 
   const handleRemoveSkillEntry = (tempId) => {
@@ -179,51 +201,27 @@ export default function SkillEntrySection({ rawText, onRawTextChange, skillEntri
 
         <Row className="mb-3">
           <Col md={6}>
-            <Label for="skillSearch">Search Skill (by name or ID)</Label>
-            <div className="position-relative">
-              <Input
-                type="text"
-                id="skillSearch"
-                value={skillSearchTerm}
-                onChange={(e) => setSkillSearchTerm(e.target.value)}
-                placeholder="Type to search skills..."
-              />
-              {searchingSkills && (
-                <div className="position-absolute top-50 end-0 translate-middle-y pe-3">
-                  <Spinner size="sm" color="primary" />
-                </div>
-              )}
-            </div>
-            {skillSearchTerm && !searchingSkills && searchedSkills.length === 0 && (
-              <small className="form-text text-muted">
-                No skills found matching "{skillSearchTerm}"
-              </small>
-            )}
+            <Label for="skillSearch">Select Skill *</Label>
+            <Select
+              inputId="skillSearch"
+              options={skillOptions}
+              value={selectedSkillOption}
+              onChange={handleSkillChange}
+              onInputChange={(value, actionMeta) => {
+                if (actionMeta.action === 'input-change') {
+                  setSkillSearchTerm(value);
+                }
+              }}
+              isLoading={searchingSkills}
+              isClearable
+              placeholder="Type to search skills..."
+              menuPortalTarget={typeof document !== 'undefined' ? document.body : null}
+              styles={{
+                menuPortal: (base) => ({ ...base, zIndex: 9999 })
+              }}
+            />
           </Col>
-          <Col md={4}>
-            <Label for="selectedSkill">Select Skill *</Label>
-            <Input
-              type="select"
-              id="selectedSkill"
-              value={selectedSkillId}
-              onChange={(e) => setSelectedSkillId(e.target.value)}
-              disabled={searchingSkills || skillsToShow.length === 0}
-            >
-              <option value="">Choose a skill...</option>
-              {searchingSkills ? (
-                <option value="" disabled>Searching...</option>
-              ) : skillsToShow.length === 0 && skillSearchTerm ? (
-                <option value="" disabled>No skills found</option>
-              ) : (
-                skillsToShow.map((skill) => (
-                  <option key={skill.id} value={skill.id}>
-                    {skill.name} (ID: {skill.id})
-                  </option>
-                ))
-              )}
-            </Input>
-          </Col>
-          <Col md={2}>
+          <Col md={6}>
             <Label for="skillRating">Rating *</Label>
             <Input
               type="number"
