@@ -14,6 +14,7 @@ import useCatch from "../../lib/api/useCatch.js";
 import {useNavigate} from "react-router-dom";
 import {handleChange} from "../../lib/formUtils.js";
 import { useOrganization } from "../../context/OrganizationContext.jsx";
+import DateInput from "./DateInput.jsx";
 
 export default function SaveEmployeeForm({ employeeId = null }) {
   const navigate = useNavigate();
@@ -263,8 +264,7 @@ export default function SaveEmployeeForm({ employeeId = null }) {
       <Col md={6}>
         <FormGroup>
           <Label for="hireDate">Hire Date *</Label>
-          <Input
-            type="date"
+          <DateInput
             name="hireDate"
             id="hireDate"
             value={formData.hireDate}

@@ -101,6 +101,20 @@
   word-wrap: break-word;
 }
 
+/* Hide native date picker icon only inside our custom date input wrapper
+   so we rely on the explicit calendar button but still keep native behavior.
+   When starting the application with docker, the date picker was not opening.
+    */
+.date-input-wrapper input[type="date"]::-webkit-calendar-picker-indicator {
+  opacity: 0;
+  display: none;
+}
+
+.date-input-wrapper input[type="date"]::-ms-clear,
+.date-input-wrapper input[type="date"]::-ms-expand {
+  display: none;
+}
+
 .page-wrapper input[readonly],
 .page-wrapper input[disabled] {
   overflow-wrap: break-word;

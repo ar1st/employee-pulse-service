@@ -5,8 +5,7 @@ import {
   GET_EMPLOYEES_BY_ORGANIZATION_URL,
   GET_PERFORMANCE_REVIEW_URL,
   UPDATE_PERFORMANCE_REVIEW_URL,
-  ADD_SKILL_ENTRY_TO_REVIEW_URL,
-  ADD_SKILL_ENTRIES_BULK_TO_REVIEW_URL,
+    ADD_SKILL_ENTRIES_BULK_TO_REVIEW_URL,
   DELETE_SKILL_ENTRY_FROM_REVIEW_URL
 } from "../../lib/api/apiUrls.js";
 import {axiosGet, axiosPost, axiosPut, axiosDelete} from "../../lib/api/client.js";
@@ -16,6 +15,7 @@ import {useNavigate} from "react-router-dom";
 import {handleChange} from "../../lib/formUtils.js";
 import SkillEntrySection from "./SkillEntrySection.jsx";
 import { useOrganization } from "../../context/OrganizationContext.jsx";
+import DateInput from "./DateInput.jsx";
 
 export default function SavePerformanceReviewForm({ reviewId = null }) {
   const isEditMode = !!reviewId;
@@ -384,8 +384,7 @@ export default function SavePerformanceReviewForm({ reviewId = null }) {
 
     <FormGroup>
       <Label for="reviewDate">Review Date *</Label>
-      <Input
-        type="date"
+      <DateInput
         name="reviewDate"
         id="reviewDate"
         value={formData.reviewDate}

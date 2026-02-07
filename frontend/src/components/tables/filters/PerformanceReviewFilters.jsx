@@ -1,6 +1,7 @@
 import {useState} from "react";
 import {Card, CardBody, CardHeader, Collapse, FormGroup, Label, Input, Row, Col, Button} from "reactstrap";
 import {usePerformanceReviewFilter} from "./PerformanceReviewFilterContext.jsx";
+import DateInput from "../../forms/DateInput.jsx";
 
 export default function PerformanceReviewFilters() {
   const {filterValues, setFilterValues, resetFilters} = usePerformanceReviewFilter();
@@ -111,9 +112,8 @@ export default function PerformanceReviewFilters() {
             <Col md={2}>
               <FormGroup className="mb-0">
                 <Label for="filter-reviewDateStart" className="small mb-1">Review Date Start</Label>
-                <Input
+                <DateInput
                   id="filter-reviewDateStart"
-                  type="date"
                   value={filterValues.reviewDateStart}
                   onChange={(e) => handleFilterChange('reviewDateStart', e.target.value)}
                   bsSize="sm"
@@ -123,9 +123,8 @@ export default function PerformanceReviewFilters() {
             <Col md={2}>
               <FormGroup className="mb-0">
                 <Label for="filter-reviewDateEnd" className="small mb-1">Review Date End</Label>
-                <Input
+                <DateInput
                   id="filter-reviewDateEnd"
-                  type="date"
                   value={filterValues.reviewDateEnd}
                   onChange={(e) => handleFilterChange('reviewDateEnd', e.target.value)}
                   bsSize="sm"

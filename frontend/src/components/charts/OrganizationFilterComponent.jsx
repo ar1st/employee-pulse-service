@@ -6,6 +6,7 @@ import { axiosGet } from '../../lib/api/client.js';
 import useCatch from '../../lib/api/useCatch.js';
 import { useOrganizationFilter } from './OrganizationFilterContext.jsx';
 import { useOrganization } from "../../context/OrganizationContext.jsx";
+import DateInput from "../forms/DateInput.jsx";
 
 function OrganizationFilterComponent() {
   const { cWrapper } = useCatch();
@@ -176,8 +177,7 @@ function OrganizationFilterComponent() {
             <Col md={3}>
               <FormGroup>
                 <Label for="startDate">Start Date *</Label>
-                <Input
-                  type="date"
+                <DateInput
                   name="startDate"
                   id="startDate"
                   value={filterValues.startDate}
@@ -190,8 +190,7 @@ function OrganizationFilterComponent() {
             <Col md={3}>
               <FormGroup>
                 <Label for="endDate">End Date *</Label>
-                <Input
-                  type="date"
+                <DateInput
                   name="endDate"
                   id="endDate"
                   value={filterValues.endDate}
