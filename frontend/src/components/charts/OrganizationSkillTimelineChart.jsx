@@ -16,11 +16,16 @@ function OrganizationSkillTimelineChart() {
   const [loadingChart, setLoadingChart] = useState(false);
   const { selectedOrganization } = useOrganization();
 
-  // Fetch data when triggerFetch changes (Generate Chart button clicked)
+  // Fetch data when triggerFetch changes (auto-triggers when skill is selected or date range changes)
   useEffect(() => {
-    if (triggerFetch === 0) return; // Don't fetch on initial mount
-    
-    if (!filterValues.startDate || !filterValues.endDate) {
+    if (!selectedOrganization?.value || !filterValues.skillId) {
+      setChartData(null);
+      setHasAttemptedChart(false);
+      return;
+    }
+
+    // Skip initial mount - wait for trigger to be set
+    if (triggerFetch === 0) {
       return;
     }
 

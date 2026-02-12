@@ -8,6 +8,7 @@ public record OrgDeptReportingResponseDto(
         String organizationName,
         Integer departmentId,
         String departmentName,
-        List<OrgDeptReportingSkillDto> skills
+        List<OrgDeptReportingSkillDto> skills,
+        List<OrgDeptOverallRatingPeriodDto> overallRatings
 ) {
 }

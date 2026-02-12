@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { Card, CardBody, Form, FormGroup, Label, Input, Button, Row, Col } from 'reactstrap';
+import { Card, CardBody, FormGroup, Label, Row, Col } from 'reactstrap';
 import Select from 'react-select';
 import { GET_SKILLS_BY_ORGANIZATION_URL, GET_SKILLS_BY_DEPARTMENT_URL, GET_DEPARTMENTS_BY_ORGANIZATION_URL } from '../../lib/api/apiUrls.js';
 import { axiosGet } from '../../lib/api/client.js';
@@ -121,19 +121,12 @@ function OrganizationFilterComponent() {
     setFilterValues({ [name]: value });
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (filterValues.startDate && filterValues.endDate && filterValues.skillId) {
-      triggerChartGeneration();
-    }
-  };
-
-  const isGenerateDisabled = !filterValues.startDate || !filterValues.endDate || !filterValues.skillId;
-
   return (
     <Card className="mb-4">
-      <CardBody>
-        <Form onSubmit={handleSubmit}>
+      <CardBody className="filter-card-body">
+        {/* Overall Rating Filters Section */}
+        <div className="mb-4">
+          <h5 className="mb-3">Overall Rating Filters</h5>
           <Row>
             <Col md={3}>
               <FormGroup>
@@ -156,62 +149,67 @@ function OrganizationFilterComponent() {
 
             <Col md={3}>
               <FormGroup>
-                <Label for="skillId">Skill *</Label>
+                <Label for="startDate">Start Date</Label>
+                <DateInput
+                  name="startDate"
+                  id="startDate"
+                  value={filterValues.startDate}
+                  onChange={handleFormChange}
+                />
+              </FormGroup>
+            </Col>
+
+            <Col md={6}>
+              <FormGroup>
+                <Label for="endDate">End Date</Label>
+                <DateInput
+                  name="endDate"
+                  id="endDate"
+                  value={filterValues.endDate}
+                  onChange={handleFormChange}
+                />
+              </FormGroup>
+            </Col>
+          </Row>
+        </div>
+
+        <hr className="my-4" />
+
+        {/* Skill Filters Section */}
+        <div>
+          <h5 className="mb-3">Skill Filter</h5>
+          <Row>
+            <Col md={6}>
+              <FormGroup>
+                <Label for="skillId">Skill</Label>
                 <Select
                   inputId="skillId"
                   options={skillOptions}
                   value={selectedSkillOption}
                   onChange={handleSkillChange}
                   isLoading={loadingSkills}
-                  isDisabled={loadingSkills}
+                  isDisabled={loadingSkills || !selectedOrganization?.value}
                   isClearable
-                  placeholder="Select a skill..."
+                  placeholder={selectedOrganization?.value ? "Select a skill..." : "Select an organization first"}
                   menuPortalTarget={typeof document !== 'undefined' ? document.body : null}
                   styles={{
                     menuPortal: (base) => ({ ...base, zIndex: 9999 })
                   }}
                 />
-              </FormGroup>
-            </Col>
-
-            <Col md={3}>
-              <FormGroup>
-                <Label for="startDate">Start Date *</Label>
-                <DateInput
-                  name="startDate"
-                  id="startDate"
-                  value={filterValues.startDate}
-                  onChange={handleFormChange}
-                  required
-                />
-              </FormGroup>
-            </Col>
-
-            <Col md={3}>
-              <FormGroup>
-                <Label for="endDate">End Date *</Label>
-                <DateInput
-                  name="endDate"
-                  id="endDate"
-                  value={filterValues.endDate}
-                  onChange={handleFormChange}
-                  required
-                />
+                {!selectedOrganization?.value && (
+                  <small className="form-text text-muted">
+                    Please select an organization first
+                  </small>
+                )}
+                {selectedOrganization?.value && !filterValues.skillId && (
+                  <small className="form-text text-muted">
+                    Skill charts will appear when a skill is selected
+                  </small>
+                )}
               </FormGroup>
             </Col>
           </Row>
-          <Row>
-            <Col md={12} className="d-flex justify-content-end">
-              <Button
-                type="submit"
-                color="primary"
-                disabled={isGenerateDisabled}
-              >
-                Generate Chart
-              </Button>
-            </Col>
-          </Row>
-        </Form>
+        </div>
       </CardBody>
     </Card>
   );

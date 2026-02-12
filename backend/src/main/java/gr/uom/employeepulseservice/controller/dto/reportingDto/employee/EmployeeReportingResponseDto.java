@@ -5,6 +5,7 @@ import java.util.List;
 public record EmployeeReportingResponseDto(Integer employeeId,
                                            String firstName,
                                            String lastName,
-                                           List<EmployeeReportingSkillDto> skills
+                                           List<EmployeeReportingSkillDto> skills,
+                                           List<EmployeeOverallRatingPeriodDto> overallRatings
 ) {
 }

@@ -18,11 +18,17 @@ function OrganizationPerformanceReviewChart() {
   const [loadingChart, setLoadingChart] = useState(false);
   const { selectedOrganization } = useOrganization();
 
-  // Fetch data when triggerFetch changes (Generate Chart button clicked)
+  // Fetch data when triggerFetch changes (auto-triggers when skill is selected or date range changes)
   useEffect(() => {
-    if (triggerFetch === 0) return; // Don't fetch on initial mount
-    
-    if (!filterValues.skillId || !filterValues.startDate || !filterValues.endDate) {
+    if (!selectedOrganization?.value || !filterValues.skillId) {
+      setChartResponseData(null);
+      setChartData([]);
+      setHasAttemptedChart(false);
+      return;
+    }
+
+    // Skip initial mount - wait for trigger to be set
+    if (triggerFetch === 0) {
       return;
     }
 
@@ -115,7 +121,8 @@ function OrganizationPerformanceReviewChart() {
             <h5 className="mb-3">
               {selectedSkillName}
               {selectedDepartmentName && ` - ${selectedDepartmentName}`}
-              {` - ${formatDateToDDMMYYYY(filterValues.startDate)} to ${formatDateToDDMMYYYY(filterValues.endDate)}`}
+              {filterValues.startDate && filterValues.endDate && 
+                ` - ${formatDateToDDMMYYYY(filterValues.startDate)} to ${formatDateToDDMMYYYY(filterValues.endDate)}`}
             </h5>
             <ResponsiveContainer width="100%" height={400}>
               <BarChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
