@@ -191,7 +191,7 @@ function EmployeeFilterComponent() {
                   placeholder="All Departments"
                   menuPortalTarget={typeof document !== 'undefined' ? document.body : null}
                   styles={{
-                    control: (base) => ({ ...base, backgroundColor: '#e7f3ff' }),
+                    // control: (base) => ({ ...base, backgroundColor: '#e7f3ff' }),
                     menuPortal: (base) => ({ ...base, zIndex: 9999 })
                   }}
                 />
@@ -212,7 +212,7 @@ function EmployeeFilterComponent() {
                   placeholder="Select an employee..."
                   menuPortalTarget={typeof document !== 'undefined' ? document.body : null}
                   styles={{
-                    control: (base) => ({ ...base, backgroundColor: '#e7f3ff' }),
+                    // control: (base) => ({ ...base, backgroundColor: '#e7f3ff' }),
                     menuPortal: (base) => ({ ...base, zIndex: 9999 })
                   }}
                 />

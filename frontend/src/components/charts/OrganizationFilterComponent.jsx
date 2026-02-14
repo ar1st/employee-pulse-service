@@ -85,7 +85,7 @@ function OrganizationFilterComponent() {
                   isClearable={false}
                   menuPortalTarget={typeof document !== 'undefined' ? document.body : null}
                   styles={{
-                    control: (base) => ({ ...base, backgroundColor: '#e7f3ff' }),
+                    // control: (base) => ({ ...base, backgroundColor: '#e7f3ff' }),
                     menuPortal: (base) => ({ ...base, zIndex: 9999 })
                   }}
                 />

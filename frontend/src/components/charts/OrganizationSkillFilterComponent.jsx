@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { Card, CardBody, FormGroup, Label, Row, Col } from 'reactstrap';
+import { Card, CardBody, FormGroup, Row, Col } from 'reactstrap';
 import Select from 'react-select';
 import { GET_SKILLS_BY_ORGANIZATION_URL, GET_SKILLS_BY_DEPARTMENT_URL } from '../../lib/api/apiUrls.js';
 import { axiosGet } from '../../lib/api/client.js';
@@ -86,7 +86,7 @@ function OrganizationSkillFilterComponent() {
                 placeholder={selectedOrganization?.value ? "Select a skill..." : "Select an organization first"}
                 menuPortalTarget={typeof document !== 'undefined' ? document.body : null}
                 styles={{
-                  control: (base) => ({ ...base, backgroundColor: '#e7f3ff' }),
+                  // control: (base) => ({ ...base, backgroundColor: '#e7f3ff' }),
                   menuPortal: (base) => ({ ...base, zIndex: 9999 })
                 }}
               />
