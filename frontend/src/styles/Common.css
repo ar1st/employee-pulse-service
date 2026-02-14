@@ -1,104 +1,104 @@
 .page-wrapper {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  min-height: 0;
-  width: 100%;
-  max-width: 100%;
-  min-width: 0;
-  overflow-x: hidden;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 0;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    overflow-x: hidden;
 }
 
 .table-container {
-  margin-top: 1rem;
-  overflow-x: auto;
-  overflow-y: auto;
-  flex: 1;
-  min-height: 500px;
-  min-width: 0;
-  width: 100%;
-  border: 1px solid #dee2e6;
-  border-radius: 0.25rem;
+    margin-top: 1rem;
+    overflow-x: auto;
+    overflow-y: auto;
+    flex: 1;
+    min-height: 500px;
+    min-width: 0;
+    width: 100%;
+    border: 1px solid #dee2e6;
+    border-radius: 0.25rem;
 }
 
 .data-table thead {
-  position: sticky;
-  top: 0;
-  background-color: #fff;
-  z-index: 10;
+    position: sticky;
+    top: 0;
+    background-color: #fff;
+    z-index: 10;
 }
 
 .data-table {
-  margin-bottom: 0;
+    margin-bottom: 0;
 }
 
 .edit-button {
-  background: none;
-  border: none;
-  padding: 0.5rem;
-  cursor: pointer;
-  color: #007bff;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 0.25rem;
-  transition: all 0.2s ease;
+    background: none;
+    border: none;
+    padding: 0.5rem;
+    cursor: pointer;
+    color: #007bff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.25rem;
+    transition: all 0.2s ease;
 }
 
 .edit-button:hover {
-  background-color: #e7f3ff;
-  color: #0056b3;
+    background-color: #e7f3ff;
+    color: #0056b3;
 }
 
 .edit-button:active {
-  background-color: #cfe2ff;
+    background-color: #cfe2ff;
 }
 
 .edit-button svg {
-  display: block;
+    display: block;
 }
 
 /* Form width constraints */
 .page-wrapper form {
-  width: 100%;
-  max-width: 100%;
-  min-width: 0;
-  overflow-x: hidden;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    overflow-x: hidden;
 }
 
 .page-wrapper .row {
-  width: 100%;
-  max-width: 100%;
-  margin-left: 0 !important;
-  margin-right: 0 !important;
+    width: 100%;
+    max-width: 100%;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
 }
 
 .page-wrapper .row > * {
-  padding-left: 0.75rem;
-  padding-right: 0.75rem;
-  box-sizing: border-box;
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+    box-sizing: border-box;
 }
 
 .page-wrapper .col,
 .page-wrapper [class*="col-"] {
-  min-width: 0;
-  max-width: 100%;
+    min-width: 0;
+    max-width: 100%;
 }
 
 .page-wrapper .form-group,
 .page-wrapper .form-group > * {
-  max-width: 100%;
-  min-width: 0;
+    max-width: 100%;
+    min-width: 0;
 }
 
 .page-wrapper input,
 .page-wrapper textarea,
 .page-wrapper select {
-  max-width: 100% !important;
-  box-sizing: border-box;
-  width: 100%;
-  overflow-wrap: break-word;
-  word-wrap: break-word;
+    max-width: 100% !important;
+    box-sizing: border-box;
+    width: 100%;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
 }
 
 /* Hide native date picker icon only inside our custom date input wrapper
@@ -106,54 +106,54 @@
    When starting the application with docker, the date picker was not opening.
     */
 .date-input-wrapper input[type="date"]::-webkit-calendar-picker-indicator {
-  opacity: 0;
-  display: none;
+    opacity: 0;
+    display: none;
 }
 
 .date-input-wrapper input[type="date"]::-ms-clear,
 .date-input-wrapper input[type="date"]::-ms-expand {
-  display: none;
+    display: none;
 }
 
 .page-wrapper input[readonly],
 .page-wrapper input[disabled] {
-  overflow-wrap: break-word;
-  word-wrap: break-word;
-  max-width: 100% !important;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    max-width: 100% !important;
 }
 
 /* Table sections */
 .page-wrapper table {
-  margin-top: 0.2rem;
-  width: 100%;
-  max-width: 100%;
+    margin-top: 0.2rem;
+    width: 100%;
+    max-width: 100%;
 }
 
 .page-wrapper table th {
-  background-color: #f8f9fa;
-  font-weight: 600;
-  border-bottom: 2px solid #dee2e6;
+    background-color: #f8f9fa;
+    font-weight: 600;
+    border-bottom: 2px solid #dee2e6;
 }
 
 .page-wrapper table td {
-  vertical-align: middle;
+    vertical-align: middle;
 }
 
 .page-wrapper .btn-sm {
-  padding: 0.25rem 0.5rem;
-  font-size: 0.875rem;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
 }
 
 /* Filter card body background */
 .filter-card-body {
-  background-color: #e7f3ff;
+    background-color: #e7f3ff;
 }
 
 /* Filter form groups background */
 .filter-card-body .form-group {
-  background-color: #e7f3ff;
-  padding: 0.5rem;
-  border-radius: 0.25rem;
+    background-color: #e7f3ff;
+    padding: 0.5rem;
+    border-radius: 0.25rem;
 }
 
 /* Filter inputs background */
@@ -162,14 +162,41 @@
 .filter-card-body input[type="email"],
 .filter-card-body input[type="number"],
 .filter-card-body select {
-  background-color: #e7f3ff !important;
+    background-color: #e7f3ff !important;
 }
 
 /* React-select components - use attribute selector to target control divs */
 .filter-card-body [class*="control"] {
-  background-color: #e7f3ff !important;
+    background-color: #e7f3ff !important;
 }
 
 .filter-card-body [class*="control"]:hover {
-  background-color: #d0e7ff !important;
+    background-color: #d0e7ff !important;
+}
+
+/* React-select placeholder - prevent truncation with margin-left */
+.filter-card-body [class*="placeholder"] {
+    padding-left: 4px !important;
+
+    text-overflow: clip !important;
+    overflow: visible !important;
+}
+
+/* React-select value container - adjust to show full text */
+.filter-card-body [class*="ValueContainer"] {
+    padding-left: 4px !important;
+    overflow: visible !important;
+}
+
+/* React-select single value - prevent truncation */
+.filter-card-body [class*="singleValue"] {
+    /*margin-left: 10px !important;*/
+    padding-left: 4px !important;
+    text-overflow: clip !important;
+    overflow: visible !important;
+}
+
+/* React-select control - ensure it doesn't clip content */
+.filter-card-body [class*="control"] {
+    overflow: visible !important;
 }
