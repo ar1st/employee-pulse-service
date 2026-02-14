@@ -2,6 +2,7 @@ import '../../styles/Common.css';
 import { OrganizationFilterProvider } from '../charts/OrganizationFilterContext.jsx';
 import OrganizationFilterComponent from '../charts/OrganizationFilterComponent.jsx';
 import OrganizationOverallRatingTimelineChart from '../charts/OrganizationOverallRatingTimelineChart.jsx';
+import OrganizationSkillFilterComponent from '../charts/OrganizationSkillFilterComponent.jsx';
 import OrganizationPerformanceReviewChart from '../charts/OrganizationPerformanceReviewChart.jsx';
 import OrganizationSkillTimelineChart from '../charts/OrganizationSkillTimelineChart.jsx';
 
@@ -14,6 +15,7 @@ function OrganizationChartsPage() {
       <OrganizationFilterProvider>
         <OrganizationFilterComponent />
         <OrganizationOverallRatingTimelineChart />
+        <OrganizationSkillFilterComponent />
         <OrganizationPerformanceReviewChart />
         <OrganizationSkillTimelineChart />
       </OrganizationFilterProvider>

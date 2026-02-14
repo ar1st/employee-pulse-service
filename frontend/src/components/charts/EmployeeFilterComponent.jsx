@@ -171,12 +171,6 @@ function EmployeeFilterComponent() {
     });
   };
 
-  const handleSkillChange = (selected) => {
-    setFilterValues({ 
-      skillId: selected ? selected.value.toString() : '' 
-    });
-  };
-
   return (
     <Card className="mb-4">
       <CardBody className="filter-card-body">
@@ -197,6 +191,7 @@ function EmployeeFilterComponent() {
                   placeholder="All Departments"
                   menuPortalTarget={typeof document !== 'undefined' ? document.body : null}
                   styles={{
+                    control: (base) => ({ ...base, backgroundColor: '#e7f3ff' }),
                     menuPortal: (base) => ({ ...base, zIndex: 9999 })
                   }}
                 />
@@ -217,6 +212,7 @@ function EmployeeFilterComponent() {
                   placeholder="Select an employee..."
                   menuPortalTarget={typeof document !== 'undefined' ? document.body : null}
                   styles={{
+                    control: (base) => ({ ...base, backgroundColor: '#e7f3ff' }),
                     menuPortal: (base) => ({ ...base, zIndex: 9999 })
                   }}
                 />
@@ -249,48 +245,6 @@ function EmployeeFilterComponent() {
           </Row>
         </div>
 
-        <hr className="my-4" />
-
-        {/* Skill Filters Section */}
-        <div>
-          <h5 className="mb-3">Skill Filter</h5>
-          <Row>
-            <Col md={6}>
-              <FormGroup>
-                <Label for="skillId">Skill</Label>
-                <Select
-                  inputId="skillId"
-                  options={skillOptions}
-                  value={selectedSkillOption}
-                  onChange={handleSkillChange}
-                  isLoading={loadingSkills || loadingEmployeeSkills}
-                  isDisabled={loadingSkills || loadingEmployeeSkills || !filterValues.employeeId}
-                  isClearable
-                  placeholder={filterValues.employeeId ? "Select a skill..." : "Select an employee first"}
-                  menuPortalTarget={typeof document !== 'undefined' ? document.body : null}
-                  styles={{
-                    menuPortal: (base) => ({ ...base, zIndex: 9999 })
-                  }}
-                />
-                {loadingEmployeeSkills && (
-                  <small className="text-muted">
-                    Loading employee skills...
-                  </small>
-                )}
-                {!filterValues.employeeId && (
-                  <small className="form-text text-muted">
-                    Please select an employee first
-                  </small>
-                )}
-                {filterValues.employeeId && !filterValues.skillId && (
-                  <small className="form-text text-muted">
-                    Skill charts will appear when a skill is selected
-                  </small>
-                )}
-              </FormGroup>
-            </Col>
-          </Row>
-        </div>
       </CardBody>
     </Card>
   );

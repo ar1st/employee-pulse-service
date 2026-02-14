@@ -148,3 +148,28 @@
 .filter-card-body {
   background-color: #e7f3ff;
 }
+
+/* Filter form groups background */
+.filter-card-body .form-group {
+  background-color: #e7f3ff;
+  padding: 0.5rem;
+  border-radius: 0.25rem;
+}
+
+/* Filter inputs background */
+.filter-card-body input[type="text"],
+.filter-card-body input[type="date"],
+.filter-card-body input[type="email"],
+.filter-card-body input[type="number"],
+.filter-card-body select {
+  background-color: #e7f3ff !important;
+}
+
+/* React-select components - use attribute selector to target control divs */
+.filter-card-body [class*="control"] {
+  background-color: #e7f3ff !important;
+}
+
+.filter-card-body [class*="control"]:hover {
+  background-color: #d0e7ff !important;
+}
