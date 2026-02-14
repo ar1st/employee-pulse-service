@@ -174,7 +174,7 @@ function EmployeeFilterComponent() {
   return (
     <Card className="mb-4">
       <CardBody className="filter-card-body">
-        <div className="mb-4">
+        <div className="">
           <h5 className="mb-3">Overall Rating Filters</h5>
           <Row>
             <Col md={2}>
