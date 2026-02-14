@@ -75,7 +75,6 @@ function OrganizationSkillFilterComponent() {
         <Row>
           <Col md={6}>
             <FormGroup>
-              <Label for="skillId">Skill</Label>
               <Select
                 inputId="skillId"
                 options={skillOptions}
