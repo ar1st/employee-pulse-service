@@ -1,13 +1,16 @@
 import { useState, useEffect } from 'react';
 import { Nav, NavItem, Dropdown, DropdownToggle, DropdownMenu, DropdownItem } from 'reactstrap'
 import { NavLink, useLocation } from 'react-router-dom'
-import { DEFAULT_ORGANIZATION_ID, GET_ORGANIZATION_URL } from '../lib/api/apiUrls.js'
+import Select from 'react-select'
+import { GET_ORGANIZATIONS_URL } from '../lib/api/apiUrls.js'
 import { axiosGet } from '../lib/api/client.js'
 import useCatch from '../lib/api/useCatch.js'
+import { useOrganization } from '../context/OrganizationContext.jsx'
 
 function Navbar() {
   const [analyticsDropdownOpen, setAnalyticsDropdownOpen] = useState(false);
-  const [organizationName, setOrganizationName] = useState('');
+  const [organizations, setOrganizations] = useState([]);
+  const { selectedOrganization, setOrganization } = useOrganization();
   const location = useLocation();
   const { cWrapper } = useCatch();
   
@@ -15,12 +18,29 @@ function Navbar() {
 
   useEffect(() => {
     cWrapper(() =>
-      axiosGet(GET_ORGANIZATION_URL(DEFAULT_ORGANIZATION_ID))
+      axiosGet(GET_ORGANIZATIONS_URL())
         .then((response) => {
-          setOrganizationName(response.data?.name || '');
+          const options = (response.data || []).map((org) => ({
+            value: org.id,
+            label: org.name,
+          }));
+          setOrganizations(options);
+
+          if (selectedOrganization) {
+            const existing = options.find((opt) => opt.label === selectedOrganization.label);
+            if (existing) {
+              setOrganization(existing);
+              return;
+            }
+          }
+
+          if (options[0]) {
+            setOrganization(options[0]);
+          }
         })
         .catch(() => {
-          setOrganizationName('');
+          setOrganizations([]);
+          setOrganization(null);
         })
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -100,7 +120,17 @@ function Navbar() {
           </Dropdown>
         </NavItem>
         <NavItem className="navbar-brand-right">
-          <span className="app-name">{organizationName || ''}</span>
+          <div style={{ minWidth: 220, padding: '1rem 1.5rem' }}>
+            <Select
+              classNamePrefix="org-select"
+              options={organizations}
+              value={selectedOrganization}
+              onChange={setOrganization}
+              placeholder="Select organization..."
+              isClearable={false}
+              // isSearchable={false}
+            />
+          </div>
         </NavItem>
       </Nav>
     </div>

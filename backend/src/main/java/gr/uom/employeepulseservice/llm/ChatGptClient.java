@@ -8,6 +8,8 @@ import com.openai.core.JsonValue;
 import com.openai.models.responses.*;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -21,12 +23,13 @@ public class ChatGptClient {
     private final String chatGptModel;
     private final ObjectMapper objectMapper;
 
-    public ChatGptClient() {
-        this.chatGptApiKey = System.getenv("EMPLOYEE_PULSE_SERVICE_OPENAI_KEY");
+    public ChatGptClient(@Value("${openai.api-key:}") String chatGptApiKey) {
+        this.chatGptApiKey = chatGptApiKey;
         this.chatGptModel = "gpt-5.1-2025-11-13";
         this.objectMapper = new ObjectMapper();
-        if (this.chatGptApiKey == null) {
-            log.warn("OpenAI key not found!");
+
+        if (StringUtils.isBlank(chatGptApiKey)) {
+            log.warn("OpenAI key not found in application properties (property 'openai.api-key').");
         }
     }
 
@@ -69,7 +72,7 @@ public class ChatGptClient {
                 .asOutputText()
                 .text();
 
-
+        log.info("ChatGPT response: {}", json);
         return objectMapper.readValue(json, new TypeReference<>() {});
     }
 

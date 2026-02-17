@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
 import { Card, CardBody, CardHeader, Collapse } from 'reactstrap';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { DEFAULT_ORGANIZATION_ID, GET_ORG_DEPT_SKILL_TIMELINE_URL } from '../../lib/api/apiUrls.js';
+import { GET_ORG_DEPT_SKILL_TIMELINE_URL } from '../../lib/api/apiUrls.js';
 import { axiosGet } from '../../lib/api/client.js';
 import useCatch from '../../lib/api/useCatch.js';
 import { useOrganizationFilter } from './OrganizationFilterContext.jsx';
+import { useOrganization } from "../../context/OrganizationContext.jsx";
 
 function OrganizationSkillTimelineChart() {
   const { cWrapper } = useCatch();
@@ -13,20 +14,28 @@ function OrganizationSkillTimelineChart() {
   const [chartData, setChartData] = useState(null);
   const [hasAttemptedChart, setHasAttemptedChart] = useState(false);
   const [loadingChart, setLoadingChart] = useState(false);
+  const { selectedOrganization } = useOrganization();
 
-  // Fetch data when triggerFetch changes (Generate Chart button clicked)
+  // Fetch data when triggerFetch changes (auto-triggers when skill is selected or date range changes)
   useEffect(() => {
-    if (triggerFetch === 0) return; // Don't fetch on initial mount
-    
-    if (!filterValues.startDate || !filterValues.endDate) {
+    if (!selectedOrganization?.value || !filterValues.skillId) {
+      setChartData(null);
+      setHasAttemptedChart(false);
+      return;
+    }
+
+    // Skip initial mount - wait for trigger to be set
+    if (triggerFetch === 0) {
       return;
     }
 
     setLoadingChart(true);
     setHasAttemptedChart(true);
+    const orgId = selectedOrganization?.value;
+
     cWrapper(() =>
       axiosGet(GET_ORG_DEPT_SKILL_TIMELINE_URL(
-        DEFAULT_ORGANIZATION_ID,
+        orgId,
         filterValues.departmentId ? parseInt(filterValues.departmentId) : null,
         filterValues.skillId ? parseInt(filterValues.skillId) : null,
         filterValues.startDate || null,
@@ -41,7 +50,7 @@ function OrganizationSkillTimelineChart() {
         .finally(() => setLoadingChart(false))
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [triggerFetch, cWrapper]);
+  }, [triggerFetch, cWrapper, selectedOrganization]);
 
   // Transform timeline data for chart
   const getChartDataForSkill = (skill) => {

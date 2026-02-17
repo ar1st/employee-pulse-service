@@ -1,6 +1,7 @@
 import {useState} from "react";
 import {Card, CardBody, CardHeader, Collapse, FormGroup, Label, Input, Row, Col, Button} from "reactstrap";
 import {useEmployeeFilter} from "./EmployeeFilterContext.jsx";
+import DateInput from "../../forms/DateInput.jsx";
 
 export default function EmployeeFilters() {
   const {filterValues, setFilterValues, resetFilters} = useEmployeeFilter();
@@ -106,9 +107,8 @@ export default function EmployeeFilters() {
             <Col md={2}>
               <FormGroup className="mb-0">
                 <Label for="filter-hireDateStart" className="small mb-1">Hire Date Start</Label>
-                <Input
+                <DateInput
                   id="filter-hireDateStart"
-                  type="date"
                   value={filterValues.hireDateStart}
                   onChange={(e) => handleFilterChange('hireDateStart', e.target.value)}
                   bsSize="sm"
@@ -118,9 +118,8 @@ export default function EmployeeFilters() {
             <Col md={2}>
               <FormGroup className="mb-0">
                 <Label for="filter-hireDateEnd" className="small mb-1">Hire Date End</Label>
-                <Input
+                <DateInput
                   id="filter-hireDateEnd"
-                  type="date"
                   value={filterValues.hireDateEnd}
                   onChange={(e) => handleFilterChange('hireDateEnd', e.target.value)}
                   bsSize="sm"

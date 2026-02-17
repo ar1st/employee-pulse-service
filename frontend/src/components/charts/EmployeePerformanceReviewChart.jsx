@@ -5,6 +5,7 @@ import { GET_EMPLOYEE_REPORT_URL } from '../../lib/api/apiUrls.js';
 import { axiosGet } from '../../lib/api/client.js';
 import useCatch from '../../lib/api/useCatch.js';
 import { useEmployeeFilter } from './EmployeeFilterContext.jsx';
+import { formatDateToDDMMYYYY } from '../../lib/dateUtils.js';
 
 function EmployeePerformanceReviewChart() {
   const { cWrapper } = useCatch();
@@ -15,11 +16,16 @@ function EmployeePerformanceReviewChart() {
   const [hasAttemptedChart, setHasAttemptedChart] = useState(false);
   const [loadingCharts, setLoadingCharts] = useState(false);
 
-  // Fetch data when triggerFetch changes (Generate Chart button clicked)
   useEffect(() => {
-    if (triggerFetch === 0) return; // Don't fetch on initial mount
-    
-    if (!filterValues.employeeId || !filterValues.skillId || !filterValues.startDate || !filterValues.endDate) {
+    if (!filterValues.employeeId || !filterValues.skillId) {
+      setChartResponseData(null);
+      setChartData([]);
+      setHasAttemptedChart(false);
+      return;
+    }
+
+    // Skip initial mount - wait for trigger to be set
+    if (triggerFetch === 0) {
       return;
     }
 
@@ -33,9 +39,15 @@ function EmployeePerformanceReviewChart() {
         filterValues.endDate || null
       ))
         .then((response) => {
-          setChartResponseData(response.data || null);
+          const data = response.data;
+          // Ensure skills is always an array, even if missing
+          if (data && !data.skills) {
+            data.skills = [];
+          }
+          setChartResponseData(data || null);
         })
-        .catch(() => {
+        .catch((error) => {
+          console.error('Error fetching performance review data:', error);
           setChartResponseData(null);
         })
         .finally(() => setLoadingCharts(false))
@@ -49,10 +61,16 @@ function EmployeePerformanceReviewChart() {
       return;
     }
 
-    // Since we're filtering by skillId on the backend, there should be at most one skill in the response
-    const selectedSkill = chartResponseData.skills?.[0];
+    // Check if skills exists and is an array
+    if (!chartResponseData.skills || !Array.isArray(chartResponseData.skills) || chartResponseData.skills.length === 0) {
+      setChartData([]);
+      return;
+    }
 
-    if (!selectedSkill || !selectedSkill.periods || selectedSkill.periods.length === 0) {
+    // Since we're filtering by skillId on the backend, there should be at most one skill in the response
+    const selectedSkill = chartResponseData.skills[0];
+
+    if (!selectedSkill || !selectedSkill.periods || !Array.isArray(selectedSkill.periods) || selectedSkill.periods.length === 0) {
       setChartData([]);
       return;
     }
@@ -107,7 +125,8 @@ function EmployeePerformanceReviewChart() {
             <h5 className="mb-3">
               {chartResponseData?.firstName && chartResponseData?.lastName && `${chartResponseData.firstName} ${chartResponseData.lastName}`}
               {selectedSkillName && ` - ${selectedSkillName}`}
-              {` - ${filterValues.startDate} to ${filterValues.endDate}`}
+              {filterValues.startDate && filterValues.endDate && 
+                ` - ${formatDateToDDMMYYYY(filterValues.startDate)} to ${formatDateToDDMMYYYY(filterValues.endDate)}`}
             </h5>
             <ResponsiveContainer width="100%" height={400}>
               <BarChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>

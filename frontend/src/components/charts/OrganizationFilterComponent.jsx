@@ -1,25 +1,27 @@
 import { useState, useEffect, useMemo } from 'react';
-import { Card, CardBody, Form, FormGroup, Label, Input, Button, Row, Col } from 'reactstrap';
+import { Card, CardBody, FormGroup, Label, Row, Col } from 'reactstrap';
 import Select from 'react-select';
-import { DEFAULT_ORGANIZATION_ID, GET_SKILLS_BY_ORGANIZATION_URL, GET_SKILLS_BY_DEPARTMENT_URL, GET_DEPARTMENTS_BY_ORGANIZATION_URL } from '../../lib/api/apiUrls.js';
+import { GET_DEPARTMENTS_BY_ORGANIZATION_URL } from '../../lib/api/apiUrls.js';
 import { axiosGet } from '../../lib/api/client.js';
 import useCatch from '../../lib/api/useCatch.js';
 import { useOrganizationFilter } from './OrganizationFilterContext.jsx';
+import { useOrganization } from "../../context/OrganizationContext.jsx";
+import DateInput from "../forms/DateInput.jsx";
 
 function OrganizationFilterComponent() {
   const { cWrapper } = useCatch();
-  const { filterValues, setFilterValues, triggerChartGeneration } = useOrganizationFilter();
-  const [allSkills, setAllSkills] = useState([]);
+  const { filterValues, setFilterValues } = useOrganizationFilter();
   const [departments, setDepartments] = useState([]);
-  const [loadingSkills, setLoadingSkills] = useState(false);
   const [loadingDepartments, setLoadingDepartments] = useState(false);
+  const { selectedOrganization } = useOrganization();
 
-  // Load departments on mount
   useEffect(() => {
     setLoadingDepartments(true);
 
+    const orgId = selectedOrganization?.value;
+
     cWrapper(() =>
-      axiosGet(GET_DEPARTMENTS_BY_ORGANIZATION_URL(DEFAULT_ORGANIZATION_ID))
+      axiosGet(GET_DEPARTMENTS_BY_ORGANIZATION_URL(orgId))
         .then((departmentsResponse) => {
           const depts = departmentsResponse.data.content || departmentsResponse.data || [];
           setDepartments(Array.isArray(depts) ? depts : []);
@@ -28,35 +30,7 @@ function OrganizationFilterComponent() {
           setLoadingDepartments(false);
         })
     );
-  }, [cWrapper]);
-
-  // Load skills based on department selection
-  useEffect(() => {
-    setLoadingSkills(true);
-
-    const loadSkills = filterValues.departmentId
-      ? axiosGet(GET_SKILLS_BY_DEPARTMENT_URL(parseInt(filterValues.departmentId)))
-      : axiosGet(GET_SKILLS_BY_ORGANIZATION_URL(DEFAULT_ORGANIZATION_ID));
-
-    cWrapper(() =>
-      loadSkills
-        .then((skillsResponse) => {
-          setAllSkills(skillsResponse.data || []);
-          
-          // Clear skill selection if current skill is not in the filtered skills
-          if (filterValues.skillId) {
-            const skillIds = (skillsResponse.data || []).map(s => s.id.toString());
-            if (!skillIds.includes(filterValues.skillId)) {
-              setFilterValues({ skillId: '' });
-            }
-          }
-        })
-        .finally(() => {
-          setLoadingSkills(false);
-        })
-    );
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filterValues.departmentId, cWrapper]);
+  }, [cWrapper, selectedOrganization]);
 
   // Convert departments to react-select options
   const departmentOptions = useMemo(
@@ -79,35 +53,10 @@ function OrganizationFilterComponent() {
     [departmentOptions, filterValues.departmentId]
   );
 
-  // Convert skills to react-select options
-  const skillOptions = useMemo(
-    () =>
-      allSkills.map((skill) => ({
-        value: skill.id,
-        label: skill.name
-      })),
-    [allSkills]
-  );
-
-  // Find selected skill option
-  const selectedSkillOption = useMemo(
-    () =>
-      skillOptions.find(
-        (opt) => opt.value?.toString() === filterValues.skillId
-      ) || null,
-    [skillOptions, filterValues.skillId]
-  );
-
   const handleDepartmentChange = (selected) => {
     setFilterValues({
       departmentId: selected && selected.value !== '' ? selected.value.toString() : '',
       skillId: '' // Clear skill when department changes
-    });
-  };
-
-  const handleSkillChange = (selected) => {
-    setFilterValues({
-      skillId: selected ? selected.value.toString() : ''
     });
   };
 
@@ -116,19 +65,12 @@ function OrganizationFilterComponent() {
     setFilterValues({ [name]: value });
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (filterValues.startDate && filterValues.endDate && filterValues.skillId) {
-      triggerChartGeneration();
-    }
-  };
-
-  const isGenerateDisabled = !filterValues.startDate || !filterValues.endDate || !filterValues.skillId;
-
   return (
     <Card className="mb-4">
-      <CardBody>
-        <Form onSubmit={handleSubmit}>
+      <CardBody className="filter-card-body">
+        {/* Overall Rating Filters Section */}
+        <div className="">
+          <h5 className="mb-3">Overall Rating Filters</h5>
           <Row>
             <Col md={3}>
               <FormGroup>
@@ -143,6 +85,7 @@ function OrganizationFilterComponent() {
                   isClearable={false}
                   menuPortalTarget={typeof document !== 'undefined' ? document.body : null}
                   styles={{
+                    // control: (base) => ({ ...base, backgroundColor: '#e7f3ff' }),
                     menuPortal: (base) => ({ ...base, zIndex: 9999 })
                   }}
                 />
@@ -151,64 +94,29 @@ function OrganizationFilterComponent() {
 
             <Col md={3}>
               <FormGroup>
-                <Label for="skillId">Skill *</Label>
-                <Select
-                  inputId="skillId"
-                  options={skillOptions}
-                  value={selectedSkillOption}
-                  onChange={handleSkillChange}
-                  isLoading={loadingSkills}
-                  isDisabled={loadingSkills}
-                  isClearable
-                  placeholder="Select a skill..."
-                  menuPortalTarget={typeof document !== 'undefined' ? document.body : null}
-                  styles={{
-                    menuPortal: (base) => ({ ...base, zIndex: 9999 })
-                  }}
-                />
-              </FormGroup>
-            </Col>
-
-            <Col md={3}>
-              <FormGroup>
-                <Label for="startDate">Start Date *</Label>
-                <Input
-                  type="date"
+                <Label for="startDate">Start Date</Label>
+                <DateInput
                   name="startDate"
                   id="startDate"
                   value={filterValues.startDate}
                   onChange={handleFormChange}
-                  required
                 />
               </FormGroup>
             </Col>
 
-            <Col md={3}>
+            <Col md={6}>
               <FormGroup>
-                <Label for="endDate">End Date *</Label>
-                <Input
-                  type="date"
+                <Label for="endDate">End Date</Label>
+                <DateInput
                   name="endDate"
                   id="endDate"
                   value={filterValues.endDate}
                   onChange={handleFormChange}
-                  required
                 />
               </FormGroup>
             </Col>
           </Row>
-          <Row>
-            <Col md={12} className="d-flex justify-content-end">
-              <Button
-                type="submit"
-                color="primary"
-                disabled={isGenerateDisabled}
-              >
-                Generate Chart
-              </Button>
-            </Col>
-          </Row>
-        </Form>
+        </div>
       </CardBody>
     </Card>
   );

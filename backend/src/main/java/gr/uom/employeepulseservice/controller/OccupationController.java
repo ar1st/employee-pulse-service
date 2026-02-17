@@ -3,6 +3,7 @@ package gr.uom.employeepulseservice.controller;
 import gr.uom.employeepulseservice.controller.dto.OccupationDto;
 import gr.uom.employeepulseservice.controller.dto.SaveOccupationDto;
 import gr.uom.employeepulseservice.service.OccupationService;
+import gr.uom.employeepulseservice.service.OrganizationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -18,6 +19,7 @@ import java.util.List;
 public class OccupationController {
 
     private final OccupationService occupationService;
+    private final OrganizationService organizationService;
 
     @GetMapping
     public ResponseEntity<Page<OccupationDto>> findAll(
@@ -61,7 +63,13 @@ public class OccupationController {
     }
 
     @GetMapping("/organization/{organizationId}")
-    public ResponseEntity<List<OccupationDto>> findByOrganizationId(@PathVariable Integer organizationId) {
+    public ResponseEntity<List<OccupationDto>> findByOrganizationId(
+            @PathVariable Integer organizationId,
+            @RequestHeader(value = "X-Organization-Name", required = false) String headerOrgName
+    ) {
+        String orgName = organizationService.findOrganizationNameById(organizationId);
+        HttpUtils.validateOrganizationHeader(orgName, headerOrgName);
+
         return ResponseEntity.ok(occupationService.findByOrganizationId(organizationId));
     }
 

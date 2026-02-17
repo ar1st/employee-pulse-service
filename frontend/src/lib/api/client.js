@@ -2,9 +2,26 @@ import axios from 'axios'
 
 const api = axios.create()
 
+let organizationName = null
+
+export const setOrganizationHeader = (orgName) => {
+  organizationName = orgName
+}
+
+api.interceptors.request.use((config) => {
+  const updatedConfig = { ...config }
+  updatedConfig.headers = updatedConfig.headers ?? {}
+
+  if (organizationName != null) {
+    updatedConfig.headers['X-Organization-Name'] = organizationName
+  }
+
+  return updatedConfig
+})
+
 export const axiosGet = async (url, parameters) => {
   return await api.get(url, {
-    params: {...parameters},
+    params: { ...parameters },
   })
     .catch((error) => {
       console.log('GET error ', url)

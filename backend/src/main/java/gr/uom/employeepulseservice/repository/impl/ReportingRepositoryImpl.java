@@ -134,9 +134,7 @@ public class ReportingRepositoryImpl implements ReportingRepository {
                 )
         );
 
-        if (rows.isEmpty()) {
-            return null;
-        }
+        // Note: We don't return null even if rows is empty, because we might have overall ratings
 
         // Group all rows by skillName
         Map<String, List<OrgDeptReportingStatsDto>> bySkill = new LinkedHashMap<>();
@@ -167,15 +165,107 @@ public class ReportingRepositoryImpl implements ReportingRepository {
             skills.add(new OrgDeptReportingSkillDto(skillName, periods));
         }
 
-        // Extract parent org/dept info from first row
-        OrgDeptReportingStatsDto first = rows.getFirst();
+        // Extract parent org/dept info from first row (if available)
+        String organizationName = null;
+        String departmentName = null;
+        if (!rows.isEmpty()) {
+            OrgDeptReportingStatsDto first = rows.getFirst();
+            organizationName = first.organizationName();
+            departmentName = (departmentId != null) ? first.departmentName() : null;
+        }
+
+        // If no skill results but we need org/dept info, get it from a separate query
+        if (organizationName == null) {
+            String orgNameSql = """
+                    SELECT o.name AS organization_name
+                    FROM organizations o
+                    WHERE o.id = :orgId
+                    LIMIT 1;
+                    """;
+            List<Map<String, Object>> orgRows = jdbc.query(orgNameSql,
+                    new MapSqlParameterSource().addValue("orgId", organizationId),
+                    (rs, rn) -> {
+                        Map<String, Object> row = new LinkedHashMap<>();
+                        row.put("organization_name", rs.getString("organization_name"));
+                        return row;
+                    });
+            if (!orgRows.isEmpty()) {
+                organizationName = (String) orgRows.getFirst().get("organization_name");
+            }
+        }
+
+        // Get department name if needed and not already available
+        if (departmentId != null && departmentName == null) {
+            String deptNameSql = """
+                    SELECT d.name AS department_name
+                    FROM departments d
+                    WHERE d.id = :deptId
+                    LIMIT 1;
+                    """;
+            List<Map<String, Object>> deptRows = jdbc.query(deptNameSql,
+                    new MapSqlParameterSource().addValue("deptId", departmentId),
+                    (rs, rn) -> {
+                        Map<String, Object> row = new LinkedHashMap<>();
+                        row.put("department_name", rs.getString("department_name"));
+                        return row;
+                    });
+            if (!deptRows.isEmpty()) {
+                departmentName = (String) deptRows.getFirst().get("department_name");
+            }
+        }
+
+        // Build date range predicate for performance_reviews (using review_date instead of entry_date)
+        StringBuilder overallRatingDatePredicate = new StringBuilder("TRUE");
+        if (startDate != null) {
+            overallRatingDatePredicate.append(" AND pr.review_date::date >= :startDate");
+        }
+        if (endDate != null) {
+            overallRatingDatePredicate.append(" AND pr.review_date::date <= :endDate");
+        }
+
+        // Query overall ratings from performance_reviews table
+        // Use review_date for period grouping instead of entry_date
+        String overallRatingPeriodStart = periodStart.replace("entry_date", "review_date");
+        String overallRatingSql = String.format("""
+                SELECT
+                    %s AS period_start,
+                    AVG(pr.overall_rating) AS avg_overall_rating
+                FROM performance_reviews pr
+                JOIN employees e ON pr.employee_id = e.id
+                JOIN departments d ON e.department_id = d.id
+                WHERE d.organization_id = :orgId
+                  AND pr.review_date IS NOT NULL
+                  AND pr.overall_rating IS NOT NULL
+                  %s
+                  AND %s
+                GROUP BY period_start
+                ORDER BY period_start;
+                """, overallRatingPeriodStart,
+                (departmentId != null) ? "AND d.id = :deptId" : "",
+                overallRatingDatePredicate.toString());
+
+        // Use same parameters for overall rating query
+        MapSqlParameterSource overallRatingParams = new MapSqlParameterSource()
+                .addValue("orgId", organizationId);
+        if (departmentId != null) overallRatingParams.addValue("deptId", departmentId);
+        if (startDate != null) overallRatingParams.addValue("startDate", startDate);
+        if (endDate != null) overallRatingParams.addValue("endDate", endDate);
+
+        // Execute overall rating query
+        List<OrgDeptOverallRatingPeriodDto> overallRatings = jdbc.query(overallRatingSql, overallRatingParams, (rs, rn) ->
+                new OrgDeptOverallRatingPeriodDto(
+                        rs.getObject("period_start", LocalDate.class),
+                        rs.getDouble("avg_overall_rating")
+                )
+        );
 
         return new OrgDeptReportingResponseDto(
                 organizationId,
-                first.organizationName(),
+                organizationName,
                 departmentId,
-                (departmentId != null) ? first.departmentName() : null,
-                skills
+                departmentName,
+                skills,
+                overallRatings
         );
     }
 
@@ -243,10 +333,7 @@ public class ReportingRepositoryImpl implements ReportingRepository {
                 )
         );
 
-        // No results found
-        if (rows.isEmpty()) {
-            return null;
-        }
+        // Note: We don't return null even if rows is empty, because we might have overall ratings
 
         // Group all rows by skillName
         Map<String, List<EmployeeReportingStatsDto>> bySkill = new LinkedHashMap<>();
@@ -276,15 +363,85 @@ public class ReportingRepositoryImpl implements ReportingRepository {
             skills.add(new EmployeeReportingSkillDto(skillName, periods));
         }
 
-        // Extract parent employee info from first row
-        EmployeeReportingStatsDto first = rows.getFirst();
+        // Extract parent employee info from first row (if available)
+        String firstName = null;
+        String lastName = null;
+        if (!rows.isEmpty()) {
+            EmployeeReportingStatsDto first = rows.getFirst();
+            firstName = first.firstName();
+            lastName = first.lastName();
+        }
+
+        // Build date range predicate for performance_reviews (using review_date instead of entry_date)
+        StringBuilder overallRatingDatePredicate = new StringBuilder("TRUE");
+        if (startDate != null) {
+            overallRatingDatePredicate.append(" AND review_date::date >= :startDate");
+        }
+        if (endDate != null) {
+            overallRatingDatePredicate.append(" AND review_date::date <= :endDate");
+        }
+
+        // Query overall ratings from performance_reviews table
+        // Use review_date for period grouping instead of entry_date
+        String overallRatingPeriodStart = periodStart.replace("entry_date", "review_date");
+        String overallRatingSql = String.format("""
+                SELECT
+                    %s AS period_start,
+                    AVG(overall_rating) AS overall_rating
+                FROM performance_reviews
+                WHERE employee_id = :employeeId
+                  AND review_date IS NOT NULL
+                  AND overall_rating IS NOT NULL
+                  AND %s
+                GROUP BY period_start
+                ORDER BY period_start;
+                """, overallRatingPeriodStart, overallRatingDatePredicate.toString());
+
+        // Use same parameters for overall rating query
+        MapSqlParameterSource overallRatingParams = new MapSqlParameterSource()
+                .addValue("employeeId", employeeId);
+        if (startDate != null) overallRatingParams.addValue("startDate", startDate);
+        if (endDate != null) overallRatingParams.addValue("endDate", endDate);
+
+        // Execute overall rating query
+        List<EmployeeOverallRatingPeriodDto> overallRatings = jdbc.query(overallRatingSql, overallRatingParams, (rs, rn) ->
+                new EmployeeOverallRatingPeriodDto(
+                        rs.getObject("period_start", LocalDate.class),
+                        rs.getDouble("overall_rating")
+                )
+        );
+
+        // If no skill results but we have employee info from overall ratings, we still need employee name
+        // Try to get employee name from a separate query if not available
+        if (firstName == null || lastName == null) {
+            String employeeNameSql = """
+                    SELECT first_name, last_name
+                    FROM employees
+                    WHERE id = :employeeId
+                    LIMIT 1;
+                    """;
+            List<Map<String, Object>> employeeRows = jdbc.query(employeeNameSql, 
+                    new MapSqlParameterSource().addValue("employeeId", employeeId),
+                    (rs, rn) -> {
+                        Map<String, Object> row = new LinkedHashMap<>();
+                        row.put("first_name", rs.getString("first_name"));
+                        row.put("last_name", rs.getString("last_name"));
+                        return row;
+                    });
+            if (!employeeRows.isEmpty()) {
+                Map<String, Object> empRow = employeeRows.getFirst();
+                firstName = (String) empRow.get("first_name");
+                lastName = (String) empRow.get("last_name");
+            }
+        }
 
         // Build the final parent DTO
         return new EmployeeReportingResponseDto(
                 employeeId,
-                first.firstName(),
-                first.lastName(),
-                skills
+                firstName,
+                lastName,
+                skills,
+                overallRatings
         );
     }
 

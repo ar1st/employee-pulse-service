@@ -1,5 +1,5 @@
 import {useEffect, useState, useMemo} from "react";
-import {DEFAULT_ORGANIZATION_ID, GET_PERFORMANCE_REVIEWS_URL, DELETE_PERFORMANCE_REVIEW_URL} from "../../lib/api/apiUrls.js";
+import {GET_PERFORMANCE_REVIEWS_URL, DELETE_PERFORMANCE_REVIEW_URL} from "../../lib/api/apiUrls.js";
 import {Alert, Spinner, Table} from "reactstrap";
 import {axiosGet, axiosDelete} from "../../lib/api/client.js";
 import useCatch from "../../lib/api/useCatch.js";
@@ -7,6 +7,7 @@ import {formatDateTime} from "../../lib/dateUtils.js";
 import ConfirmModal from "../ConfirmModal.jsx";
 import {useNavigate} from "react-router-dom";
 import {usePerformanceReviewFilter} from "./filters/PerformanceReviewFilterContext.jsx";
+import { useOrganization } from "../../context/OrganizationContext.jsx";
 
 export default function PerformanceReviewsTable() {
   const navigate = useNavigate()
@@ -17,6 +18,7 @@ export default function PerformanceReviewsTable() {
   const [deleting, setDeleting] = useState(false)
   const {cWrapper} = useCatch()
   const {filterValues} = usePerformanceReviewFilter()
+  const { selectedOrganization } = useOrganization();
 
   const formatRating = (rating) => {
     return rating != null ? rating.toFixed(1) : 'N/A'
@@ -24,9 +26,11 @@ export default function PerformanceReviewsTable() {
 
   const loadPerformanceReviews = () => {
     setLoading(true)
+    const orgId = selectedOrganization?.value;
+
     cWrapper(() =>
       axiosGet(
-        GET_PERFORMANCE_REVIEWS_URL(DEFAULT_ORGANIZATION_ID),
+        GET_PERFORMANCE_REVIEWS_URL(orgId),
       ).then((response) => {
         setPerformanceReviews(response.data)
       })
@@ -37,7 +41,7 @@ export default function PerformanceReviewsTable() {
   useEffect(() => {
     loadPerformanceReviews()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [cWrapper])
+  }, [cWrapper, selectedOrganization])
 
   const handleEdit = (reviewId) => {
     navigate(`/performance-reviews/save?id=${reviewId}`)

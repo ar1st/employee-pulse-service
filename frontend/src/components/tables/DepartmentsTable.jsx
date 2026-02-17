@@ -1,13 +1,14 @@
 import {useEffect, useState} from "react";
 import {
   DELETE_DEPARTMENT_URL,
-  GET_DEPARTMENTS_BY_ORGANIZATION_URL, DEFAULT_ORGANIZATION_ID
-} from "../../lib/api/apiUrls.js";
+  GET_DEPARTMENTS_BY_ORGANIZATION_URL,
+  } from "../../lib/api/apiUrls.js";
 import {Alert, Spinner, Table} from "reactstrap";
 import {axiosGet, axiosDelete} from "../../lib/api/client.js";
 import useCatch from "../../lib/api/useCatch.js";
 import ConfirmModal from "../ConfirmModal.jsx";
 import {useNavigate} from "react-router-dom";
+import { useOrganization } from "../../context/OrganizationContext.jsx";
 
 export default function DepartmentsTable() {
   const navigate = useNavigate()
@@ -17,11 +18,14 @@ export default function DepartmentsTable() {
   const [departmentToDelete, setDepartmentToDelete] = useState(null)
   const [deleting, setDeleting] = useState(false)
   const {cWrapper} = useCatch()
+  const { selectedOrganization } = useOrganization();
 
   const loadDepartments = () => {
     setLoading(true)
+    const orgId = selectedOrganization?.value;
+
     cWrapper(() =>
-      axiosGet(GET_DEPARTMENTS_BY_ORGANIZATION_URL(DEFAULT_ORGANIZATION_ID))
+      axiosGet(GET_DEPARTMENTS_BY_ORGANIZATION_URL(orgId))
         .then((response) => {
           setDepartments(response.data)
         })
@@ -32,7 +36,7 @@ export default function DepartmentsTable() {
   useEffect(() => {
     loadDepartments()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [cWrapper])
+  }, [cWrapper, selectedOrganization])
 
   const handleEdit = (departmentId) => {
     navigate(`/departments/save?id=${departmentId}`)

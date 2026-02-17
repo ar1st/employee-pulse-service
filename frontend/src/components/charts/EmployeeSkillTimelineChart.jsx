@@ -14,11 +14,11 @@ function EmployeeSkillTimelineChart() {
   const [hasAttemptedChart, setHasAttemptedChart] = useState(false);
   const [loadingChart, setLoadingChart] = useState(false);
 
-  // Fetch data when triggerFetch changes (Generate Chart button clicked)
+  // Fetch data when triggerFetch changes (auto-triggers when skill is selected or date range changes)
   useEffect(() => {
     if (triggerFetch === 0) return; // Don't fetch on initial mount
     
-    if (!filterValues.employeeId || !filterValues.startDate || !filterValues.endDate) {
+    if (!filterValues.employeeId || !filterValues.skillId) {
       return;
     }
 

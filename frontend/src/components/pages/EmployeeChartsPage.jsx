@@ -1,6 +1,8 @@
 import '../../styles/Common.css';
 import {EmployeeFilterProvider} from '../charts/EmployeeFilterContext.jsx';
 import EmployeeFilterComponent from '../charts/EmployeeFilterComponent.jsx';
+import EmployeeOverallRatingTimelineChart from '../charts/EmployeeOverallRatingTimelineChart.jsx';
+import EmployeeSkillFilterComponent from '../charts/EmployeeSkillFilterComponent.jsx';
 import EmployeePerformanceReviewChart from '../charts/EmployeePerformanceReviewChart.jsx';
 import EmployeeSkillTimelineChart from '../charts/EmployeeSkillTimelineChart.jsx';
 
@@ -12,6 +14,8 @@ function EmployeeChartsPage() {
 
       <EmployeeFilterProvider>
         <EmployeeFilterComponent/>
+        <EmployeeOverallRatingTimelineChart/>
+        <EmployeeSkillFilterComponent/>
         <EmployeePerformanceReviewChart/>
         <EmployeeSkillTimelineChart/>
       </EmployeeFilterProvider>

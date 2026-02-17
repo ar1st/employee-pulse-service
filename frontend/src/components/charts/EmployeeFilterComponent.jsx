@@ -1,13 +1,16 @@
 import { useState, useEffect, useMemo } from 'react';
-import { Card, CardBody, Form, FormGroup, Label, Input, Button, Row, Col } from 'reactstrap';
+import { Card, CardBody, FormGroup, Label, Row, Col } from 'reactstrap';
 import Select from 'react-select';
-import { DEFAULT_ORGANIZATION_ID, GET_SKILLS_BY_ORGANIZATION_URL, GET_EMPLOYEES_BY_ORGANIZATION_URL, GET_DEPARTMENTS_BY_ORGANIZATION_URL, GET_EMPLOYEE_LATEST_SKILL_ENTRIES_URL } from '../../lib/api/apiUrls.js';
+import { GET_SKILLS_BY_ORGANIZATION_URL, GET_EMPLOYEES_BY_ORGANIZATION_URL, GET_DEPARTMENTS_BY_ORGANIZATION_URL, GET_EMPLOYEE_LATEST_SKILL_ENTRIES_URL } from '../../lib/api/apiUrls.js';
 import { axiosGet } from '../../lib/api/client.js';
 import useCatch from '../../lib/api/useCatch.js';
 import { useEmployeeFilter } from './EmployeeFilterContext.jsx';
+import { useOrganization } from "../../context/OrganizationContext.jsx";
+import DateInput from "../forms/DateInput.jsx";
 
 function EmployeeFilterComponent() {
   const { cWrapper } = useCatch();
+  const { selectedOrganization } = useOrganization();
   const { filterValues, setFilterValues, triggerChartGeneration } = useEmployeeFilter();
   const [allSkills, setAllSkills] = useState([]);
   const [employees, setEmployees] = useState([]);
@@ -24,11 +27,13 @@ function EmployeeFilterComponent() {
     setLoadingEmployees(true);
     setLoadingDepartments(true);
 
+    const orgId = selectedOrganization?.value;
+
     cWrapper(() =>
       Promise.all([
-        axiosGet(GET_SKILLS_BY_ORGANIZATION_URL(DEFAULT_ORGANIZATION_ID)),
-        axiosGet(GET_EMPLOYEES_BY_ORGANIZATION_URL(DEFAULT_ORGANIZATION_ID)),
-        axiosGet(GET_DEPARTMENTS_BY_ORGANIZATION_URL(DEFAULT_ORGANIZATION_ID))
+        axiosGet(GET_SKILLS_BY_ORGANIZATION_URL(orgId)),
+        axiosGet(GET_EMPLOYEES_BY_ORGANIZATION_URL(orgId)),
+        axiosGet(GET_DEPARTMENTS_BY_ORGANIZATION_URL(orgId))
       ])
         .then(([skillsResponse, employeesResponse, departmentsResponse]) => {
           setAllSkills(skillsResponse.data || []);
@@ -43,7 +48,7 @@ function EmployeeFilterComponent() {
           setLoadingDepartments(false);
         })
     );
-  }, [cWrapper]);
+  }, [cWrapper, selectedOrganization]);
 
   // Load employee skills when employee is selected
   useEffect(() => {
@@ -166,25 +171,11 @@ function EmployeeFilterComponent() {
     });
   };
 
-  const handleSkillChange = (selected) => {
-    setFilterValues({ 
-      skillId: selected ? selected.value.toString() : '' 
-    });
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (filterValues.startDate && filterValues.endDate && filterValues.employeeId && filterValues.skillId) {
-      triggerChartGeneration();
-    }
-  };
-
-  const isGenerateDisabled = !filterValues.startDate || !filterValues.endDate || !filterValues.employeeId || !filterValues.skillId;
-
   return (
     <Card className="mb-4">
-      <CardBody>
-        <Form onSubmit={handleSubmit}>
+      <CardBody className="filter-card-body">
+        <div className="">
+          <h5 className="mb-3">Overall Rating Filters</h5>
           <Row>
             <Col md={2}>
               <FormGroup>
@@ -200,6 +191,7 @@ function EmployeeFilterComponent() {
                   placeholder="All Departments"
                   menuPortalTarget={typeof document !== 'undefined' ? document.body : null}
                   styles={{
+                    // control: (base) => ({ ...base, backgroundColor: '#e7f3ff' }),
                     menuPortal: (base) => ({ ...base, zIndex: 9999 })
                   }}
                 />
@@ -220,6 +212,7 @@ function EmployeeFilterComponent() {
                   placeholder="Select an employee..."
                   menuPortalTarget={typeof document !== 'undefined' ? document.body : null}
                   styles={{
+                    // control: (base) => ({ ...base, backgroundColor: '#e7f3ff' }),
                     menuPortal: (base) => ({ ...base, zIndex: 9999 })
                   }}
                 />
@@ -228,69 +221,30 @@ function EmployeeFilterComponent() {
 
             <Col md={3}>
               <FormGroup>
-                <Label for="skillId">Skill *</Label>
-                <Select
-                  inputId="skillId"
-                  options={skillOptions}
-                  value={selectedSkillOption}
-                  onChange={handleSkillChange}
-                  isLoading={loadingSkills || loadingEmployeeSkills}
-                  isDisabled={loadingSkills || loadingEmployeeSkills || !filterValues.employeeId}
-                  isClearable
-                  placeholder={filterValues.employeeId ? "Select a skill..." : "Select an employee first"}
-                  menuPortalTarget={typeof document !== 'undefined' ? document.body : null}
-                  styles={{
-                    menuPortal: (base) => ({ ...base, zIndex: 9999 })
-                  }}
-                />
-                {loadingEmployeeSkills && (
-                  <small className="text-muted">
-                    Loading employee skills...
-                  </small>
-                )}
-              </FormGroup>
-            </Col>
-
-            <Col md={2}>
-              <FormGroup>
-                <Label for="startDate">Start Date *</Label>
-                <Input
-                  type="date"
+                <Label for="startDate">Start Date</Label>
+                <DateInput
                   name="startDate"
                   id="startDate"
                   value={filterValues.startDate}
                   onChange={handleFormChange}
-                  required
                 />
               </FormGroup>
             </Col>
 
-            <Col md={2}>
+            <Col md={4}>
               <FormGroup>
-                <Label for="endDate">End Date *</Label>
-                <Input
-                  type="date"
+                <Label for="endDate">End Date</Label>
+                <DateInput
                   name="endDate"
                   id="endDate"
                   value={filterValues.endDate}
                   onChange={handleFormChange}
-                  required
                 />
               </FormGroup>
             </Col>
           </Row>
-          <Row>
-            <Col md={12} className="d-flex justify-content-end">
-              <Button
-                type="submit"
-                color="primary"
-                disabled={isGenerateDisabled}
-              >
-                Generate Chart
-              </Button>
-            </Col>
-          </Row>
-        </Form>
+        </div>
+
       </CardBody>
     </Card>
   );

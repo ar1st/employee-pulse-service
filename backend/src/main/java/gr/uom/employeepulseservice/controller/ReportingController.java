@@ -6,6 +6,7 @@ import gr.uom.employeepulseservice.controller.dto.reportingDto.orgdept.OrgDeptRe
 import gr.uom.employeepulseservice.controller.dto.reportingDto.orgdept.OrgDeptSkillTimelineResponseDto;
 import gr.uom.employeepulseservice.model.PeriodType;
 import gr.uom.employeepulseservice.repository.ReportingRepository;
+import gr.uom.employeepulseservice.service.OrganizationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +20,7 @@ import java.time.LocalDate;
 public class ReportingController {
 
     private final ReportingRepository reportingRepository;
+    private final OrganizationService organizationService;
 
     @GetMapping("/org/{orgId}")
     public ResponseEntity<OrgDeptReportingResponseDto> getReportByOrganizationAndDepartment(
@@ -27,8 +29,13 @@ public class ReportingController {
             @RequestParam(required = false) Integer deptId,
             @RequestParam(required = false) Integer skillId,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
+            @RequestHeader(value = "X-Organization-Name", required = false) String headerOrgName
     ) {
+        String orgName = organizationService.findOrganizationNameById(orgId);
+        HttpUtils.validateOrganizationHeader(orgName, headerOrgName);
+
+
         return ResponseEntity.ok(
                 reportingRepository.getReportByOrganizationAndDepartment(
                         periodType,
@@ -70,8 +77,12 @@ public class ReportingController {
             @RequestParam(required = false) Integer departmentId,
             @RequestParam(required = false) Integer skillId,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
+            @RequestHeader(value = "X-Organization-Name", required = false) String headerOrgName
     ) {
+        String orgName = organizationService.findOrganizationNameById(organizationId);
+        HttpUtils.validateOrganizationHeader(orgName, headerOrgName);
+
         return reportingRepository.getSkillTimelineByOrganizationAndDepartment(
                 organizationId,
                 departmentId,
