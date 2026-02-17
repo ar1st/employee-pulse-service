@@ -150,7 +150,7 @@ function OrganizationOverallRatingTimelineChart() {
                     type="monotone" 
                     dataKey="avgOverallRating" 
                     stroke="#8884d8" 
-                    name="Average Overall Rating"
+                    name="Average Overall Rating of Employees"
                     strokeWidth={2}
                     dot={{ r: 4 }}
                   />
